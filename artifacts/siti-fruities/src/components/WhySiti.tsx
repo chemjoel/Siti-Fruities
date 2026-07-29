@@ -1,44 +1,55 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Leaf, Ban, Sunrise, ChefHat, Gift, Users } from 'lucide-react';
+import parfaitImg from '@assets/Screenshot_20260729-212242_1785360049881.jpg';
+import yoghurtImg from '@assets/Screenshot_20260729-212331_1785360049844.jpg';
+import chefImg from '@assets/Screenshot_20260729-212642_1785360049574.jpg';
+import cateringEventImg from '@assets/Screenshot_20260729-212635_1785360049633.jpg';
+import treatBoxImg from '@assets/Screenshot_20260729-212815_1785360013704.jpg';
+import hamperImg from '@assets/Screenshot_20260729-213638_1785360173839.jpg';
 
 const FEATURES = [
   {
     icon: Leaf,
     title: "Fresh Ingredients",
-    desc: "Sourced fresh daily, nothing frozen. We believe in the power of real food."
+    desc: "Sourced fresh daily, nothing frozen. We believe in the power of real food.",
+    img: parfaitImg,
   },
   {
     icon: Ban,
     title: "No Artificial Additives",
-    desc: "Pure, clean, whole food ingredients. No preservatives or hidden sugars."
+    desc: "Pure, clean, whole food ingredients. No preservatives or hidden sugars.",
+    img: yoghurtImg,
   },
   {
     icon: Sunrise,
     title: "Prepared Daily",
-    desc: "Made fresh every morning in our kitchen to ensure maximum nutrient retention."
+    desc: "Made fresh every morning in our kitchen to ensure maximum nutrient retention.",
+    img: chefImg,
   },
   {
     icon: ChefHat,
     title: "Premium Recipes",
-    desc: "Crafted with love and expertise by our culinary team for perfect balance."
+    desc: "Crafted with love and expertise by our culinary team for perfect balance.",
+    img: cateringEventImg,
   },
   {
     icon: Gift,
     title: "Beautiful Packaging",
-    desc: "Perfect for gifts and special occasions. Healthy food should look stunning."
+    desc: "Perfect for gifts and special occasions. Healthy food should look stunning.",
+    img: treatBoxImg,
   },
   {
     icon: Users,
     title: "For Everyone",
-    desc: "Individuals, families, corporate events and parties. We cater to all."
+    desc: "Individuals, families, corporate events and parties. We cater to all.",
+    img: hamperImg,
   }
 ];
 
 export default function WhySiti() {
   return (
     <section className="py-24 bg-card relative overflow-hidden">
-      {/* Decorative bg elements */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-[80px]" />
       
@@ -60,7 +71,7 @@ export default function WhySiti() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {FEATURES.map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -68,15 +79,28 @@ export default function WhySiti() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="bg-white rounded-3xl p-8 shadow-sm border border-border hover:shadow-xl transition-all duration-300 group"
+              className="relative rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group cursor-default h-64 md:h-72"
             >
-              <div className="w-14 h-14 bg-secondary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-secondary transition-colors duration-300">
-                <feature.icon className="w-7 h-7 text-secondary group-hover:text-white transition-colors duration-300" />
+              {/* Background image */}
+              <img
+                src={feature.img}
+                alt={feature.title}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              {/* Gradient overlay — dark at bottom, lighter at top */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 group-hover:from-black/85 transition-all duration-300" />
+
+              {/* Content anchored to bottom */}
+              <div className="absolute inset-0 flex flex-col justify-end p-6">
+                {/* Icon badge */}
+                <div className="w-11 h-11 bg-primary/90 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:bg-primary transition-colors duration-300">
+                  <feature.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-1.5 leading-snug">{feature.title}</h3>
+                <p className="text-white/80 text-sm leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all">
+                  {feature.desc}
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {feature.desc}
-              </p>
             </motion.div>
           ))}
         </div>

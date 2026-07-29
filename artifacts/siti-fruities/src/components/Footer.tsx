@@ -1,5 +1,5 @@
 import React from 'react';
-import logoImg from '@assets/sitifruities_logo_crop_1785360265146.png';
+import logoImg from '@assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png';
 import { MapPin, Phone, Instagram, Facebook } from 'lucide-react';
 import { SiWhatsapp } from 'react-icons/si';
 
@@ -47,7 +47,7 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-sm">
                 <MapPin className="w-5 h-5 text-primary shrink-0" />
-                <span>Forlat Shopping Complex, Opposite Maintenance, Ede Road, Ile-Ife, Osun State</span>
+                <span>Poplat Shopping Complex, Opposite Maintenance, Ede Road, Ile-Ife, Osun State</span>
               </li>
               <li className="flex items-center gap-3 text-sm">
                 <Phone className="w-5 h-5 text-primary shrink-0" />
