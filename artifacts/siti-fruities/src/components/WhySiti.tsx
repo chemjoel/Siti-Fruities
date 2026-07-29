@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Leaf, Ban, Sunrise, ChefHat, Gift, Users } from 'lucide-react';
-import parfaitImg from '@assets/Screenshot_20260729-212242_1785360049881.jpg';
-import yoghurtImg from '@assets/Screenshot_20260729-212331_1785360049844.jpg';
-import chefImg from '@assets/Screenshot_20260729-212642_1785360049574.jpg';
-import cateringEventImg from '@assets/Screenshot_20260729-212635_1785360049633.jpg';
-import treatBoxImg from '@assets/Screenshot_20260729-212815_1785360013704.jpg';
-import hamperImg from '@assets/Screenshot_20260729-213638_1785360173839.jpg';
+const parfaitImg = '/assets/Screenshot_20260729-212242_1785360049881.jpg';
+const yoghurtImg = '/assets/Screenshot_20260729-212331_1785360049844.jpg';
+const chefImg = '/assets/Screenshot_20260729-212642_1785360049574.jpg';
+const cateringEventImg = '/assets/Screenshot_20260729-212635_1785360049633.jpg';
+const treatBoxImg = '/assets/Screenshot_20260729-212815_1785360013704.jpg';
+const hamperImg = '/assets/Screenshot_20260729-213638_1785360173839.jpg';
 
 const FEATURES = [
   {

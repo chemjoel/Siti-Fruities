@@ -3,10 +3,10 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { Star, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-import rev1 from '@assets/Screenshot_20260729-213453_1785360013623.jpg';
-import rev2 from '@assets/Screenshot_20260729-213507_1785360013666.jpg';
-import rev3 from '@assets/Screenshot_20260729-213514_1785360013577.jpg';
-import rev4 from '@assets/Screenshot_20260729-213549_1785360013494.jpg';
+const rev1 = '/assets/Screenshot_20260729-213453_1785360013623.jpg';
+const rev2 = '/assets/Screenshot_20260729-213507_1785360013666.jpg';
+const rev3 = '/assets/Screenshot_20260729-213514_1785360013577.jpg';
+const rev4 = '/assets/Screenshot_20260729-213549_1785360013494.jpg';
 
 const REVIEWS = [
   { img: rev1, name: "Aisha T.", type: "Breakthrough feeling" },

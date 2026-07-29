@@ -2,10 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
-import heroBgImg from '@assets/Screenshot_20260729-212635_1785360049633.jpg';
-import parfaitImg from '@assets/Screenshot_20260729-212242_1785360049881.jpg';
-import treatBoxImg from '@assets/Screenshot_20260729-212815_1785360013704.jpg';
-import smoothieImg from '@assets/Screenshot_20260729-212748_1785360013740.jpg';
+const heroBgImg = '/assets/Screenshot_20260729-212635_1785360049633.jpg';
+const parfaitImg = '/assets/Screenshot_20260729-212242_1785360049881.jpg';
+const treatBoxImg = '/assets/Screenshot_20260729-212815_1785360013704.jpg';
+const smoothieImg = '/assets/Screenshot_20260729-212748_1785360013740.jpg';
 
 export default function Hero() {
   const scrollToProducts = () => {

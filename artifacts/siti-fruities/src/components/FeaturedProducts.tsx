@@ -6,12 +6,12 @@ import { Plus, Minus, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // Assets
-import greekYoghurtImg from '@assets/Screenshot_20260729-212331_1785360049844.jpg';
-import sandwichImg from '@assets/Screenshot_20260729-212433_1785360049771.jpg';
-import bananaBreadImg from '@assets/Screenshot_20260729-212519_1785360049733.jpg';
-import cateringImg from '@assets/Screenshot_20260729-212642_1785360049574.jpg';
-import treatBoxImg from '@assets/Screenshot_20260729-212815_1785360013704.jpg';
-import parfaitImg from '@assets/Screenshot_20260729-212256_1785360049919.jpg';
+const greekYoghurtImg = '/assets/Screenshot_20260729-212331_1785360049844.jpg';
+const sandwichImg = '/assets/Screenshot_20260729-212433_1785360049771.jpg';
+const bananaBreadImg = '/assets/Screenshot_20260729-212519_1785360049733.jpg';
+const cateringImg = '/assets/Screenshot_20260729-212642_1785360049574.jpg';
+const treatBoxImg = '/assets/Screenshot_20260729-212815_1785360013704.jpg';
+const parfaitImg = '/assets/Screenshot_20260729-212256_1785360049919.jpg';
 
 // Helper for formatting currency
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;

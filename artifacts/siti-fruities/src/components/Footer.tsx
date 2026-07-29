@@ -1,5 +1,5 @@
 import React from 'react';
-import logoImg from '@assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png';
+const logoImg = '/assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png';
 import { MapPin, Phone, Instagram, Facebook } from 'lucide-react';
 import { SiWhatsapp } from 'react-icons/si';
 

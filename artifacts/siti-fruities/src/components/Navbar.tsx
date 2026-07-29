@@ -4,7 +4,7 @@ import { ShoppingBag, Search, Menu, X } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
-import logoImg from '@assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png';
+const logoImg = '/assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_LINKS = [
