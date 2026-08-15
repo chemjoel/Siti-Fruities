@@ -15,7 +15,7 @@ export default function Hero() {
   return (
     <section className="relative min-h-[90dvh] pt-24 md:pt-32 pb-16 overflow-hidden flex items-center">
       {/* Full-bleed background image */}
-      <div className="absolute inset-0 -z-20">
+      <div className="absolute inset-0 z-0">
         <img
           src={heroBgImg}
           alt="Siti Fruities hero background"
@@ -27,13 +27,13 @@ export default function Hero() {
       </div>
 
       {/* Decorative blobs */}
-      <div className="absolute top-1/4 -right-1/4 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[120px] -z-10 mix-blend-screen" />
-      <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[140px] -z-10 mix-blend-screen" />
+      <div className="absolute top-1/4 -right-1/4 w-[500px] h-[500px] bg-primary/15 rounded-full blur-[120px] z-0 mix-blend-screen" />
+      <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[140px] z-0 mix-blend-screen" />
 
       <div className="container mx-auto px-4 md:px-8 flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
         
         {/* Text Content */}
-        <div className="flex-1 w-full max-w-2xl text-center lg:text-left z-10 pt-10 lg:pt-0">
+        <div className="flex-1 w-full max-w-2xl text-center lg:text-left relative z-10 pt-10 lg:pt-0">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

@@ -9,16 +9,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_LINKS = [
   { name: 'Home', href: '/' },
-  { name: 'Healthy Smoothies', href: '#products-section' },
-  { name: 'Cold Pressed Juice', href: '#products-section' },
-  { name: 'Greek Yoghurt', href: '#products-section' },
-  { name: 'Parfaits', href: '#products-section' },
-  { name: 'Sandwiches', href: '#products-section' },
-  { name: 'Healthy Treat Boxes', href: '#products-section' },
-  { name: 'Fruit Hampers', href: '#products-section' },
-  { name: 'Combos', href: '#products-section' },
-  { name: 'Catering', href: '#products-section' },
-  { name: 'About Us', href: '#footer' },
+  { name: 'Fresh Fruits & Snacks', href: '/fruits' },
+  { name: 'Greek Yogurt', href: '/yogurt' },
+  { name: 'VIP & VVIP Parfaits', href: '/parfaits' },
+  { name: 'Healthy Smoothies', href: '/smoothies' },
+  { name: 'Cold Pressed Juices', href: '/cold-pressed-juices' },
+  { name: 'Signature Sandwiches', href: '/sandwiches' },
+  { name: 'Healthy Treat Boxes', href: '/treat-boxes' },
+  { name: 'Flavoured Tea', href: '/tea' },
+  { name: 'Creamy Milkshakes', href: '/milkshakes' },
+  { name: 'Tiger Nut Drink', href: '/tiger-nut-drink' },
+  { name: 'Fruit Hampers', href: '/hampers' },
+  { name: 'Combos & Catering', href: '/#products-section' },
+  { name: 'About Us', href: '/#footer' },
 ];
 
 export default function Navbar() {
@@ -34,13 +37,16 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (href.startsWith('#')) {
-      e.preventDefault();
-      const el = document.querySelector(href);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-        setIsMobileMenuOpen(false);
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    setIsMobileMenuOpen(false);
+    if (href.startsWith('/#') || href.startsWith('#')) {
+      const targetId = href.includes('#') ? '#' + href.split('#')[1] : href;
+      if (window.location.pathname === '/') {
+        e.preventDefault();
+        const el = document.querySelector(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     }
   };
@@ -100,19 +106,22 @@ export default function Navbar() {
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <img src={logoImg} alt="Siti Fruities" className="h-10 w-auto object-contain" />
               </SheetHeader>
-              <div className="flex flex-col py-6 px-4 overflow-y-auto h-[calc(100vh-80px)]">
+              <div className="flex flex-col py-4 px-2 overflow-y-auto h-[calc(100vh-80px)]">
                 {NAV_LINKS.map((link, i) => (
-                  <motion.a
+                  <motion.div
                     key={link.name}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    href={link.href}
-                    onClick={(e) => scrollToSection(e, link.href)}
-                    className="py-4 px-4 text-lg font-medium text-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
+                    transition={{ delay: i * 0.03 }}
                   >
-                    {link.name}
-                  </motion.a>
+                    <Link
+                      href={link.href}
+                      onClick={(e) => handleNavClick(e as any, link.href)}
+                      className="py-3 px-4 text-base font-semibold text-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all block cursor-pointer"
+                    >
+                      {link.name}
+                    </Link>
+                  </motion.div>
                 ))}
               </div>
             </SheetContent>
