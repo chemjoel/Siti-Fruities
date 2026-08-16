@@ -32,27 +32,20 @@ const CATEGORY_MAP: Record<string, CategoryDetail> = {
       { name: 'Fresh Fruit Bowl (Gbemidele Size)', description: 'Generous serving of nutrient-rich seasonal fruits.', price: '₦5,500' }
     ]
   },
-  'yogurt': {
-    title: 'Greek Yogurt',
-    description: 'Rich, thick, and probiotic-packed Greek Yogurt made with zero artificial preservatives.',
-    gradient: 'from-emerald-500 to-teal-600',
+  'greek-yogurt-parfaits': {
+    title: 'Greek Yogurt & Parfaits',
+    description: 'Rich, thick probiotic Greek Yogurt and premium layered parfaits with fresh fruits, granola, seeds, nuts, and natural honey.',
+    gradient: 'from-emerald-500 to-rose-600',
     products: [
       { name: 'Greek Yogurt - Sweetened', description: 'Naturally sweetened, creamy probiotic yogurt.', price: 'From ₦4,500' },
-      { name: 'Greek Yogurt - Unsweetened', description: 'Rich, tart, unsweetened Greek yogurt. Perfect for gut health.', price: 'From ₦4,500' }
-    ]
-  },
-  'parfaits': {
-    title: 'Greek Yogurt Parfaits',
-    description: 'Indulgent parfaits layered with fresh fruits, granola, seeds, nuts, and natural honey.',
-    gradient: 'from-pink-500 to-rose-600',
-    products: [
+      { name: 'Greek Yogurt - Unsweetened', description: 'Rich, tart, unsweetened Greek yogurt. Perfect for gut health.', price: 'From ₦4,500' },
       { name: 'VIP Parfait (500ml)', description: 'Greek yogurt layered with apple, banana, grapes, coconut, granola, and cashew nuts.', price: '₦8,000' },
       { name: 'VVIP Parfait (550ml)', description: 'Premium tier parfait with extra toppings including kiwi, strawberries, and rolled oats.', price: '₦9,000' },
       { name: 'Smallie Parfait (330ml)', description: 'Perfect size for events and quick healthy snacks (Minimum order: 2 cups).', price: '₦4,500' }
     ]
   },
   'smoothies': {
-    title: 'Healthy Smoothies',
+    title: 'Smoothies',
     description: 'Creamy, thick, and nutrient-dense smoothies made from fresh fruits and nuts.',
     gradient: 'from-purple-500 to-indigo-600',
     products: [
@@ -67,12 +60,11 @@ const CATEGORY_MAP: Record<string, CategoryDetail> = {
     gradient: 'from-amber-400 to-orange-600',
     products: [
       { name: 'PING Juice (35cl)', description: 'Our signature blend of Pineapple and Ginger. Super refreshing.', price: '₦2,500' },
-      { name: 'Zobo Drink (50cl)', description: 'Traditional hibiscus flower tea infused with cloves and ginger.', price: '₦1,500' },
       { name: 'Pure Orange Juice', description: 'Freshly squeezed premium oranges with no added sugar.', price: '₦2,500' }
     ]
   },
-  'sandwiches': {
-    title: 'Signature Sandwiches',
+  'sandwiches-savoury': {
+    title: 'Sandwiches & Savoury',
     description: 'Freshly assembled sandwiches with fresh cabbage, carrot, premium protein, and in-house cream.',
     gradient: 'from-amber-600 to-yellow-600',
     products: [
@@ -81,8 +73,23 @@ const CATEGORY_MAP: Record<string, CategoryDetail> = {
       { name: 'Beef Sandwich', description: 'Juicy stir-fried beef slices with crisp veggies and special sauce.', price: '₦3,000' }
     ]
   },
+  'milk-tea-drinks': {
+    title: 'Milk Tea & Drinks',
+    description: 'Milk Tea, traditional Zobo, fresh Tigernut drink, and other refreshing beverages.',
+    gradient: 'from-pink-500 to-amber-600',
+    products: [
+      { name: 'Classic Milk Tea', description: 'Our signature original milk tea recipe with chewy black tapioca pearls.', price: '₦9,000' },
+      { name: 'Vanilla Milk Tea', description: 'Smooth, fragrant vanilla-infused milk tea with chewy black tapioca pearls.', price: '₦8,000' },
+      { name: 'Zobo Drink (50cl)', description: 'Traditional hibiscus flower tea infused with cloves and ginger.', price: '₦1,500' },
+      { name: 'Fresh Tiger Nut Drink (50cl)', description: 'Raw tiger nut beverage infused with coconut, dates, and ginger.', price: '₦2,500' },
+      { name: 'Tiger Nut & Coconut Blend (1L)', description: 'Thicker, ultra-creamy traditional tiger nut drink.', price: '₦4,500' },
+      { name: 'Strawberry Cream Milkshake (500ml)', description: 'Made with fresh strawberries, healthy dairy, and honey.', price: '₦4,500' },
+      { name: 'Vanilla Bean Milkshake (500ml)', description: 'Classic vanilla bean milkshake topped with crushed nuts.', price: '₦4,000' },
+      { name: 'Double Chocolate Milkshake (500ml)', description: 'Rich dark cocoa milkshake sweetened with dates.', price: '₦4,500' }
+    ]
+  },
   'treat-boxes': {
-    title: 'Healthy Treat Boxes',
+    title: 'Treat Boxes',
     description: 'Curated combination boxes featuring healthy salads, yogurt, parfaits, and baked goodies.',
     gradient: 'from-purple-600 to-pink-500',
     products: [
@@ -124,35 +131,7 @@ const CATEGORY_MAP: Record<string, CategoryDetail> = {
       }
     ]
   },
-  'tea': {
-    title: 'Flavoured & Milk Tea',
-    description: 'Smooth, rich tea selections served with chewy tapioca pearls.',
-    gradient: 'from-amber-700 to-yellow-600',
-    products: [
-      { name: 'Classic Milk Tea', description: 'Our signature original milk tea recipe with chewy black tapioca pearls.', price: '₦9,000' },
-      { name: 'Vanilla Milk Tea', description: 'Smooth, fragrant vanilla-infused milk tea with chewy black tapioca pearls.', price: '₦8,000' }
-    ]
-  },
-  'milkshakes': {
-    title: 'Creamy Milkshakes',
-    description: 'Thick, frosty, and delicious milkshakes made from premium healthy dairy.',
-    gradient: 'from-sky-400 to-blue-600',
-    products: [
-      { name: 'Strawberry Cream Milkshake', description: 'Made with fresh strawberries, healthy dairy, and honey.', price: '₦4,500' },
-      { name: 'Vanilla Bean Milkshake', description: 'Classic vanilla bean milkshake topped with crushed nuts.', price: '₦4,000' },
-      { name: 'Double Chocolate Milkshake', description: 'Rich dark cocoa milkshake sweetened with dates.', price: '₦4,500' }
-    ]
-  },
-  'tiger-nut-drink': {
-    title: 'Tiger Nut Drink',
-    description: 'Traditional Nigerian Kunun Aya - freshly squeezed, sweetened with dates, and completely dairy-free.',
-    gradient: 'from-amber-600 to-emerald-700',
-    products: [
-      { name: 'Fresh Tiger Nut Drink (50cl)', description: 'Raw tiger nut beverage infused with coconut, dates, and ginger.', price: '₦2,500' },
-      { name: 'Tiger Nut & Coconut Blend (1L)', description: 'Thicker, ultra-creamy traditional tiger nut drink.', price: '₦4,500' }
-    ]
-  },
-  'hampers': {
+  'fruit-hampers': {
     title: 'Fruit Hampers',
     description: 'Exquisite gift baskets packed with fresh fruits, premium nuts, and healthy delicacies.',
     gradient: 'from-emerald-700 to-green-600',
@@ -169,6 +148,26 @@ const CATEGORY_MAP: Record<string, CategoryDetail> = {
         price: '₦55,000',
         features: ['1x Big Pineapple', '1x Big Watermelon', '5x Red Apples', '4x Clementines', '1x Pack of Red Seedless Grapes', '1x Pack of Strawberries', '2x Kiwis, 2x Oranges, 2x Lemons', 'Luxury Hamper Basket & Note Card'] 
       }
+    ]
+  },
+  'combos': {
+    title: 'Combos',
+    description: 'Specially paired healthy meal combinations at discounted rates.',
+    gradient: 'from-amber-500 to-teal-600',
+    products: [
+      { name: 'Sandwich & Smoothie Combo', description: 'A freshly prepared Chicken or Beef Sandwich paired with any regular smoothie of your choice.', price: '₦6,000' },
+      { name: 'Parfait & Salad Combo', description: 'A 500ml Exotic Parfait coupled with our signature Healthy Chicken Salad Bowl.', price: '₦12,500' },
+      { name: 'Fruit Bowl & Greek Yogurt Combo', description: 'An Exotic Fruit Salad Bowl combined with a 500ml sweetened or unsweetened Greek Yogurt.', price: '₦7,500' }
+    ]
+  },
+  'catering-events': {
+    title: 'Catering & Events',
+    description: 'Fresh healthy catering setups, bulk supply, and custom dessert tables for weddings, parties, and corporate events.',
+    gradient: 'from-blue-600 to-emerald-600',
+    products: [
+      { name: 'Corporate Brunch Package', description: 'Assorted finger-sandwiches, fresh fruit cups, and mini yogurt parfaits (Serves 10-15).', price: '₦50,000' },
+      { name: 'Celebration Dessert Table', description: 'Premium fruit salad carvings, assorted parfaits, and whole wheat banana bread loaves (Serves 25-30).', price: '₦120,000' },
+      { name: 'Deluxe Event Catering Service', description: 'Fully staffed on-site custom smoothie bar and freshly made parfait cups for weddings or major events.', price: '₦250,000' }
     ]
   }
 };

@@ -5,7 +5,9 @@ import {
   Coffee, 
   GlassWater, 
   Milk, 
-  ArrowRight 
+  ArrowRight,
+  Sparkles,
+  Utensils
 } from 'lucide-react';
 
 // Import Assets
@@ -29,25 +31,19 @@ interface CategoryItem {
 
 const CATEGORIES: CategoryItem[] = [
   { 
-    name: 'Fresh Fruits & Snacks', 
+    name: 'Fresh Fruits & Healthy Snacks', 
     desc: 'Fresh seasonal fruit salad bowls, healthy chicken salad, and clean snacks.', 
     img: freshFruitsImg, 
     href: '/fruits' 
   },
   { 
-    name: 'Greek Yogurt', 
-    desc: 'Thick, creamy probiotic-packed yogurt. Sweetened or unsweetened only.', 
+    name: 'Greek Yogurt & Parfaits', 
+    desc: 'Probiotic Greek yogurt (sweetened or unsweetened) and premium layered parfaits.', 
     img: yoghurtImg, 
-    href: '/yogurt' 
+    href: '/greek-yogurt-parfaits' 
   },
   { 
-    name: 'VIP & VVIP Parfaits', 
-    desc: 'Layered premium Greek yogurt parfaits packed with fresh fruit, nuts, and granola.', 
-    img: parfaitImg, 
-    href: '/parfaits' 
-  },
-  { 
-    name: 'Healthy Smoothies', 
+    name: 'Smoothies', 
     desc: 'Rich, thick, and nutrient-dense smoothies made from fresh fruits and nuts.', 
     img: smoothieImg, 
     href: '/smoothies' 
@@ -59,46 +55,46 @@ const CATEGORIES: CategoryItem[] = [
     href: '/cold-pressed-juices' 
   },
   { 
-    name: 'Signature Sandwiches', 
+    name: 'Sandwiches & Savoury', 
     desc: 'Freshly made Chicken, Beef, and Egg sandwiches with signature cream.', 
     img: sandwichImg, 
-    href: '/sandwiches' 
+    href: '/sandwiches-savoury' 
   },
   { 
-    name: 'Healthy Treat Boxes', 
+    name: 'Milk Tea & Drinks', 
+    desc: 'Freshly brewed Milk Tea, Zobo, Tigernut Drink, and other refreshing beverages.', 
+    img: '', 
+    href: '/milk-tea-drinks',
+    icon: GlassWater,
+    gradient: 'from-[#FEE2E2] to-[#FCA5A5]/80 border-[#FCA5A5]/40 text-[#DC2626]'
+  },
+  { 
+    name: 'Treat Boxes', 
     desc: 'Curated combination packages featuring salad, yogurt, parfait, and bread.', 
     img: treatBoxImg, 
     href: '/treat-boxes' 
   },
   { 
-    name: 'Flavoured & Milk Tea', 
-    desc: 'Smooth Vanilla and Classic Milk Tea served with chewy tapioca pearls.', 
-    img: '', 
-    href: '/tea',
-    icon: Coffee,
-    gradient: 'from-[#E6CCB2]/40 to-[#B08968]/30 border-[#B08968]/20 text-[#6F4E37]'
-  },
-  { 
-    name: 'Creamy Milkshakes', 
-    desc: 'Thick, premium, and frosty milkshakes for a refreshing healthy treat.', 
-    img: '', 
-    href: '/milkshakes',
-    icon: GlassWater,
-    gradient: 'from-[#FEE2E2] to-[#FCA5A5]/80 border-[#FCA5A5]/40 text-[#DC2626]'
-  },
-  { 
-    name: 'Tiger Nut Drink', 
-    desc: 'Traditional freshly pressed tiger nut milk infused with coconut and dates.', 
-    img: '', 
-    href: '/tiger-nut-drink',
-    icon: Milk,
-    gradient: 'from-[#FEF3C7] to-[#FDE68A]/80 border-[#FDE68A]/40 text-[#D97706]'
-  },
-  { 
     name: 'Fruit Hampers', 
     desc: 'Beautifully arranged deluxe and exotic fresh fruit gift hampers.', 
     img: hamperImg, 
-    href: '/hampers' 
+    href: '/fruit-hampers' 
+  },
+  {
+    name: 'Combos',
+    desc: 'Specially paired healthy meal combinations at discounted prices.',
+    img: '',
+    href: '/combos',
+    icon: Sparkles,
+    gradient: 'from-[#FEF3C7] to-[#FDE68A]/80 border-[#FDE68A]/40 text-[#D97706]'
+  },
+  {
+    name: 'Catering & Events',
+    desc: 'Indoor, outdoor, and bulk food supply services customized for your events.',
+    img: '',
+    href: '/catering-events',
+    icon: Utensils,
+    gradient: 'from-[#E0F2FE] to-[#BAE6FD]/80 border-[#BAE6FD]/40 text-[#0284C7]'
   }
 ];
 

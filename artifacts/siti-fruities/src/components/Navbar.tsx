@@ -7,21 +7,23 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/co
 const logoImg = '/assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const NAV_LINKS = [
+const MAIN_LINKS = [
   { name: 'Home', href: '/' },
-  { name: 'Fresh Fruits & Snacks', href: '/fruits' },
-  { name: 'Greek Yogurt', href: '/yogurt' },
-  { name: 'VIP & VVIP Parfaits', href: '/parfaits' },
-  { name: 'Healthy Smoothies', href: '/smoothies' },
-  { name: 'Cold Pressed Juices', href: '/cold-pressed-juices' },
-  { name: 'Signature Sandwiches', href: '/sandwiches' },
-  { name: 'Healthy Treat Boxes', href: '/treat-boxes' },
-  { name: 'Flavoured Tea', href: '/tea' },
-  { name: 'Creamy Milkshakes', href: '/milkshakes' },
-  { name: 'Tiger Nut Drink', href: '/tiger-nut-drink' },
-  { name: 'Fruit Hampers', href: '/hampers' },
-  { name: 'Combos & Catering', href: '/#products-section' },
-  { name: 'About Us', href: '/#footer' },
+  { name: 'About Us', href: '/about' },
+  { name: 'Contact / Get in Touch', href: '/contact' },
+];
+
+const SHOP_LINKS = [
+  { name: 'Fresh Fruits & Healthy Snacks', href: '/fruits' },
+  { name: 'Greek Yogurt & Parfaits', href: '/greek-yogurt-parfaits' },
+  { name: 'Smoothies', href: '/smoothies' },
+  { name: 'Cold-Pressed Juices', href: '/cold-pressed-juices' },
+  { name: 'Sandwiches & Savoury', href: '/sandwiches-savoury' },
+  { name: 'Milk Tea & Drinks', href: '/milk-tea-drinks' },
+  { name: 'Treat Boxes', href: '/treat-boxes' },
+  { name: 'Fruit Hampers', href: '/fruit-hampers' },
+  { name: 'Combos', href: '/combos' },
+  { name: 'Catering & Events', href: '/catering-events' },
 ];
 
 export default function Navbar() {
@@ -106,23 +108,54 @@ export default function Navbar() {
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <img src={logoImg} alt="Siti Fruities" className="h-10 w-auto object-contain" />
               </SheetHeader>
-              <div className="flex flex-col py-4 px-2 overflow-y-auto h-[calc(100vh-80px)]">
-                {NAV_LINKS.map((link, i) => (
-                  <motion.div
-                    key={link.name}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03 }}
-                  >
-                    <Link
-                      href={link.href}
-                      onClick={(e) => handleNavClick(e as any, link.href)}
-                      className="py-3 px-4 text-base font-semibold text-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all block cursor-pointer"
-                    >
-                      {link.name}
-                    </Link>
-                  </motion.div>
-                ))}
+              <div className="flex flex-col py-4 px-2 overflow-y-auto h-[calc(100vh-80px)] space-y-6">
+                <div>
+                  <div className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/60 px-4 mb-2">
+                    Main
+                  </div>
+                  <div className="space-y-0.5">
+                    {MAIN_LINKS.map((link, i) => (
+                      <motion.div
+                        key={link.name}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                      >
+                        <Link
+                          href={link.href}
+                          onClick={(e) => handleNavClick(e as any, link.href)}
+                          className="py-2.5 px-4 text-base font-semibold text-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all block cursor-pointer"
+                        >
+                          {link.name}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/60 px-4 mb-2">
+                    Our Menu / Shop
+                  </div>
+                  <div className="space-y-0.5">
+                    {SHOP_LINKS.map((link, i) => (
+                      <motion.div
+                        key={link.name}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (MAIN_LINKS.length + i) * 0.03 }}
+                      >
+                        <Link
+                          href={link.href}
+                          onClick={(e) => handleNavClick(e as any, link.href)}
+                          className="py-2.5 px-4 text-base font-semibold text-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all block cursor-pointer"
+                        >
+                          {link.name}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </SheetContent>
           </Sheet>
