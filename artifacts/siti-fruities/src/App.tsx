@@ -11,6 +11,10 @@ import SmoothiesPage from '@/pages/SmoothiesPage';
 import ColdPressedJuicesPage from '@/pages/ColdPressedJuicesPage';
 import SandwichesSavouryPage from '@/pages/SandwichesSavouryPage';
 import MilkTeaDrinksPage from '@/pages/MilkTeaDrinksPage';
+import TreatBoxesPage from '@/pages/TreatBoxesPage';
+import FruitHampersPage from '@/pages/FruitHampersPage';
+import CombosPage from '@/pages/CombosPage';
+import CateringEventsPage from '@/pages/CateringEventsPage';
 import AboutUs from '@/pages/AboutUs';
 import Contact from '@/pages/Contact';
 import { CartProvider } from '@/context/CartContext';
@@ -27,6 +31,10 @@ function Router() {
       <Route path="/cold-pressed-juices" component={ColdPressedJuicesPage} />
       <Route path="/sandwiches-savoury" component={SandwichesSavouryPage} />
       <Route path="/milk-tea-drinks" component={MilkTeaDrinksPage} />
+      <Route path="/treat-boxes" component={TreatBoxesPage} />
+      <Route path="/fruit-hampers" component={FruitHampersPage} />
+      <Route path="/combos" component={CombosPage} />
+      <Route path="/catering-events" component={CateringEventsPage} />
       <Route path="/about" component={AboutUs} />
       <Route path="/contact" component={Contact} />
       <Route path="/:category" component={CategoryPlaceholder} />
