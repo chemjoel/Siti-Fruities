@@ -7,11 +7,11 @@ import { motion } from 'framer-motion';
 
 // Assets
 const greekYoghurtImg = '/assets/Screenshot_20260729-212331_1785360049844.jpg';
-const sandwichImg = '/assets/Screenshot_20260729-212433_1785360049771.jpg';
-const bananaBreadImg = '/assets/Screenshot_20260729-212519_1785360049733.jpg';
+const sandwichImg = '/assets/IMG_1940_sandwich.jpg';
+const bananaBreadImg = '/assets/IMG_7131_banana_bread_tray.jpg';
 const cateringImg = '/assets/Screenshot_20260729-212642_1785360049574.jpg';
 const treatBoxImg = '/assets/Screenshot_20260729-212815_1785360013704.jpg';
-const parfaitImg = '/assets/Screenshot_20260729-212256_1785360049919.jpg';
+const parfaitImg = '/assets/IMG_1639_parfait_1l.jpg';
 
 // Helper for formatting currency
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
@@ -347,9 +347,12 @@ function ParfaitCard() {
   };
 
   return (
-    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
+    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 ring-2 ring-primary/20">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img src={parfaitImg} alt="Exotic Parfait" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <div className="absolute top-3 left-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+          ⭐ #1 Signature Product
+        </div>
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
           From {formatPrice(5000)}
         </div>
@@ -358,7 +361,7 @@ function ParfaitCard() {
         <div>
           <h3 className="text-xl font-bold font-serif mb-2">Exotic Parfait</h3>
           <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-            Greek Yoghurt, Apple, Banana, Grapes, Coconut, Granola, Cashew, Kiwi, Strawberry, Rolled Oats
+            Greek Yogurt, Apple, Coconut, Grapes, Granola with rolled oats, Cashew nuts, Kiwi, Strawberry, Raisins
           </p>
         </div>
 
@@ -580,8 +583,8 @@ export default function FeaturedProducts() {
 
         {/* Mobile: Horizontal scroll, Desktop: Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          <GreekYoghurtCard />
           <ParfaitCard />
+          <GreekYoghurtCard />
           <SandwichCard />
           <BananaBreadCard />
           <TreatBoxCard />

@@ -25,10 +25,11 @@ import { motion } from 'framer-motion';
 
 // Local assets mapping (reused from CategorySection)
 const freshFruitsImg = '/assets/Screenshot_20260729-212635_1785360049633.jpg';
-const parfaitImg = '/assets/Screenshot_20260729-212242_1785360049881.jpg';
+const parfaitImg = '/assets/IMG_8455_parfait_bowls.jpg';
 const smoothieImg = '/assets/Screenshot_20260729-212748_1785360013740.jpg';
-const sandwichImg = '/assets/Screenshot_20260729-212433_1785360049771.jpg';
+const sandwichImg = '/assets/IMG_1940_sandwich.jpg';
 const hamperImg = '/assets/Screenshot_20260729-213638_1785360173839.jpg';
+const founderImg = '/assets/IMG_1954_founder.jpg';
 
 export default function AboutUs() {
   return (
@@ -258,13 +259,16 @@ export default function AboutUs() {
           <div className="container mx-auto px-4 md:px-8 max-w-4xl">
             <div className="bg-card rounded-3xl border border-card-border p-8 md:p-12 shadow-lg flex flex-col md:flex-row items-center gap-10 md:gap-12">
               
-              {/* Profile Placeholder (no stock photo) */}
-              <div className="w-48 h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-emerald-100 to-teal-200 border border-secondary/20 flex flex-col items-center justify-center text-secondary relative shrink-0 shadow-inner p-2">
-                <div className="bg-white/80 w-full h-full rounded-full flex flex-col items-center justify-center">
-                  <User className="w-16 h-16 stroke-[1.25] text-primary" />
-                </div>
-                <span className="absolute bottom-2 bg-primary text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm border border-white/20">
-                  Director
+              {/* Founder Photograph */}
+              <div className="w-56 h-64 sm:w-64 sm:h-72 md:w-72 md:h-80 rounded-3xl overflow-hidden border-2 border-secondary/20 shadow-2xl relative shrink-0 group bg-card">
+                <img 
+                  src={founderImg} 
+                  alt="Abimbola Sitirat Yunna - Founder & Creative Director, SITI FRUITIES"
+                  className="w-full h-full object-cover object-[center_20%] transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
+                <span className="absolute bottom-3 left-4 right-4 text-center bg-white/95 backdrop-blur-sm text-primary text-[10px] font-black uppercase tracking-widest py-1.5 px-3 rounded-full shadow-md border border-white/20">
+                  Founder & Creative Director
                 </span>
               </div>
 

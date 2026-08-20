@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 const heroBgImg = '/assets/Screenshot_20260729-212635_1785360049633.jpg';
-const parfaitImg = '/assets/Screenshot_20260729-212242_1785360049881.jpg';
-const treatBoxImg = '/assets/Screenshot_20260729-212815_1785360013704.jpg';
+const parfaitImg = '/assets/IMG_8455_parfait_bowls.jpg';
+const parfaitStackImg = '/assets/IMG_8428_parfait_stack.jpg';
 const smoothieImg = '/assets/Screenshot_20260729-212748_1785360013740.jpg';
 
 export default function Hero() {
@@ -65,7 +65,7 @@ export default function Hero() {
             transition={{ duration: 0.7, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="text-lg md:text-xl text-white/80 font-medium mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
           >
-            Healthy meals, smoothies, parfaits, fresh juices and beautifully curated healthy gift boxes made with premium ingredients in Ile-Ife.
+            Signature Exotic Parfaits, rich Greek Yogurt, natural smoothies, fresh juices, and delicious healthy meals handcrafted in Ile-Ife.
           </motion.p>
           
           <motion.div 
@@ -97,10 +97,10 @@ export default function Hero() {
             className="flex flex-wrap justify-center lg:justify-start gap-3 text-sm md:text-base font-semibold text-white"
           >
             {[
+              "Signature Parfaits", 
               "Fresh Daily", 
               "Premium Ingredients", 
-              "Made To Order", 
-              "Healthy Never Tasted This Good"
+              "100% Nutritious & Delicious"
             ].map((badge, i) => (
               <div key={i} className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 shadow-sm">
                 <CheckCircle2 className="w-4 h-4 text-primary fill-primary/20" />
@@ -116,27 +116,33 @@ export default function Hero() {
             initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
             animate={{ opacity: 1, scale: 1, rotate: -5 }}
             transition={{ duration: 1, delay: 0.2, type: 'spring' }}
-            className="absolute top-10 right-10 lg:right-0 w-48 lg:w-64 h-48 lg:h-64 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/80 z-20"
+            className="absolute top-10 right-10 lg:right-0 w-52 lg:w-72 h-52 lg:h-72 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 z-20 group"
           >
-            <img src={parfaitImg} alt="Exotic Parfait" className="w-full h-full object-cover" />
+            <img src={parfaitImg} alt="Siti Fruities Signature Exotic Parfait" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <div className="absolute top-3 left-3 bg-primary/95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
+              ⭐ #1 Signature Parfait
+            </div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.8, rotate: 10 }}
             animate={{ opacity: 1, scale: 1, rotate: 8 }}
             transition={{ duration: 1, delay: 0.4, type: 'spring' }}
-            className="absolute bottom-10 right-40 lg:right-24 w-56 lg:w-72 h-40 lg:h-56 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/80 z-30"
+            className="absolute bottom-8 right-36 lg:right-20 w-52 lg:w-64 h-44 lg:h-52 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 z-30 group"
           >
-            <img src={treatBoxImg} alt="Deluxe Treat Box" className="w-full h-full object-cover" />
+            <img src={parfaitStackImg} alt="Siti Fruities Exotic Parfaits Range" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+              Fresh Daily
+            </div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.8, rotate: 15 }}
             animate={{ opacity: 1, scale: 1, rotate: 12 }}
             transition={{ duration: 1, delay: 0.6, type: 'spring' }}
-            className="absolute top-1/2 -left-4 lg:left-10 w-40 lg:w-48 h-56 lg:h-64 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/80 z-10"
+            className="absolute top-1/2 -left-4 lg:left-8 w-40 lg:w-48 h-52 lg:h-60 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 z-10 group"
           >
-            <img src={smoothieImg} alt="Nutty Choco Smoothie" className="w-full h-full object-cover" />
+            <img src={smoothieImg} alt="Nutty Choco Smoothie" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           </motion.div>
         </div>
 
@@ -146,9 +152,12 @@ export default function Hero() {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/80 z-20"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 z-20"
           >
-            <img src={parfaitImg} alt="Exotic Parfait" className="w-full h-full object-cover" />
+            <img src={parfaitImg} alt="Siti Fruities Signature Exotic Parfait" className="w-full h-full object-cover" />
+            <div className="absolute top-3 left-3 bg-primary/95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
+              ⭐ #1 Signature Parfait
+            </div>
           </motion.div>
         </div>
       </div>

@@ -18,6 +18,7 @@ export interface Product {
   name: string;
   description: string;
   basePrice: number;
+  image?: string;
   placeholderIcon: React.ComponentType<any>;
   placeholderGradient: string; // e.g. "from-orange-100 to-amber-100"
   options?: ProductOption[];
@@ -80,8 +81,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     addItem({
       productId: product.productId,
       name: product.name,
-      // We pass the Siti Fruities Logo as fallback thumbnail for cart list items
-      image: '/assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png',
+      image: product.image || '/assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png',
       price: unitPrice,
       quantity,
       options: formattedOptions,
@@ -96,14 +96,25 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="bg-card rounded-2xl shadow-md border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
       
-      {/* Polished Gradient Image Placeholder */}
-      <div className={`relative aspect-[4/3] w-full bg-gradient-to-br ${product.placeholderGradient} flex flex-col items-center justify-center border-b border-card-border p-6 overflow-hidden shrink-0`}>
-        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="bg-white/80 backdrop-blur-sm p-4 rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
-          <IconComponent className="w-10 h-10 stroke-[1.5] text-primary" />
+      {/* Product Image or Polished Gradient Placeholder */}
+      {product.image ? (
+        <div className="relative aspect-[4/3] w-full overflow-hidden shrink-0 bg-muted border-b border-card-border">
+          <img 
+            src={product.image} 
+            alt={product.name} 
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        <span className="text-[10px] font-bold tracking-widest text-primary/70 uppercase mt-4">Siti Fruities Fresh</span>
-      </div>
+      ) : (
+        <div className={`relative aspect-[4/3] w-full bg-gradient-to-br ${product.placeholderGradient} flex flex-col items-center justify-center border-b border-card-border p-6 overflow-hidden shrink-0`}>
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="bg-white/80 backdrop-blur-sm p-4 rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
+            <IconComponent className="w-10 h-10 stroke-[1.5] text-primary" />
+          </div>
+          <span className="text-[10px] font-bold tracking-widest text-primary/70 uppercase mt-4">Siti Fruities Fresh</span>
+        </div>
+      )}
 
       {/* Card Content */}
       <div className="p-6 flex flex-col flex-1 gap-5">

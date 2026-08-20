@@ -13,9 +13,9 @@ import {
 // Import Assets
 const smoothieImg = '/assets/Screenshot_20260729-212748_1785360013740.jpg';
 const juiceImg = '/assets/Screenshot_20260729-212547_1785360049692.jpg';
-const yoghurtImg = '/assets/Screenshot_20260729-212331_1785360049844.jpg';
-const parfaitImg = '/assets/Screenshot_20260729-212242_1785360049881.jpg';
-const sandwichImg = '/assets/Screenshot_20260729-212433_1785360049771.jpg';
+const parfaitCategoryImg = '/assets/IMG_8435_parfait_multi.jpg';
+const sandwichImg = '/assets/IMG_1940_sandwich.jpg';
+const bobaTeaImg = '/assets/IMG_2364_bubble_tea_duo.jpg';
 const treatBoxImg = '/assets/Screenshot_20260729-212815_1785360013704.jpg';
 const hamperImg = '/assets/Screenshot_20260729-213638_1785360173839.jpg';
 const freshFruitsImg = '/assets/Screenshot_20260729-212635_1785360049633.jpg';
@@ -38,8 +38,8 @@ const CATEGORIES: CategoryItem[] = [
   },
   { 
     name: 'Greek Yogurt & Parfaits', 
-    desc: 'Probiotic Greek yogurt (sweetened or unsweetened) and premium layered parfaits.', 
-    img: yoghurtImg, 
+    desc: 'Our signature layered Exotic Parfaits and 100% probiotic Greek Yogurt.', 
+    img: parfaitCategoryImg, 
     href: '/greek-yogurt-parfaits' 
   },
   { 
@@ -62,11 +62,9 @@ const CATEGORIES: CategoryItem[] = [
   },
   { 
     name: 'Milk Tea & Drinks', 
-    desc: 'Freshly brewed Milk Tea, Zobo, Tigernut Drink, and other refreshing beverages.', 
-    img: '', 
+    desc: 'Freshly brewed Milk Tea with chewy boba pearls, Zobo, and Tigernut drink.', 
+    img: bobaTeaImg, 
     href: '/milk-tea-drinks',
-    icon: GlassWater,
-    gradient: 'from-[#FEE2E2] to-[#FCA5A5]/80 border-[#FCA5A5]/40 text-[#DC2626]'
   },
   { 
     name: 'Treat Boxes', 
@@ -80,18 +78,18 @@ const CATEGORIES: CategoryItem[] = [
     img: hamperImg, 
     href: '/fruit-hampers' 
   },
-  {
-    name: 'Combos',
-    desc: 'Specially paired healthy meal combinations at discounted prices.',
-    img: '',
+  { 
+    name: 'Combos', 
+    desc: 'Specially paired healthy meal combinations at discounted prices.', 
+    img: '', 
     href: '/combos',
     icon: Sparkles,
     gradient: 'from-[#FEF3C7] to-[#FDE68A]/80 border-[#FDE68A]/40 text-[#D97706]'
   },
-  {
-    name: 'Catering & Events',
-    desc: 'Indoor, outdoor, and bulk food supply services customized for your events.',
-    img: '',
+  { 
+    name: 'Catering & Events', 
+    desc: 'Indoor, outdoor, and bulk food supply services customized for your events.', 
+    img: '', 
     href: '/catering-events',
     icon: Utensils,
     gradient: 'from-[#E0F2FE] to-[#BAE6FD]/80 border-[#BAE6FD]/40 text-[#0284C7]'

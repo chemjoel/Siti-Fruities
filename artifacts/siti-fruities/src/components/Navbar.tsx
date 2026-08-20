@@ -23,7 +23,7 @@ const SHOP_LINKS = [
   { name: 'Treat Boxes', href: '/treat-boxes' },
   { name: 'Fruit Hampers', href: '/fruit-hampers' },
   { name: 'Combos', href: '/combos' },
-  { name: 'Catering & Events', href: '/catering-events' },
+  { name: 'Events & Catering', href: '/catering-events' },
 ];
 
 export default function Navbar() {
@@ -99,16 +99,22 @@ export default function Navbar() {
           {/* Mobile Menu Toggle */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
-              <button className="p-2 text-foreground/80 hover:text-primary transition-colors rounded-full hover:bg-black/5">
+              <button 
+                aria-label="Open Navigation Menu"
+                className="p-2 text-foreground/80 hover:text-primary transition-colors rounded-full hover:bg-black/5"
+              >
                 <Menu className="w-6 h-6 md:w-7 md:h-7" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0 border-l-0 bg-background/95 backdrop-blur-xl">
-              <SheetHeader className="p-6 border-b border-border/50 text-left">
+            <SheetContent 
+              side="right" 
+              className="w-[85vw] max-w-[360px] sm:w-[400px] h-[100dvh] max-h-[100dvh] flex flex-col p-0 gap-0 border-l border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl overflow-hidden"
+            >
+              <SheetHeader className="shrink-0 p-5 md:p-6 pr-14 border-b border-border/50 text-left flex flex-row items-center justify-between">
                 <SheetTitle className="sr-only">Menu</SheetTitle>
-                <img src={logoImg} alt="Siti Fruities" className="h-10 w-auto object-contain" />
+                <img src={logoImg} alt="Siti Fruities" className="h-9 md:h-10 w-auto object-contain" />
               </SheetHeader>
-              <div className="flex flex-col py-4 px-2 overflow-y-auto h-[calc(100vh-80px)] space-y-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y py-4 px-2 space-y-6">
                 <div>
                   <div className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/60 px-4 mb-2">
                     Main
@@ -137,7 +143,7 @@ export default function Navbar() {
                   <div className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/60 px-4 mb-2">
                     Our Menu / Shop
                   </div>
-                  <div className="space-y-0.5">
+                  <div className="space-y-0.5 pb-12">
                     {SHOP_LINKS.map((link, i) => (
                       <motion.div
                         key={link.name}

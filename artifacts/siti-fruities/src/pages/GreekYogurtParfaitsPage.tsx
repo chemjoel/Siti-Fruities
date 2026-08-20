@@ -15,8 +15,10 @@ import {
   Info, 
   Layers, 
   Sparkles, 
-  Apple 
+  Apple,
+  MessageCircle 
 } from 'lucide-react';
+import { SiWhatsapp } from 'react-icons/si';
 import { motion } from 'framer-motion';
 
 // Helper for formatting currency
@@ -77,7 +79,7 @@ export default function GreekYogurtParfaitsPage() {
     addItem({
       productId: 'vvip-exotic-parfait',
       name: 'VVIP Exotic Parfait',
-      image: '/assets/Screenshot_20260729-212242_1785360049881.jpg',
+      image: '/assets/IMG_8455_parfait_bowls.jpg',
       price: vvipUnitPrice,
       quantity: vvipQty,
       options: [
@@ -107,7 +109,7 @@ export default function GreekYogurtParfaitsPage() {
     addItem({
       productId: 'vip-exotic-parfait',
       name: 'VIP Exotic Parfait',
-      image: '/assets/Screenshot_20260729-212242_1785360049881.jpg',
+      image: '/assets/IMG_6519_parfait_500ml.jpg',
       price: vipUnitPrice,
       quantity: vipQty,
       options: [
@@ -119,15 +121,24 @@ export default function GreekYogurtParfaitsPage() {
   };
 
   // --- 4. CUSTOM PARFAIT STATE ---
-  const [customSize, setCustomSize] = useState<'330ml' | '500ml' | '550ml' | '1L' | '2L' | '5L'>('500ml');
+  const customSizeOptions = [
+    { id: '330ml', label: 'Mini', volume: '330ml' },
+    { id: '500ml', label: 'Medium', volume: '500ml' },
+    { id: '550ml', label: 'Gbemidele', volume: '550ml' },
+    { id: '1L', label: 'Ay Bowl', volume: '1 litre' },
+    { id: '2L', label: 'Wonder Bowl', volume: '2 litres' },
+    { id: '5L', label: 'Twa Bowl', volume: '5 litres' },
+  ];
+
+  const [customSize, setCustomSize] = useState<string>('500ml');
   const [customYogurtType, setCustomYogurtType] = useState<'Sweetened' | 'Unsweetened'>('Sweetened');
   const [customQty, setCustomQty] = useState<number>(1);
 
   const fruitOptions = ['Apple', 'Coconut', 'Grapes', 'Strawberries', 'Kiwi'];
-  const [selectedFruits, setSelectedFruits] = useState<string[]>(fruitOptions);
+  const [selectedFruits, setSelectedFruits] = useState<string[]>(['Apple', 'Grapes', 'Strawberries']);
 
   const toppingOptions = ['Granola with rolled oats', 'Raisins', 'Cashew nuts'];
-  const [selectedToppings, setSelectedToppings] = useState<string[]>(toppingOptions);
+  const [selectedToppings, setSelectedToppings] = useState<string[]>(['Granola with rolled oats', 'Cashew nuts']);
 
   const handleToggleFruit = (fruit: string) => {
     setSelectedFruits(prev => 
@@ -141,34 +152,24 @@ export default function GreekYogurtParfaitsPage() {
     );
   };
 
-  // Base pricing uses standard size rate
-  const customBasePrices: Record<string, number> = {
-    '330ml': 6000,
-    '500ml': 8500,
-    '550ml': 10000,
-    '1L': 15000,
-    '2L': 29000,
-    '5L': 65000
-  };
+  const handleRequestQuote = () => {
+    const sizeInfo = customSizeOptions.find(s => s.id === customSize) || { label: 'Medium', volume: '500ml' };
+    const sizeStr = `${sizeInfo.label} — ${sizeInfo.volume}`;
+    const fruitsStr = selectedFruits.length > 0 ? selectedFruits.join(', ') : 'None';
+    const toppingsStr = selectedToppings.length > 0 ? selectedToppings.join(', ') : 'None';
 
-  const customUnitPrice = customBasePrices[customSize];
-  const customTotalPrice = customUnitPrice * customQty;
+    const message = `Hello SITI FRUITIES, I'd like to get a quote for a Custom Exotic Parfait.
 
-  const handleAddCustom = () => {
-    addItem({
-      productId: 'custom-exotic-parfait',
-      name: 'Custom Exotic Parfait',
-      image: '/assets/Screenshot_20260729-212242_1785360049881.jpg',
-      price: customUnitPrice,
-      quantity: customQty,
-      options: [
-        { name: 'Yogurt Type', value: customYogurtType },
-        { name: 'Size', value: customSize },
-        { name: 'Fruits', value: selectedFruits.length > 0 ? selectedFruits.join(', ') : 'None' },
-        { name: 'Toppings', value: selectedToppings.length > 0 ? selectedToppings.join(', ') : 'None' }
-      ]
-    });
-    setCustomQty(1);
+Size: ${sizeStr}
+Yogurt: ${customYogurtType} Greek Yogurt
+Fruits: ${fruitsStr}
+Toppings: ${toppingsStr}${customQty > 1 ? `\nQuantity: ${customQty}` : ''}
+
+Please confirm the price and availability.`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/2348120842962?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
@@ -314,7 +315,7 @@ export default function GreekYogurtParfaitsPage() {
               {/* Product Image Holder */}
               <div className="w-full md:w-1/2 aspect-[4/3] rounded-3xl bg-gradient-to-br from-rose-50 to-pink-100/50 border border-border overflow-hidden relative group">
                 <img 
-                  src="/assets/Screenshot_20260729-212242_1785360049881.jpg" 
+                  src="/assets/IMG_8455_parfait_bowls.jpg" 
                   alt="Siti Fruities VVIP Exotic Parfait"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
@@ -327,101 +328,84 @@ export default function GreekYogurtParfaitsPage() {
               {/* Product Details & Selectors */}
               <div className="w-full md:w-1/2 space-y-6">
                 <div>
-                  <div className="inline-block bg-accent/10 text-accent-foreground text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
-                    VVIP Exclusive
+                  <div className="inline-block bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+                    Premium Fruit Selection
                   </div>
-                  <h2 className="text-3xl font-bold font-serif text-foreground">VVIP Exotic Parfait</h2>
-                  <p className="text-muted-foreground mt-2">
-                    Our ultimate tier parfait layered with fresh organic strawberries, kiwi, grapes, granola, and premium crunchy nuts.
+                  <h2 className="text-3xl md:text-4xl font-bold font-serif text-foreground mb-3">VVIP Exotic Parfait</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    A luxurious medley of pure Greek Yogurt layered with apple, kiwi, strawberry, grapes, crunchy granola with rolled oats, raisins, and cashew nuts.
                   </p>
                 </div>
 
-                {/* Ingredients Chip List */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Ingredients Included</label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Greek Yogurt', 'Apple', 'Coconut', 'Grapes', 'Strawberries', 'Kiwi', 'Granola with rolled oats', 'Raisins', 'Cashew nuts'].map((ing) => (
-                      <span key={ing} className="px-2.5 py-1 bg-white border border-border/80 text-[11px] font-semibold rounded-lg text-foreground/80 flex items-center gap-1">
-                        <Check className="w-3 h-3 text-secondary" /> {ing}
-                      </span>
-                    ))}
+                {/* Selectors */}
+                <div className="space-y-4 pt-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase">Yogurt Base</label>
+                    <div className="flex gap-3">
+                      {(['Sweetened', 'Unsweetened'] as const).map((t) => (
+                        <button
+                          key={t}
+                          onClick={() => setVvipYogurtType(t)}
+                          className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold border transition-all ${
+                            vvipYogurtType === t 
+                              ? 'bg-secondary border-secondary text-white shadow-sm' 
+                              : 'bg-white border-border text-foreground hover:border-secondary/40'
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase">Size</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { key: '330ml', label: 'Mini (330ml)' },
+                        { key: '500ml', label: 'Medium (500ml)' },
+                        { key: '550ml', label: 'Gbemidele (550ml)' },
+                        { key: '1L', label: 'Ay Bowl (1L)' },
+                        { key: '2L', label: 'Wonder Bowl (2L)' },
+                        { key: '5L', label: 'Twa Bowl (5L)' }
+                      ].map((s) => (
+                        <button
+                          key={s.key}
+                          onClick={() => setVvipSize(s.key as any)}
+                          className={`py-2 px-2 rounded-xl text-xs font-semibold border text-center transition-all ${
+                            vvipSize === s.key 
+                              ? 'bg-primary border-primary text-white shadow-sm' 
+                              : 'bg-white border-border text-foreground hover:border-primary/40'
+                          }`}
+                        >
+                          <div className="font-bold">{s.label}</div>
+                          <div className="text-[10px] opacity-80">{formatPrice(vvipBasePrices[s.key])}</div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Yogurt Type Selector */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Yogurt Base Choice</label>
-                  <div className="flex gap-2">
-                    {['Sweetened', 'Unsweetened'].map(type => (
-                      <button
-                        key={type}
-                        onClick={() => setVvipYogurtType(type as any)}
-                        className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
-                          vvipYogurtType === type
-                            ? 'bg-primary border-primary text-white shadow-md'
-                            : 'bg-white border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Size Selector */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Select Size & Volume</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {Object.entries({
-                      '330ml': 'Mini — 330ml',
-                      '500ml': 'Medium — 500ml',
-                      '550ml': 'Gbemidele — 550ml',
-                      '1L': 'Ay Bowl — 1L',
-                      '2L': 'Wonder Bowl — 2L',
-                      '5L': 'Twa Bowl — 5L'
-                    }).map(([size, label]) => (
-                      <button
-                        key={size}
-                        onClick={() => {
-                          setVvipSize(size as any);
-                        }}
-                        className={`p-2.5 rounded-xl text-left border transition-all flex flex-col justify-between ${
-                          vvipSize === size
-                            ? 'bg-secondary border-secondary text-white shadow-md'
-                            : 'bg-white border-border text-foreground hover:border-secondary/50 hover:bg-secondary/5'
-                        }`}
-                      >
-                        <span className="text-[10px] font-bold tracking-wide uppercase opacity-85">{size === '330ml' ? 'Mini' : size === '500ml' ? 'Medium' : size === '550ml' ? 'Gbemidele' : size === '1L' ? 'Ay Bowl' : size === '2L' ? 'Wonder Bowl' : 'Twa Bowl'}</span>
-                        <span className="text-xs font-semibold mt-0.5">{size}</span>
-                        <span className="text-sm font-black mt-2">{formatPrice(vvipBasePrices[size])}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Total and Cart Button */}
-                <div className="pt-4 border-t border-border flex flex-wrap items-center gap-4">
+                {/* Price and Cart Addition */}
+                <div className="flex items-center justify-between pt-6 border-t border-border gap-4">
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total Price</span>
-                    <span className="text-2xl font-black text-primary leading-none mt-1">
-                      {formatPrice(vvipTotalPrice)}
-                    </span>
+                    <span className="text-2xl font-black text-primary">{formatPrice(vvipTotalPrice)}</span>
+                    <span className="text-xs text-muted-foreground">Unit: {formatPrice(vvipUnitPrice)}</span>
                   </div>
 
-                  <div className="flex items-center gap-3 ml-auto">
-                    {/* Qty Selector */}
-                    <div className="flex items-center bg-muted rounded-full p-1 border border-border shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center bg-muted rounded-full p-1 border border-border">
                       <button 
                         onClick={() => setVvipQty(Math.max(1, vvipQty - 1))}
-                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50"
                         disabled={vvipQty <= 1}
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50"
                       >
                         <Minus className="w-4 h-4" />
                       </button>
-                      <span className="w-8 text-center font-bold text-sm text-foreground">{vvipQty}</span>
+                      <span className="w-8 text-center font-bold text-sm">{vvipQty}</span>
                       <button 
                         onClick={() => setVvipQty(vvipQty + 1)}
-                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -429,7 +413,7 @@ export default function GreekYogurtParfaitsPage() {
 
                     <Button 
                       onClick={handleAddVvip}
-                      className="bg-secondary hover:bg-secondary/90 hover:shadow-md active:scale-95 text-white font-bold rounded-full h-11 px-6 text-sm transition-all flex items-center gap-2"
+                      className="bg-primary hover:bg-primary/90 text-white rounded-full px-6 font-bold shadow-md hover:shadow-lg transition-all h-11 flex items-center gap-2"
                     >
                       <ShoppingBag className="w-4 h-4" />
                       <span>Add to Order</span>
@@ -448,7 +432,7 @@ export default function GreekYogurtParfaitsPage() {
               {/* Product Image Holder */}
               <div className="w-full md:w-1/2 aspect-[4/3] rounded-3xl bg-gradient-to-br from-amber-50 to-orange-100/50 border border-border overflow-hidden relative group">
                 <img 
-                  src="/assets/Screenshot_20260729-212242_1785360049881.jpg" 
+                  src="/assets/IMG_6519_parfait_500ml.jpg" 
                   alt="Siti Fruities VIP Exotic Parfait"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
@@ -578,12 +562,12 @@ export default function GreekYogurtParfaitsPage() {
               
               {/* Header */}
               <div className="text-center max-w-2xl mx-auto">
-                <div className="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+                <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full mb-3">
                   <Layers className="w-3.5 h-3.5" /> Build Your Own
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold font-serif text-foreground">Custom Exotic Parfait</h2>
                 <p className="text-muted-foreground font-medium mt-2">
-                  Select your size, yogurt base, and construct your own combination of fruits and toppings.
+                  Select your size, yogurt base, and construct your own combination of fresh fruits and crunchy toppings.
                 </p>
               </div>
 
@@ -595,19 +579,19 @@ export default function GreekYogurtParfaitsPage() {
                   {/* Size Selector */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">1. Choose Size</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {Object.keys(customBasePrices).map((size) => (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {customSizeOptions.map((item) => (
                         <button
-                          key={size}
-                          onClick={() => setCustomSize(size as any)}
-                          className={`p-2.5 rounded-xl border text-center transition-all ${
-                            customSize === size
+                          key={item.id}
+                          onClick={() => setCustomSize(item.id)}
+                          className={`p-2.5 rounded-xl border text-left sm:text-center transition-all ${
+                            customSize === item.id
                               ? 'bg-secondary border-secondary text-white shadow-sm font-bold'
                               : 'bg-white border-border text-foreground hover:border-secondary/50 hover:bg-secondary/5'
                           }`}
                         >
-                          <span className="text-[10px] block opacity-85">{size === '330ml' ? 'Mini' : size === '500ml' ? 'Medium' : size === '550ml' ? 'Gbemidele' : size === '1L' ? 'Ay Bowl' : size === '2L' ? 'Wonder Bowl' : 'Twa Bowl'}</span>
-                          <span className="text-xs">{size}</span>
+                          <span className="text-[10px] block opacity-85">{item.label}</span>
+                          <span className="text-xs font-semibold">{item.volume}</span>
                         </button>
                       ))}
                     </div>
@@ -615,7 +599,7 @@ export default function GreekYogurtParfaitsPage() {
 
                   {/* Yogurt Base */}
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">2. Yogurt Base Type</label>
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">2. Yogurt Base</label>
                     <div className="flex gap-2">
                       {['Sweetened', 'Unsweetened'].map(type => (
                         <button
@@ -627,7 +611,7 @@ export default function GreekYogurtParfaitsPage() {
                               : 'bg-white border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
                           }`}
                         >
-                          {type}
+                          {type} Greek Yogurt
                         </button>
                       ))}
                     </div>
@@ -690,76 +674,102 @@ export default function GreekYogurtParfaitsPage() {
                   </div>
                 </div>
 
-                {/* Right Side: Preview & Add */}
+                {/* Right Side: Configuration Summary & Get Quote */}
                 <div className="bg-muted/30 border border-border p-6 rounded-2xl flex flex-col justify-between space-y-6">
                   <div className="space-y-4">
                     <h3 className="text-lg font-bold font-serif text-foreground border-b border-border pb-2 flex items-center gap-2">
                       <span>🎨</span> Parfait Summary
                     </h3>
                     
-                    <div className="space-y-2 text-sm text-foreground/80 font-medium">
-                      <div className="flex justify-between">
-                        <span>Base Rate ({customSize}):</span>
-                        <span className="font-bold">{formatPrice(customBasePrices[customSize])}</span>
+                    <div className="space-y-3 text-sm text-foreground/90 font-medium">
+                      <div className="flex justify-between items-center py-1 border-b border-border/50">
+                        <span className="text-muted-foreground">Size:</span>
+                        <span className="font-bold text-foreground">
+                          {customSizeOptions.find(s => s.id === customSize)?.label} — {customSizeOptions.find(s => s.id === customSize)?.volume}
+                        </span>
                       </div>
                       
-                      <div className="flex justify-between">
-                        <span>Yogurt Base:</span>
-                        <span className="text-primary font-bold">{customYogurtType}</span>
+                      <div className="flex justify-between items-center py-1 border-b border-border/50">
+                        <span className="text-muted-foreground">Yogurt:</span>
+                        <span className="text-primary font-bold">{customYogurtType} Greek Yogurt</span>
+                      </div>
+
+                      <div className="py-1 border-b border-border/50">
+                        <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider block mb-1.5">Fruits:</span>
+                        {selectedFruits.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedFruits.map(fruit => (
+                              <span key={fruit} className="inline-flex items-center gap-1 bg-emerald-50 text-secondary border border-secondary/20 px-2 py-0.5 rounded-md text-xs font-semibold">
+                                <Check className="w-3 h-3" /> {fruit}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">None selected</span>
+                        )}
+                      </div>
+
+                      <div className="py-1 border-b border-border/50">
+                        <span className="text-muted-foreground text-xs uppercase font-bold tracking-wider block mb-1.5">Toppings:</span>
+                        {selectedToppings.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedToppings.map(topping => (
+                              <span key={topping} className="inline-flex items-center gap-1 bg-emerald-50 text-secondary border border-secondary/20 px-2 py-0.5 rounded-md text-xs font-semibold">
+                                <Check className="w-3 h-3" /> {topping}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">None selected</span>
+                        )}
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-border">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Selected Ingredients:</span>
-                      <p className="text-xs text-muted-foreground font-medium mt-1 leading-relaxed">
-                        Yogurt base, {selectedFruits.length > 0 ? selectedFruits.join(', ') : 'No fruits selected'}, {selectedToppings.length > 0 ? selectedToppings.join(', ') : 'No toppings selected'}.
-                      </p>
-                    </div>
-
-                    {/* Disclaimer Notice */}
-                    <div className="bg-secondary/5 border border-secondary/10 p-3 rounded-xl flex items-start gap-2">
+                    {/* Custom Quote Notice */}
+                    <div className="bg-secondary/5 border border-secondary/15 p-3.5 rounded-xl flex items-start gap-2.5">
                       <Info className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
                       <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
-                        <strong>Custom Pricing Notice:</strong> Parfait is priced at standard size base rates. Final customization details are verified at order confirmation.
+                        <strong>Custom order? Get a quote from SITI FRUITIES.</strong> Your custom combination will be priced based on your selections and ingredient quantities. Get a quote on WhatsApp.
                       </p>
                     </div>
                   </div>
 
-                  {/* Quantity and Cart */}
-                  <div className="pt-4 border-t border-border flex items-center justify-between gap-4">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Calculated Total</span>
-                      <span className="text-2xl font-black text-primary leading-none mt-1">
-                        {formatPrice(customTotalPrice)}
+                  {/* Quoting CTA Area */}
+                  <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                    <div className="flex items-center justify-between sm:flex-col sm:items-start">
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Price</span>
+                      <span className="text-lg sm:text-xl font-black text-primary leading-none sm:mt-1">
+                        Quote Required
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       {/* Qty Selector */}
                       <div className="flex items-center bg-white rounded-full p-1 border border-border shadow-2xs shrink-0">
                         <button 
                           onClick={() => setCustomQty(Math.max(1, customQty - 1))}
                           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted text-foreground transition-colors disabled:opacity-50"
                           disabled={customQty <= 1}
+                          aria-label="Decrease quantity"
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="w-8 text-center font-bold text-sm text-foreground">{customQty}</span>
+                        <span className="w-7 text-center font-bold text-sm text-foreground">{customQty}</span>
                         <button 
                           onClick={() => setCustomQty(customQty + 1)}
                           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted text-foreground transition-colors"
+                          aria-label="Increase quantity"
                         >
                           <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
 
                       <Button 
-                        onClick={handleAddCustom}
-                        disabled={selectedFruits.length === 0 && selectedToppings.length === 0}
-                        className="bg-secondary hover:bg-secondary/90 hover:shadow-md active:scale-95 text-white font-bold rounded-full h-10 px-5 text-sm transition-all flex items-center gap-2 disabled:opacity-50"
+                        onClick={handleRequestQuote}
+                        className="flex-1 sm:flex-initial bg-[#25D366] hover:bg-[#1EBE5D] hover:shadow-md active:scale-95 text-white font-bold rounded-full h-11 px-6 text-sm transition-all flex items-center justify-center gap-2 shadow-sm"
                       >
-                        <ShoppingBag className="w-4 h-4" />
-                        <span>Add Custom</span>
+                        <SiWhatsapp className="w-4 h-4" />
+                        <span>Get a Quote</span>
                       </Button>
                     </div>
                   </div>

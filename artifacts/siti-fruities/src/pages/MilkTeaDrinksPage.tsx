@@ -14,6 +14,7 @@ const MILK_TEA_PRODUCTS: Product[] = [
     name: 'MATCHA MILK TEA',
     description: 'Premium Matcha Flavor with Chewy Tapioca Pearls',
     basePrice: 8500,
+    image: '/assets/IMG_2326_bubble_tea.jpg',
     placeholderIcon: Coffee,
     placeholderGradient: 'from-emerald-50 to-teal-100 border-emerald-200/50 text-emerald-600'
   },
@@ -22,6 +23,7 @@ const MILK_TEA_PRODUCTS: Product[] = [
     name: 'TARO MILK TEA',
     description: 'Creamy Taro Flavored Tea, with chewy Tapioca Pearls',
     basePrice: 8000,
+    image: '/assets/IMG_2326_bubble_tea.jpg',
     placeholderIcon: Coffee,
     placeholderGradient: 'from-purple-50 to-indigo-100 border-indigo-200/50 text-indigo-600'
   },
@@ -30,6 +32,7 @@ const MILK_TEA_PRODUCTS: Product[] = [
     name: 'STRAWBERRY MILK TEA',
     description: 'Sweet Strawberry Delight Tea, with chewy Tapioca Pearls',
     basePrice: 8500,
+    image: '/assets/IMG_2364_bubble_tea_duo.jpg',
     placeholderIcon: Coffee,
     placeholderGradient: 'from-pink-50 to-rose-100 border-rose-200/50 text-rose-600'
   },
@@ -38,6 +41,7 @@ const MILK_TEA_PRODUCTS: Product[] = [
     name: 'CHOCOLATE MILK TEA',
     description: 'Rich Chocolate Flavored Bubble Tea with chewy Tapioca Pearls',
     basePrice: 8500,
+    image: '/assets/IMG_2326_bubble_tea.jpg',
     placeholderIcon: Coffee,
     placeholderGradient: 'from-[#E6CCB2]/40 to-[#B08968]/30 border-[#B08968]/20 text-[#6F4E37]'
   },
@@ -46,6 +50,7 @@ const MILK_TEA_PRODUCTS: Product[] = [
     name: 'VANILLA MILK TEA',
     description: 'Smooth and Rich Vanilla Flavor with chewy Tapioca Pearls',
     basePrice: 8000,
+    image: '/assets/IMG_2326_bubble_tea.jpg',
     placeholderIcon: Coffee,
     placeholderGradient: 'from-[#FEF3C7] to-[#FDE68A]/80 border-[#FDE68A]/40 text-[#D97706]'
   },
@@ -54,6 +59,7 @@ const MILK_TEA_PRODUCTS: Product[] = [
     name: 'CLASSIC MILK TEA',
     description: 'Our Signature Original Milk Tea with Chewy Tapioca Pearls',
     basePrice: 7000,
+    image: '/assets/IMG_2364_bubble_tea_duo.jpg',
     placeholderIcon: Coffee,
     placeholderGradient: 'from-amber-50 to-orange-100 border-orange-200/50 text-orange-600'
   }

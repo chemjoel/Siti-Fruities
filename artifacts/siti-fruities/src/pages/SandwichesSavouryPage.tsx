@@ -14,6 +14,7 @@ const SANDWICH_PRODUCTS: Product[] = [
     name: 'Chicken Sandwich',
     description: '3 sliced breads, cabbage, carrot, in-house cream and chicken.',
     basePrice: 3000,
+    image: '/assets/IMG_1940_sandwich.jpg',
     placeholderIcon: Sparkles,
     placeholderGradient: 'from-yellow-50 to-amber-100 border-yellow-200/50 text-amber-600'
   },
@@ -22,6 +23,7 @@ const SANDWICH_PRODUCTS: Product[] = [
     name: 'Beef Sandwich',
     description: '3 sliced breads, cabbage, carrot, in-house cream and beef.',
     basePrice: 3000,
+    image: '/assets/IMG_1940_sandwich.jpg',
     placeholderIcon: Sparkles,
     placeholderGradient: 'from-amber-50 to-orange-100 border-orange-200/50 text-orange-600'
   },
@@ -30,6 +32,7 @@ const SANDWICH_PRODUCTS: Product[] = [
     name: 'Chicken & Egg Sandwich',
     description: '3 sliced breads, cabbage, carrot, in-house cream, chicken and egg.',
     basePrice: 5000,
+    image: '/assets/IMG_1940_sandwich.jpg',
     placeholderIcon: Sparkles,
     placeholderGradient: 'from-orange-50 to-red-100 border-orange-200/50 text-red-600',
     options: [
