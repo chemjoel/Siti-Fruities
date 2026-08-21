@@ -18,6 +18,7 @@ import CateringEventsPage from '@/pages/CateringEventsPage';
 import AboutUs from '@/pages/AboutUs';
 import Contact from '@/pages/Contact';
 import { CartProvider } from '@/context/CartContext';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ function App() {
       <TooltipProvider>
         <CartProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+            <ScrollToTop />
             <Router />
           </WouterRouter>
           <Toaster />

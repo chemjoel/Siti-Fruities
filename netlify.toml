@@ -1,0 +1,18 @@
+# Netlify deployment configuration for SITI FRUITIES
+# Vite SPA — all routes served from index.html (client-side routing via Wouter)
+
+[build]
+  # Root of the workspace
+  base    = "artifacts/siti-fruities"
+  command = "pnpm run build"
+  publish = "dist/public"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Redirect all paths to index.html so Wouter can handle client-side routing.
+# Without this, direct navigation to e.g. /greek-yogurt-parfaits returns 404.
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

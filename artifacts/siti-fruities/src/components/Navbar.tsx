@@ -23,7 +23,7 @@ const SHOP_LINKS = [
   { name: 'Treat Boxes', href: '/treat-boxes' },
   { name: 'Fruit Hampers', href: '/fruit-hampers' },
   { name: 'Combos', href: '/combos' },
-  { name: 'Events & Catering', href: '/catering-events' },
+  { name: 'Catering & Events', href: '/catering-events' },
 ];
 
 export default function Navbar() {
