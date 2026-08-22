@@ -17,6 +17,8 @@ import CombosPage from '@/pages/CombosPage';
 import CateringEventsPage from '@/pages/CateringEventsPage';
 import AboutUs from '@/pages/AboutUs';
 import Contact from '@/pages/Contact';
+import AdminLoginPage from '@/pages/admin/AdminLoginPage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import { CartProvider } from '@/context/CartContext';
 import ScrollToTop from '@/components/ScrollToTop';
 
@@ -26,6 +28,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/admin/login" component={AdminLoginPage} />
+      <Route path="/admin" component={AdminDashboardPage} />
       <Route path="/fruits" component={FruitsCategoryPage} />
       <Route path="/greek-yogurt-parfaits" component={GreekYogurtParfaitsPage} />
       <Route path="/smoothies" component={SmoothiesPage} />

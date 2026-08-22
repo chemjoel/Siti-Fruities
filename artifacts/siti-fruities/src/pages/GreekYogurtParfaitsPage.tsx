@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { SiWhatsapp } from 'react-icons/si';
 import { motion } from 'framer-motion';
+import { enquiryService } from '@/services/enquiry.service';
 
 // Helper for formatting currency
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
@@ -166,6 +167,18 @@ Fruits: ${fruitsStr}
 Toppings: ${toppingsStr}${customQty > 1 ? `\nQuantity: ${customQty}` : ''}
 
 Please confirm the price and availability.`;
+
+    // Store custom quote request for admin review
+    enquiryService.submitCustomParfaitQuote({
+      customer_name: null,
+      customer_phone: null,
+      size: sizeInfo.volume,
+      size_label: sizeInfo.label,
+      yogurt_type: customYogurtType,
+      fruits: selectedFruits,
+      toppings: selectedToppings,
+      quantity: customQty,
+    }).catch(console.error);
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/2348120842962?text=${encodedMessage}`;

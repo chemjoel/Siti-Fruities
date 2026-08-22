@@ -557,7 +557,42 @@ function CateringCard() {
 
 // --- MAIN SECTION EXPORT --- //
 
+import { productService } from '@/services/product.service';
+import type { Product as DomainProduct } from '@/types/domain';
+
 export default function FeaturedProducts() {
+  const [featuredProducts, setFeaturedProducts] = useState<DomainProduct[]>([]);
+
+  useEffect(() => {
+    productService.getFeaturedProducts().then(setFeaturedProducts).catch(console.error);
+  }, []);
+
+  // Map known slugs to their rich components
+  const renderCardForSlug = (slug: string) => {
+    switch (slug) {
+      case 'vvip-exotic-parfait':
+      case 'vip-exotic-parfait':
+      case 'parfait':
+        return <ParfaitCard key="parfait" />;
+      case 'greek-yogurt':
+        return <GreekYoghurtCard key="greek-yogurt" />;
+      case 'chicken-sandwich':
+      case 'sandwich':
+        return <SandwichCard key="sandwich" />;
+      case 'whole-wheat-banana-bread':
+      case 'banana-bread':
+        return <BananaBreadCard key="banana-bread" />;
+      case 'juicy-treatbox':
+      case 'treatbox':
+        return <TreatBoxCard key="treatbox" />;
+      case 'smallie-parfait':
+      case 'catering':
+        return <CateringCard key="catering" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4 md:px-8">
@@ -583,12 +618,20 @@ export default function FeaturedProducts() {
 
         {/* Mobile: Horizontal scroll, Desktop: Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          <ParfaitCard />
-          <GreekYoghurtCard />
-          <SandwichCard />
-          <BananaBreadCard />
-          <TreatBoxCard />
-          <CateringCard />
+          {featuredProducts.length > 0 ? (
+            featuredProducts.map((p) => renderCardForSlug(p.slug) || (
+              <ParfaitCard key={p.id} />
+            ))
+          ) : (
+            <>
+              <ParfaitCard />
+              <GreekYoghurtCard />
+              <SandwichCard />
+              <BananaBreadCard />
+              <TreatBoxCard />
+              <CateringCard />
+            </>
+          )}
         </div>
       </div>
     </section>

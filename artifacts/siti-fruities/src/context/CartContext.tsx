@@ -29,9 +29,32 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const CART_STORAGE_KEY = 'siti_fruities_cart';
+
+const getInitialCart = (): CartItem[] => {
+  try {
+    const stored = localStorage.getItem(CART_STORAGE_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    console.error('Failed to load cart from storage:', err);
+    return [];
+  }
+};
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(getInitialCart);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Sync with localStorage
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } catch (err) {
+      console.error('Failed to persist cart:', err);
+    }
+  }, [items]);
 
   const addItem = useCallback((newItem: Omit<CartItem, 'id'>) => {
     setItems((prev) => {

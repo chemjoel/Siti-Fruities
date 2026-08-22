@@ -13,9 +13,6 @@ export default function CartPanel() {
   const { items, isCartOpen, setIsCartOpen, updateQuantity, removeItem, subtotal } = useCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
-  const deliveryFee = subtotal >= 20000 ? 0 : 1500;
-  const total = subtotal + deliveryFee;
-
   return (
     <>
       <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
@@ -114,23 +111,11 @@ export default function CartPanel() {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-semibold">{formatPrice(subtotal)}</span>
+                    <span className="font-bold text-foreground text-base">{formatPrice(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Delivery</span>
-                    {deliveryFee === 0 ? (
-                      <span className="font-bold text-secondary bg-secondary/10 px-2 rounded">FREE</span>
-                    ) : (
-                      <span className="font-semibold">{formatPrice(deliveryFee)}</span>
-                    )}
-                  </div>
-                  {deliveryFee > 0 && (
-                    <p className="text-[10px] text-muted-foreground/70 text-right">Free delivery on orders over ₦20,000</p>
-                  )}
-                  <div className="h-px bg-border my-2" />
-                  <div className="flex justify-between items-end">
-                    <span className="font-bold text-foreground">Total</span>
-                    <span className="font-black text-2xl text-primary">{formatPrice(total)}</span>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Delivery</span>
+                    <span className="font-medium">Calculated at checkout</span>
                   </div>
                 </div>
 
@@ -142,7 +127,7 @@ export default function CartPanel() {
                     }}
                     className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-14 rounded-xl shadow-lg text-lg"
                   >
-                    Checkout via WhatsApp
+                    Proceed to Checkout
                   </Button>
                   <Button 
                     variant="ghost" 
@@ -162,8 +147,6 @@ export default function CartPanel() {
         isOpen={isCheckoutOpen} 
         onClose={() => setIsCheckoutOpen(false)} 
         subtotal={subtotal}
-        deliveryFee={deliveryFee}
-        total={total}
       />
     </>
   );

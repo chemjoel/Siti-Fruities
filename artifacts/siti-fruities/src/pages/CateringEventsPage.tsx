@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Utensils, ArrowLeft, Clock, Plus, Minus, Check, MessageCircle, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { enquiryService } from '@/services/enquiry.service';
 
 // Helper for formatting currency
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
@@ -149,7 +150,17 @@ ${interestsText}
 📝 *EVENT DETAILS / REQUESTS:*
 ${eventDetails.trim() || 'None'}
 
-_Sent from sitifruities.com_`;
+    // Save enquiry to database for admin review
+    enquiryService.submitCateringEnquiry({
+      customer_name: customerName.trim(),
+      customer_phone: customerPhone.trim(),
+      customer_email: customerEmail.trim() || null,
+      event_type: eventType,
+      guest_count: guestCount,
+      event_date: eventDate,
+      menu_interests: selectedInterests,
+      event_details: eventDetails.trim() || null,
+    }).catch(console.error);
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/2348120842962?text=${encodedMessage}`;

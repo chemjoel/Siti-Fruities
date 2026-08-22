@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
+import PromotionsBanner from '@/components/PromotionsBanner';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import CategorySection from '@/components/CategorySection';
 import WhySiti from '@/components/WhySiti';
@@ -17,6 +18,7 @@ export default function Home() {
       
       <main className="flex-1 w-full">
         <Hero />
+        <PromotionsBanner />
         <CategorySection />
         <div id="products-section">
           <FeaturedProducts />
