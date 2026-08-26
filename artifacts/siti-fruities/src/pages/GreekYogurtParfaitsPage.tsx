@@ -181,7 +181,7 @@ Please confirm the price and availability.`;
     }).catch(console.error);
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/2348120842962?text=${encodedMessage}`;
+    const whatsappUrl = "https://wa.me/2348120842962?text=" + encodedMessage;
     window.open(whatsappUrl, '_blank');
   };
 
