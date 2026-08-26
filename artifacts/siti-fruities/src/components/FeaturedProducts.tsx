@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Minus, Info } from 'lucide-react';
+import { Plus, Minus, Info, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 
 // Assets
@@ -593,46 +594,99 @@ export default function FeaturedProducts() {
     }
   };
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -360, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 360, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <section className="py-20 bg-background">
+    <section className="py-20 bg-background relative border-t border-border/20">
       <div className="container mx-auto px-4 md:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold font-serif text-foreground mb-4"
-          >
-            Our Favourites
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-lg text-muted-foreground font-medium"
-          >
-            Crafted fresh, every single day with premium ingredients and zero artificial additives.
-          </motion.p>
+        
+        {/* Header with Scroll Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6">
+          <div className="max-w-xl">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-bold font-serif text-foreground mb-4"
+            >
+              Our Favourites
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-lg text-muted-foreground font-medium"
+            >
+              Crafted fresh, every single day with premium ingredients and zero artificial additives.
+            </motion.p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={scrollLeft}
+              className="w-12 h-12 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-colors shadow-sm"
+              aria-label="Scroll left"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={scrollRight}
+              className="w-12 h-12 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-colors shadow-sm"
+              aria-label="Scroll right"
+            >
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Mobile: Horizontal scroll, Desktop: Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        {/* Swipeable & Scrollable Horizontal Carousel */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex gap-6 overflow-x-auto pb-8 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {featuredProducts.length > 0 ? (
-            featuredProducts.map((p) => renderCardForSlug(p.slug) || (
-              <ParfaitCard key={p.id} />
+            featuredProducts.map((p) => (
+              <div key={p.id} className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always">
+                {renderCardForSlug(p.slug) || <ParfaitCard />}
+              </div>
             ))
           ) : (
             <>
-              <ParfaitCard />
-              <GreekYoghurtCard />
-              <SandwichCard />
-              <BananaBreadCard />
-              <TreatBoxCard />
-              <CateringCard />
+              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><ParfaitCard /></div>
+              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><GreekYoghurtCard /></div>
+              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><SandwichCard /></div>
+              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><BananaBreadCard /></div>
+              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><TreatBoxCard /></div>
+              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><CateringCard /></div>
             </>
           )}
         </div>
+
+        {/* View All Products CTA */}
+        <div className="flex justify-center mt-10">
+          <Link href="/greek-yogurt-parfaits">
+            <Button 
+              variant="outline" 
+              className="border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-full font-bold px-8 h-12 text-sm transition-all shadow-md active:scale-95"
+            >
+              View All Products
+            </Button>
+          </Link>
+        </div>
+
       </div>
     </section>
   );

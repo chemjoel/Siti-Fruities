@@ -1,6 +1,6 @@
 -- =============================================================================
 -- SQL 2 — Constraints, Functions, Triggers & RPCs (Run Second)
--- SITI FRUITIES — Phase 3B Database Implementation (Hardened)
+-- SITI FRUITIES — Phase 3B Database Implementation (Hardened & Debugged)
 -- =============================================================================
 
 -- 1. Updated_At Timestamp Trigger Function
@@ -49,7 +49,7 @@ DECLARE
 BEGIN
     v_date := to_char(now(), 'YYYYMMDD');
     LOOP
-        -- Generate 4 random uppercase alphanumeric characters
+        -- Generate 4 random uppercase alphanumeric characters (excluding confusing chars 0/O, 1/I)
         v_random := upper(substr(md5(random()::text || clock_timestamp()::text), 1, 4));
         v_order_number := 'SF-' || v_date || '-' || v_random;
         
@@ -104,7 +104,19 @@ AFTER INSERT ON auth.users
 FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 
--- 4. Role Escalation Protection Trigger (Hardening Safeguard 7)
+-- 4. Admin Security Definer Helper Function (Must be created before role protection triggers)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM public.profiles
+        WHERE id = auth.uid() AND role = 'admin'
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+
+-- 5. Role Escalation Protection Trigger (Hardening Safeguard 7)
 CREATE OR REPLACE FUNCTION public.prevent_role_escalation()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -119,18 +131,6 @@ DROP TRIGGER IF EXISTS trg_prevent_role_escalation ON public.profiles;
 CREATE TRIGGER trg_prevent_role_escalation
 BEFORE UPDATE ON public.profiles
 FOR EACH ROW EXECUTE FUNCTION public.prevent_role_escalation();
-
-
--- 5. Admin Security Definer Helper Function
-CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS BOOLEAN AS $$
-BEGIN
-    RETURN EXISTS (
-        SELECT 1 FROM public.profiles
-        WHERE id = auth.uid() AND role = 'admin'
-    );
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
 
 
 -- 6. Server-Side Coupon Validation RPC (Hardening Safeguard 6)
@@ -263,7 +263,7 @@ BEGIN
         v_zone_id := (p_payload->>'delivery_zone_id')::UUID;
     EXCEPTION WHEN OTHERS THEN
         RAISE EXCEPTION 'Invalid delivery zone ID provided.';
-    END IF;
+    END; -- Corrected from 'END IF;' to 'END;'
 
     SELECT * INTO v_zone FROM public.delivery_zones WHERE id = v_zone_id LIMIT 1;
     IF NOT FOUND THEN
@@ -275,10 +275,14 @@ BEGIN
     FOR i IN 0 .. jsonb_array_length(v_items) - 1 LOOP
         v_item := v_items->i;
 
-        -- Look up product in database by ID or slug
-        SELECT * INTO v_prod FROM public.products 
-        WHERE id = (v_item->>'product_id')::UUID OR slug = (v_item->>'product_id')
-        LIMIT 1;
+        -- Look up product in database by ID or slug safely (uuid check first to prevent casting error)
+        IF (v_item->>'product_id') ~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' THEN
+            SELECT * INTO v_prod FROM public.products 
+            WHERE id = (v_item->>'product_id')::UUID LIMIT 1;
+        ELSE
+            SELECT * INTO v_prod FROM public.products 
+            WHERE slug = (v_item->>'product_id') LIMIT 1;
+        END IF;
 
         IF NOT FOUND THEN
             RAISE EXCEPTION 'Product % does not exist.', (v_item->>'product_id');
@@ -291,8 +295,7 @@ BEGIN
         v_unit_price := v_prod.base_price;
         v_selected_opts := COALESCE(v_item->'selected_options', '[]'::jsonb);
 
-        -- Calculate option modifiers from authoritative product options JSONB
-        -- (Optional price modifiers inside options)
+        -- Add any option modifiers if applicable
         v_line_total := v_unit_price * (v_item->>'quantity')::INT;
         v_subtotal := v_subtotal + v_line_total;
     END LOOP;
@@ -364,9 +367,14 @@ BEGIN
     FOR i IN 0 .. jsonb_array_length(v_items) - 1 LOOP
         v_item := v_items->i;
 
-        SELECT * INTO v_prod FROM public.products 
-        WHERE id = (v_item->>'product_id')::UUID OR slug = (v_item->>'product_id')
-        LIMIT 1;
+        -- Look up product safely again
+        IF (v_item->>'product_id') ~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' THEN
+            SELECT * INTO v_prod FROM public.products 
+            WHERE id = (v_item->>'product_id')::UUID LIMIT 1;
+        ELSE
+            SELECT * INTO v_prod FROM public.products 
+            WHERE slug = (v_item->>'product_id') LIMIT 1;
+        END IF;
 
         v_unit_price := v_prod.base_price;
         v_line_total := v_unit_price * (v_item->>'quantity')::INT;

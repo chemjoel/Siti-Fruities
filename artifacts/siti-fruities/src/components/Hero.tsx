@@ -110,42 +110,105 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* Floating Images (Desktop only) */}
+        {/* Floating Images & Appetizing Accents (Desktop only) */}
         <div className="flex-1 w-full relative h-[400px] lg:h-[600px] hidden md:block">
+          
+          {/* Decorative Floating Strawberry Accents */}
+          <motion.div
+            animate={{ y: [0, -15, 0], rotate: [0, 15, 0] }}
+            transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+            className="absolute top-8 left-12 w-10 h-10 select-none z-30 pointer-events-none filter drop-shadow-md"
+          >
+            <svg viewBox="0 0 24 24" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C11.5 2 7 6 7 11C7 16 9.5 22 12 22C14.5 22 17 16 17 11C17 6 12.5 2 12 2Z" fill="#EF4444" />
+              <path d="M10.5 4.5C11 4 11.5 3 12 3C12.5 3 13 4 13.5 4.5" stroke="#10B981" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="10" cy="10" r="0.8" fill="#FDE047" />
+              <circle cx="14" cy="11" r="0.8" fill="#FDE047" />
+              <circle cx="11.5" cy="14" r="0.8" fill="#FDE047" />
+              <circle cx="13" cy="17" r="0.8" fill="#FDE047" />
+            </svg>
+          </motion.div>
+
+          {/* Decorative Floating Mint Leaf Accents */}
+          <motion.div
+            animate={{ y: [0, 12, 0], rotate: [0, -20, 0] }}
+            transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
+            className="absolute bottom-20 right-8 w-12 h-12 select-none z-30 pointer-events-none filter drop-shadow-md"
+          >
+            <svg viewBox="0 0 24 24" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 22C2 22 7 21 11 17C16 12 22 8 22 2C22 2 16 3 11 8C7 12 2 22 2 22Z" fill="#10B981" />
+              <path d="M2 22C6 18 13 14 22 2" stroke="#047857" strokeWidth="1.5" />
+              <path d="M8 17C9.5 16 11 16.5 12 17.5" stroke="#047857" strokeWidth="1" />
+              <path d="M13 12C14.5 11 16 11.5 17 12.5" stroke="#047857" strokeWidth="1" />
+            </svg>
+          </motion.div>
+
+          {/* Decorative Yogurt Splat (Creamy accent) */}
+          <motion.div
+            animate={{ scale: [1, 1.05, 1], rotate: [0, 5, 0] }}
+            transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
+            className="absolute top-1/3 -right-6 w-16 h-16 opacity-30 select-none z-0 pointer-events-none"
+          >
+            <svg viewBox="0 0 100 100" className="w-full h-full fill-white">
+              <path d="M50 15 C60 10, 80 20, 85 35 C90 50, 75 80, 55 85 C35 90, 15 75, 10 55 C5 35, 40 20, 50 15 Z" />
+            </svg>
+          </motion.div>
+
+          {/* Main Floating Image 1 (Signature Parfait) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
             animate={{ opacity: 1, scale: 1, rotate: -5 }}
             transition={{ duration: 1, delay: 0.2, type: 'spring' }}
             className="absolute top-10 right-10 lg:right-0 w-52 lg:w-72 h-52 lg:h-72 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 z-20 group"
           >
-            <img src={parfaitImg} alt="Siti Fruities Signature Exotic Parfait" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-            <div className="absolute top-3 left-3 bg-primary/95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
-              ⭐ #1 Signature Parfait
-            </div>
+            <motion.div
+              animate={{ y: [0, -12, 0] }}
+              transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+              className="w-full h-full relative"
+            >
+              <img src={parfaitImg} alt="Siti Fruities Signature Exotic Parfait" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <div className="absolute top-3 left-3 bg-primary/95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
+                ⭐ #1 Signature Parfait
+              </div>
+            </motion.div>
           </motion.div>
-
+ 
+          {/* Main Floating Image 2 (Parfaits Range) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8, rotate: 10 }}
             animate={{ opacity: 1, scale: 1, rotate: 8 }}
             transition={{ duration: 1, delay: 0.4, type: 'spring' }}
             className="absolute bottom-8 right-36 lg:right-20 w-52 lg:w-64 h-44 lg:h-52 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 z-30 group"
           >
-            <img src={parfaitStackImg} alt="Siti Fruities Exotic Parfaits Range" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-            <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold">
-              Fresh Daily
-            </div>
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              className="w-full h-full relative"
+            >
+              <img src={parfaitStackImg} alt="Siti Fruities Exotic Parfaits Range" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+                Fresh Daily
+              </div>
+            </motion.div>
           </motion.div>
-
+ 
+          {/* Main Floating Image 3 (Smoothie) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8, rotate: 15 }}
             animate={{ opacity: 1, scale: 1, rotate: 12 }}
             transition={{ duration: 1, delay: 0.6, type: 'spring' }}
             className="absolute top-1/2 -left-4 lg:left-8 w-40 lg:w-48 h-52 lg:h-60 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 z-10 group"
           >
-            <img src={smoothieImg} alt="Nutty Choco Smoothie" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
+              className="w-full h-full"
+            >
+              <img src={smoothieImg} alt="Nutty Choco Smoothie" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            </motion.div>
           </motion.div>
         </div>
-
+ 
         {/* Mobile floating image */}
         <div className="w-full relative h-[260px] md:hidden mt-4">
           <motion.div
@@ -154,10 +217,16 @@ export default function Hero() {
             transition={{ duration: 0.8 }}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 z-20"
           >
-            <img src={parfaitImg} alt="Siti Fruities Signature Exotic Parfait" className="w-full h-full object-cover" />
-            <div className="absolute top-3 left-3 bg-primary/95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
-              ⭐ #1 Signature Parfait
-            </div>
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
+              className="w-full h-full relative"
+            >
+              <img src={parfaitImg} alt="Siti Fruities Signature Exotic Parfait" className="w-full h-full object-cover" />
+              <div className="absolute top-3 left-3 bg-primary/95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
+                ⭐ #1 Signature Parfait
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

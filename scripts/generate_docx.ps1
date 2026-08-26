@@ -1,6 +1,6 @@
-# SITI FRUITIES — Full Phase 3B Setup Guide Word Document (.docx) Generator
+# SITI FRUITIES - Full Phase 3B Setup Guide Word Document (.docx) Generator
 $repoRoot = "C:\Users\HP\Documents\GitHub\Siti-Fruities"
-$outputDocx = Join-Path $repoRoot "SITI-FRUITIES-PHASE-3B-SETUP-GUIDE.docx"
+$outputDocx = Join-Path $repoRoot "SITI FRUITIES - Phase 3B Setup Guide.docx"
 $tempDir = Join-Path $repoRoot "temp_docx_build"
 
 if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir }
@@ -148,7 +148,12 @@ $global:docXml = New-Object System.Text.StringBuilder
 
 function EscapeXml([string]$text) {
     if ([string]::IsNullOrEmpty($text)) { return "" }
-    return $text.Replace('&', '&amp;').Replace('<', '&lt;').Replace('>', '&gt;').Replace('"', '&quot;')
+    # Use standard ASCII replacements
+    $res = $text.Replace('&', '&amp;')
+    $res = $res.Replace('<', '&lt;')
+    $res = $res.Replace('>', '&gt;')
+    $res = $res.Replace('"', '&quot;')
+    return $res
 }
 
 function AddP {
@@ -190,7 +195,7 @@ function AddCallout {
   </w:pPr>
   <w:r>
     <w:rPr><w:b/><w:color w:val="$color"/></w:rPr>
-    <w:t xml:space="preserve">$eTitle`: </w:t>
+    <w:t xml:space="preserve">$($eTitle): </w:t>
   </w:r>
   <w:r>
     <w:t xml:space="preserve">$eText</w:t>
@@ -211,6 +216,20 @@ $sql5 = Get-Content -Path (Join-Path $repoRoot "supabase\sql\5_seed_data.sql") -
 AddP "SITI FRUITIES" "Title"
 AddP "Phase 3B Complete Backend & Commerce Setup Guide" "Subtitle"
 AddCallout "PURPOSE OF THIS DOCUMENT" "This Microsoft Word document is the authoritative, copyable manual execution guide for the SITI FRUITIES backend, commerce, Paystack integration, and Supabase database. Every SQL snippet, command, environment variable, and verification test is detailed with zero placeholders."
+
+# Quick Start Section
+AddP "QUICK START" "Heading1"
+AddP "Follow these steps in order to get SITI FRUITIES fully running on your PC and staging/production databases:"
+AddP "1. Create a Supabase Project (see Section 3)."
+AddP "2. Open Supabase SQL Editor and run SQL Stages 1 through 5 in order (see Section 4)."
+AddP "3. Configure Supabase Email Auth (see Section 12)."
+AddP "4. Create your Admin user and run the safe role-elevation script (see Sections 13 and 14)."
+AddP "5. Set up Frontend Environment Variables in Netlify and your local .env (see Section 15)."
+AddP "6. Set up Supabase Edge Function Environment Secrets (see Section 16)."
+AddP "7. Configure Paystack gateway and webhook endpoint in Paystack dashboard (see Sections 17-21)."
+AddP "8. Deploy Edge Functions (see Section 22)."
+AddP "9. Test all operations using the testing checklists in Sections 23-32."
+AddP "10. Perform final Netlify production build (see Section 33)."
 
 # 1. Overview
 AddP "1. Overview" "Heading1"
@@ -241,23 +260,23 @@ AddP "6. Click 'Create new project' and wait 2 minutes for provisioning."
 AddP "4. Required SQL Execution (MANUAL)" "Heading1"
 AddP "In the Supabase Dashboard, click the SQL Editor (icon on left sidebar), open a New Query, paste each SQL stage sequentially, and click Run."
 
-AddP "SQL 01 -- Extensions & Base Tables (Run First)" "Heading2"
+AddP "SQL 01 - Extensions & Base Tables (Run First)" "Heading2"
 AddP "Creates pgcrypto/uuid extensions and core tables: categories, products, delivery_zones, coupons, promotions, profiles, saved_addresses, orders, order_items, catering_enquiries, and custom_parfait_quotes." "" $false $true
 AddCodeBlock $sql1
 
-AddP "SQL 02 -- Constraints, Functions, Triggers & RPCs (Run Second)" "Heading2"
+AddP "SQL 02 - Constraints, Functions, Triggers & RPCs (Run Second)" "Heading2"
 AddP "Creates human-readable order number generator (SF-YYYYMMDD-XXXX), profile creation trigger, role escalation protection, server-authoritative order creation RPC (create_authoritative_order), status transition enforcement trigger, and idempotent payment confirmation function." "" $false $true
 AddCodeBlock $sql2
 
-AddP "SQL 03 -- Row Level Security Policies (Run Third)" "Heading2"
+AddP "SQL 03 - Row Level Security Policies (Run Third)" "Heading2"
 AddP "Enables RLS across all tables. Grants public read for active products/categories/zones, restricts admin tables to verified admin profiles, and prevents customers from escalating roles." "" $false $true
 AddCodeBlock $sql3
 
-AddP "SQL 04 -- Supabase Storage Buckets & Policies (Run Fourth)" "Heading2"
+AddP "SQL 04 - Supabase Storage Buckets & Policies (Run Fourth)" "Heading2"
 AddP "Creates public buckets 'product-images' and 'promo-flyers' with public read and authenticated admin upload/delete policies." "" $false $true
 AddCodeBlock $sql4
 
-AddP "SQL 05 -- Complete Initial Seed Data (Run Fifth)" "Heading2"
+AddP "SQL 05 - Complete Initial Seed Data (Run Fifth)" "Heading2"
 AddP "Populates authentic menu products, options, delivery zones, initial coupons (SITI10, WELCOME500, VIPFRESH), and active promotional banners." "" $false $true
 AddCodeBlock $sql5
 
@@ -347,7 +366,7 @@ AddP "Copy the Secret Key (sk_test_... or sk_live_...) and set it in Supabase Se
 
 AddP "20 & 21. Paystack Webhook Configuration" "Heading1"
 AddP "In Paystack Settings -> API Keys & Webhooks -> Live/Test Webhook URL, enter:"
-AddP "https://<YOUR-PROJECT-REF>.supabase.co/functions/v1/paystack-webhook" "" $true
+AddP "https://<YOUR-PROJECT-REF>.supabase.co/functions/v1/paystack-webhook"
 
 AddP "22. Deploying Supabase Edge Functions (MANUAL)" "Heading1"
 AddP "Using the Supabase CLI on your workstation:"
@@ -408,8 +427,11 @@ AddP "32. Testing Admin Access" "Heading2"
 AddP "- Visit /admin as guest -> Automatically redirected to /admin/login."
 AddP "- Log in as admin@sitifruities.com -> Full dashboard unlocks."
 
-# 33 to 35 Production & Troubleshooting
-AddP "33. Production Deployment Checklist (Netlify)" "Heading1"
+AddP "33. Testing Favicon" "Heading2"
+AddP "- Verify the browser tab displays the custom SITI FRUITIES logo instead of a red square."
+
+# 34 to 35 Production & Troubleshooting
+AddP "34. Production Deployment Checklist (Netlify)" "Heading1"
 AddP "1. Go to Netlify Dashboard -> Site Configuration -> Environment Variables."
 AddP "2. Add VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_PAYSTACK_PUBLIC_KEY."
 AddP "3. In Supabase, run SQL Stages 1 through 5."
@@ -417,12 +439,12 @@ AddP "4. Deploy Edge Functions with PAYSTACK_SECRET_KEY secret."
 AddP "5. Set Paystack webhook URL to production endpoint."
 AddP "6. Trigger Netlify production build."
 
-AddP "34. Troubleshooting" "Heading1"
-AddP "- Paystack popup doesn't appear: Verify VITE_PAYSTACK_PUBLIC_KEY is set in Netlify."
+AddP "35. Troubleshooting" "Heading1"
+AddP "- Paystack popup does not appear: Verify VITE_PAYSTACK_PUBLIC_KEY is set in Netlify."
 AddP "- Webhook not confirming order: Check Supabase Edge Function logs in Supabase Dashboard -> Edge Functions -> paystack-webhook -> Logs."
 AddP "- Coupon error: Ensure order subtotal meets minimum_order_amount."
 
-AddP "35. Rollback & Migration Notes" "Heading1"
+AddP "36. Rollback & Migration Notes" "Heading1"
 AddP "If you need to reset the database to a clean state, drop the public schema tables in reverse order of foreign keys, then re-run SQL 1 through SQL 5."
 
 # Write document.xml
@@ -449,7 +471,12 @@ if (Test-Path $outputDocx) { Remove-Item -Force $outputDocx }
 Compress-Archive -Path (Join-Path $tempDir "*") -DestinationPath $tempZip -Force
 Move-Item -Path $tempZip -Destination $outputDocx -Force
 
+# Copy to standard folders
+Copy-Item $outputDocx -Destination "C:\Users\HP\Downloads\SITI FRUITIES - Phase 3B Setup Guide.docx" -Force
+Copy-Item $outputDocx -Destination "C:\Users\HP\Desktop\SITI FRUITIES - Phase 3B Setup Guide.docx" -Force
+Copy-Item $outputDocx -Destination "C:\Users\HP\.gemini\antigravity\brain\0c04cb61-15b5-4ee5-9728-aa38a3418c03\SITI FRUITIES - Phase 3B Setup Guide.docx" -Force
+
 # Clean up temp build folder
 Remove-Item -Recurse -Force $tempDir
 
-Write-Host "SUCCESS: Created $outputDocx"
+Write-Host "SUCCESS: Created and copied SITI FRUITIES - Phase 3B Setup Guide.docx"

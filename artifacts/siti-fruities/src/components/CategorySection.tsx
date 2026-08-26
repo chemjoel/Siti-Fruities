@@ -130,15 +130,15 @@ export default function CategorySection() {
           </motion.p>
         </div>
 
-        {/* Responsive Grid for Categories */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 pt-4">
+        {/* Responsive Grid/Carousel for Categories */}
+        <div className="flex md:grid overflow-x-auto md:overflow-x-visible pb-6 md:pb-0 gap-6 md:gap-8 pt-4 md:grid-cols-3 lg:grid-cols-4 snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CATEGORIES.map((category, index) => (
             <motion.div
               key={category.name}
               initial={{ opacity: 0, y: 25 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: index * 0.05 }}
-              className="group"
+              className="group w-[260px] md:w-auto shrink-0 snap-start snap-always"
             >
               <Link href={category.href}>
                 <div className="bg-card hover:bg-white rounded-3xl border border-card-border shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden cursor-pointer hover:-translate-y-1">
