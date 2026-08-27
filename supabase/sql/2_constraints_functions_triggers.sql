@@ -96,7 +96,7 @@ BEGIN
         phone = EXCLUDED.phone;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -113,7 +113,7 @@ BEGIN
         WHERE id = auth.uid() AND role = 'admin'
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public, pg_temp;
 
 
 -- 5. Role Escalation Protection Trigger (Hardening Safeguard 7)
@@ -125,7 +125,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 DROP TRIGGER IF EXISTS trg_prevent_role_escalation ON public.profiles;
 CREATE TRIGGER trg_prevent_role_escalation
@@ -201,7 +201,7 @@ BEGIN
         'message', 'Coupon applied successfully!'
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public, pg_temp;
 
 
 -- 7. Server-Authoritative Order Creation Function (Hardening Safeguards 1, 2, 3, 4)
@@ -237,6 +237,8 @@ DECLARE
     v_order_number TEXT;
     v_coupon_res JSONB;
     v_selected_opts JSONB;
+    v_qty_text TEXT;
+    v_qty INT;
 BEGIN
     -- Extract customer details
     v_customer_name := TRIM(COALESCE(p_payload->>'customer_name', ''));
@@ -263,7 +265,7 @@ BEGIN
         v_zone_id := (p_payload->>'delivery_zone_id')::UUID;
     EXCEPTION WHEN OTHERS THEN
         RAISE EXCEPTION 'Invalid delivery zone ID provided.';
-    END; -- Corrected from 'END IF;' to 'END;'
+    END;
 
     SELECT * INTO v_zone FROM public.delivery_zones WHERE id = v_zone_id LIMIT 1;
     IF NOT FOUND THEN
@@ -292,18 +294,89 @@ BEGIN
             RAISE EXCEPTION 'Product "%" is currently unavailable. Please remove it from your cart to proceed.', v_prod.name;
         END IF;
 
+        -- Quantity Validation (Secure check for positive integer, range 1-100)
+        v_qty_text := v_item->>'quantity';
+        IF v_qty_text IS NULL OR v_qty_text = '' THEN
+            RAISE EXCEPTION 'Quantity is missing for product "%".', v_prod.name;
+        END IF;
+        
+        IF v_qty_text !~ '^[0-9]+$' THEN
+            RAISE EXCEPTION 'Invalid quantity "%" for product "%". Quantity must be a positive integer.', v_qty_text, v_prod.name;
+        END IF;
+        
+        v_qty := v_qty_text::INT;
+        IF v_qty < 1 THEN
+            RAISE EXCEPTION 'Quantity for product "%" must be at least 1.', v_prod.name;
+        ELSIF v_qty > 100 THEN
+            RAISE EXCEPTION 'Quantity for product "%" exceeds the maximum allowed limit of 100.', v_prod.name;
+        END IF;
+
         v_unit_price := v_prod.base_price;
         v_selected_opts := COALESCE(v_item->'selected_options', '[]'::jsonb);
+        v_opt_mod := 0;
 
-        -- Add any option modifiers if applicable
-        v_line_total := v_unit_price * (v_item->>'quantity')::INT;
+        -- Strict Product Option & Choice Validation
+        IF jsonb_typeof(v_selected_opts) = 'array' AND jsonb_array_length(v_selected_opts) > 0 THEN
+            FOR j IN 0 .. jsonb_array_length(v_selected_opts) - 1 LOOP
+                DECLARE
+                    v_sel_opt JSONB := v_selected_opts->j;
+                    v_sel_name TEXT := v_sel_opt->>'name';
+                    v_sel_val TEXT := v_sel_opt->>'value';
+                    v_prod_opt JSONB;
+                    v_choices JSONB;
+                    v_choice JSONB;
+                    v_opt_found BOOLEAN := false;
+                    v_choice_found BOOLEAN := false;
+                BEGIN
+                    -- Find the option object in product's options with matching name
+                    IF jsonb_typeof(v_prod.options) = 'array' THEN
+                        FOR k IN 0 .. jsonb_array_length(v_prod.options) - 1 LOOP
+                            v_prod_opt := v_prod.options->k;
+                            IF v_prod_opt->>'name' = v_sel_name THEN
+                                v_opt_found := true;
+                                v_choices := v_prod_opt->'choices';
+                                -- Loop through choices to locate matching value
+                                IF jsonb_typeof(v_choices) = 'array' THEN
+                                    FOR m IN 0 .. jsonb_array_length(v_choices) - 1 LOOP
+                                        v_choice := v_choices->m;
+                                        IF v_choice->>'value' = v_sel_val THEN
+                                            v_choice_found := true;
+                                            v_opt_mod := v_opt_mod + COALESCE((v_choice->>'price_modifier')::NUMERIC, 0);
+                                            EXIT;
+                                        END IF;
+                                    END LOOP;
+                                END IF;
+                                EXIT;
+                            END IF;
+                        END LOOP;
+                    END IF;
+
+                    -- Strict Enforcement
+                    IF NOT v_opt_found THEN
+                        RAISE EXCEPTION 'Invalid option: Product "%" does not support the option "%".', v_prod.name, v_sel_name;
+                    END IF;
+
+                    IF NOT v_choice_found THEN
+                        RAISE EXCEPTION 'Invalid choice: Option "%" for product "%" does not have choice value "%".', v_sel_name, v_prod.name, v_sel_val;
+                    END IF;
+                END;
+            END LOOP;
+        END IF;
+
+        -- Apply option modifiers to base unit price
+        v_unit_price := v_unit_price + v_opt_mod;
+
+        -- Compute line total with modified unit price
+        v_line_total := v_unit_price * v_qty;
         v_subtotal := v_subtotal + v_line_total;
     END LOOP;
 
     -- 3. Validate Coupon Server-Side (if provided)
     IF v_coupon_code IS NOT NULL THEN
         v_coupon_res := public.validate_and_apply_coupon(v_coupon_code, v_subtotal);
-        IF (v_coupon_res->>'is_valid')::BOOLEAN THEN
+        IF NOT (v_coupon_res->>'is_valid')::BOOLEAN THEN
+            RAISE EXCEPTION 'Coupon validation failed: %', (v_coupon_res->>'message');
+        ELSE
             v_coupon_id := (v_coupon_res->>'coupon_id')::UUID;
             v_discount := (v_coupon_res->>'discount_amount')::NUMERIC;
         END IF;
@@ -377,7 +450,57 @@ BEGIN
         END IF;
 
         v_unit_price := v_prod.base_price;
-        v_line_total := v_unit_price * (v_item->>'quantity')::INT;
+        v_selected_opts := COALESCE(v_item->'selected_options', '[]'::jsonb);
+        v_opt_mod := 0;
+        v_qty := (v_item->>'quantity')::INT;
+
+        -- Recalculate and strictly validate options for insertion snapshot
+        IF jsonb_typeof(v_selected_opts) = 'array' AND jsonb_array_length(v_selected_opts) > 0 THEN
+            FOR j IN 0 .. jsonb_array_length(v_selected_opts) - 1 LOOP
+                DECLARE
+                    v_sel_opt JSONB := v_selected_opts->j;
+                    v_sel_name TEXT := v_sel_opt->>'name';
+                    v_sel_val TEXT := v_sel_opt->>'value';
+                    v_prod_opt JSONB;
+                    v_choices JSONB;
+                    v_choice JSONB;
+                    v_opt_found BOOLEAN := false;
+                    v_choice_found BOOLEAN := false;
+                BEGIN
+                    IF jsonb_typeof(v_prod.options) = 'array' THEN
+                        FOR k IN 0 .. jsonb_array_length(v_prod.options) - 1 LOOP
+                            v_prod_opt := v_prod.options->k;
+                            IF v_prod_opt->>'name' = v_sel_name THEN
+                                v_opt_found := true;
+                                v_choices := v_prod_opt->'choices';
+                                IF jsonb_typeof(v_choices) = 'array' THEN
+                                    FOR m IN 0 .. jsonb_array_length(v_choices) - 1 LOOP
+                                        v_choice := v_choices->m;
+                                        IF v_choice->>'value' = v_sel_val THEN
+                                            v_choice_found := true;
+                                            v_opt_mod := v_opt_mod + COALESCE((v_choice->>'price_modifier')::NUMERIC, 0);
+                                            EXIT;
+                                        END IF;
+                                    END LOOP;
+                                END IF;
+                                EXIT;
+                            END IF;
+                        END LOOP;
+                    END IF;
+
+                    IF NOT v_opt_found THEN
+                        RAISE EXCEPTION 'Invalid option: Product "%" does not support the option "%".', v_prod.name, v_sel_name;
+                    END IF;
+
+                    IF NOT v_choice_found THEN
+                        RAISE EXCEPTION 'Invalid choice: Option "%" for product "%" does not have choice value "%".', v_sel_name, v_prod.name, v_sel_val;
+                    END IF;
+                END;
+            END LOOP;
+        END IF;
+
+        v_unit_price := v_unit_price + v_opt_mod;
+        v_line_total := v_unit_price * v_qty;
 
         INSERT INTO public.order_items (
             id,
@@ -394,8 +517,8 @@ BEGIN
             v_prod.id,
             v_prod.name,
             v_unit_price,
-            (v_item->>'quantity')::INT,
-            COALESCE(v_item->'selected_options', '[]'::jsonb),
+            v_qty,
+            v_selected_opts,
             v_line_total
         );
     END LOOP;
@@ -410,7 +533,7 @@ BEGIN
         'total', v_final_total
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 
 -- 8. Explicit Order Status Transition Enforcement (Hardening Safeguard 8)
@@ -449,7 +572,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 DROP TRIGGER IF EXISTS trg_enforce_order_status ON public.orders;
 CREATE TRIGGER trg_enforce_order_status
@@ -505,7 +628,7 @@ BEGIN
         'order_number', v_order.order_number
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 
 -- 10. Performance Indexes

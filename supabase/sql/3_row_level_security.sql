@@ -1,6 +1,6 @@
 -- =============================================================================
 -- SQL 3 — Row Level Security (RLS) & Access Policies (Run Third)
--- SITI FRUITIES — Phase 3B Database Implementation
+-- SITI FRUITIES — Phase 3B Database Implementation (Hardened & Debugged)
 -- =============================================================================
 
 -- 1. Enable RLS on all tables
@@ -88,12 +88,11 @@ CREATE POLICY "Users can manage their own addresses" ON public.saved_addresses
     WITH CHECK (auth.uid() = user_id OR public.is_admin());
 
 
--- 9. Orders Policies
+-- 9. Orders Policies (Bypasses general insertion, force through authoritative RPC)
 DROP POLICY IF EXISTS "Anyone can create orders (guest or user)" ON public.orders;
-CREATE POLICY "Anyone can create orders (guest or user)" ON public.orders
-    FOR INSERT WITH CHECK (
-        user_id IS NULL OR user_id = auth.uid() OR public.is_admin()
-    );
+DROP POLICY IF EXISTS "Admin can insert orders directly" ON public.orders;
+CREATE POLICY "Admin can insert orders directly" ON public.orders
+    FOR INSERT TO authenticated WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Users can view their own orders; admin views all" ON public.orders;
 CREATE POLICY "Users can view their own orders; admin views all" ON public.orders
@@ -106,10 +105,11 @@ CREATE POLICY "Admin can update orders" ON public.orders
     FOR UPDATE USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 
--- 10. Order Items Policies
+-- 10. Order Items Policies (Bypasses general insertion, force through authoritative RPC)
 DROP POLICY IF EXISTS "Anyone can insert order items" ON public.order_items;
-CREATE POLICY "Anyone can insert order items" ON public.order_items
-    FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin can insert order items directly" ON public.order_items;
+CREATE POLICY "Admin can insert order items directly" ON public.order_items
+    FOR INSERT TO authenticated WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Users can view items of their orders; admin views all" ON public.order_items;
 CREATE POLICY "Users can view items of their orders; admin views all" ON public.order_items

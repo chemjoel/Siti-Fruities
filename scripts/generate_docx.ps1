@@ -9,6 +9,13 @@ New-Item -ItemType Directory -Path (Join-Path $tempDir "_rels") | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $tempDir "word") | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $tempDir "word\_rels") | Out-Null
 
+# Helper to write UTF-8 files WITHOUT Byte Order Mark (BOM)
+# Mismatched/corrupted BOM signatures in XML files causes MS Word to complain about document corruption.
+function Write-Utf8WithoutBom([string]$path, [string]$content) {
+    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($path, $content, $utf8NoBom)
+}
+
 # 1. [Content_Types].xml
 $contentTypes = @'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -19,7 +26,7 @@ $contentTypes = @'
   <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
 </Types>
 '@
-$contentTypes | Out-File -LiteralPath (Join-Path $tempDir "[Content_Types].xml") -Encoding utf8
+Write-Utf8WithoutBom (Join-Path $tempDir "[Content_Types].xml") $contentTypes
 
 # 2. _rels/.rels
 $dotRels = @'
@@ -28,7 +35,7 @@ $dotRels = @'
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
 </Relationships>
 '@
-$dotRels | Out-File -FilePath (Join-Path $tempDir "_rels\.rels") -Encoding utf8
+Write-Utf8WithoutBom (Join-Path $tempDir "_rels\.rels") $dotRels
 
 # 3. word/_rels/document.xml.rels
 $docRels = @'
@@ -37,7 +44,7 @@ $docRels = @'
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
 </Relationships>
 '@
-$docRels | Out-File -FilePath (Join-Path $tempDir "word\_rels\document.xml.rels") -Encoding utf8
+Write-Utf8WithoutBom (Join-Path $tempDir "word\_rels\document.xml.rels") $docRels
 
 # 4. word/styles.xml
 $stylesXml = @'
@@ -142,13 +149,12 @@ $stylesXml = @'
   </w:style>
 </w:styles>
 '@
-$stylesXml | Out-File -FilePath (Join-Path $tempDir "word\styles.xml") -Encoding utf8
+Write-Utf8WithoutBom (Join-Path $tempDir "word\styles.xml") $stylesXml
 
 $global:docXml = New-Object System.Text.StringBuilder
 
 function EscapeXml([string]$text) {
     if ([string]::IsNullOrEmpty($text)) { return "" }
-    # Use standard ASCII replacements
     $res = $text.Replace('&', '&amp;')
     $res = $res.Replace('<', '&lt;')
     $res = $res.Replace('>', '&gt;')
@@ -195,7 +201,7 @@ function AddCallout {
   </w:pPr>
   <w:r>
     <w:rPr><w:b/><w:color w:val="$color"/></w:rPr>
-    <w:t xml:space="preserve">$($eTitle): </w:t>
+    <w:t xml:space="preserve">$(${eTitle}): </w:t>
   </w:r>
   <w:r>
     <w:t xml:space="preserve">$eText</w:t>
@@ -220,7 +226,7 @@ AddCallout "PURPOSE OF THIS DOCUMENT" "This Microsoft Word document is the autho
 # Quick Start Section
 AddP "QUICK START" "Heading1"
 AddP "Follow these steps in order to get SITI FRUITIES fully running on your PC and staging/production databases:"
-AddP "1. Create a Supabase Project (see Section 3)."
+AddP "1. Open your existing Supabase Project (see Section 3)."
 AddP "2. Open Supabase SQL Editor and run SQL Stages 1 through 5 in order (see Section 4)."
 AddP "3. Configure Supabase Email Auth (see Section 12)."
 AddP "4. Create your Admin user and run the safe role-elevation script (see Sections 13 and 14)."
@@ -248,13 +254,14 @@ AddP "- Order Confirmation & WhatsApp: Human-readable order numbers (SF-YYYYMMDD
 AddP "- Operations Dashboard: Secure admin dashboard at /admin for orders, products, delivery, coupons, promotions, and enquiries."
 
 # 3. Supabase Project Setup
-AddP "3. Supabase Project Setup (MANUAL)" "Heading1"
+AddP "3. Existing Supabase Project Configuration (MANUAL)" "Heading1"
+AddP "IMPORTANT: Do NOT create a new Supabase project. You must configure and use the existing SITI FRUITIES Supabase project already provisioned for this application."
+AddP "To retrieve your API keys and configure settings:"
 AddP "1. Navigate to https://supabase.com and sign in."
-AddP "2. Click 'New Project' and select your organization."
-AddP "3. Enter Project Name: Siti-Fruities-Backend"
-AddP "4. Set a strong Database Password (store securely in your password manager)."
-AddP "5. Choose Region: West Europe (London) or closest region."
-AddP "6. Click 'Create new project' and wait 2 minutes for provisioning."
+AddP "2. Select your existing SITI FRUITIES project from the dashboard list."
+AddP "3. Navigate to Project Settings (gear icon in left sidebar) -> API."
+AddP "4. Copy the Project URL (VITE_SUPABASE_URL) and Anon Public Key (VITE_SUPABASE_ANON_KEY)."
+AddP "5. Store these variables in your local .env file or Netlify build settings."
 
 # 4. Required SQL
 AddP "4. Required SQL Execution (MANUAL)" "Heading1"
@@ -450,7 +457,13 @@ AddP "If you need to reset the database to a clean state, drop the public schema
 # Write document.xml
 $documentXml = @"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:document 
+  xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" 
+  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+  xmlns:o="urn:schemas-microsoft-com:office:office" 
+  xmlns:v="urn:schemas-microsoft-com:vml" 
+  xmlns:w10="urn:schemas-microsoft-com:office:word" 
+  xmlns:ve="http://schemas.openxmlformats.org/markup-compatibility/2006">
   <w:body>
 $($global:docXml.ToString())
     <w:sectPr>
@@ -461,7 +474,7 @@ $($global:docXml.ToString())
 </w:document>
 "@
 
-$documentXml | Out-File -FilePath (Join-Path $tempDir "word\document.xml") -Encoding utf8
+Write-Utf8WithoutBom (Join-Path $tempDir "word\document.xml") $documentXml
 
 # Compress to .zip first, then rename to .docx
 $tempZip = Join-Path $repoRoot "temp_guide.zip"

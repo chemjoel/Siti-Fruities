@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Utensils, ArrowLeft, Clock, Plus, Minus, Check, MessageCircle, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { enquiryService } from '@/services/enquiry.service';
+import { cn } from '@/lib/utils';
 
 // Helper for formatting currency
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
@@ -390,17 +391,19 @@ ${eventDetails.trim() || 'None'}
                             key={interest}
                             type="button"
                             onClick={() => handleInterestToggle(interest)}
-                            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left text-xs font-bold transition-all ${
+                            className={cn(
+                              "flex items-center gap-2.5 p-3 rounded-xl border text-left text-xs font-bold transition-all",
                               isChecked
-                                ? 'bg-primary/5 border-primary text-primary'
-                                : 'bg-white border-border text-foreground hover:bg-muted/50'
-                            }`}
+                                ? "bg-primary/5 border-primary text-primary"
+                                : "bg-white border-border text-foreground hover:bg-muted/50"
+                            )}
                           >
-                            <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
+                            <div className={cn(
+                              "w-4 h-4 rounded flex items-center justify-center border transition-all",
                               isChecked 
-                                ? 'bg-primary border-primary text-white' 
-                                : 'border-border bg-white'
-                            }`}>
+                                ? "bg-primary border-primary text-white" 
+                                : "border-border bg-white"
+                            )}>
                               {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                             </div>
                             <span>{interest}</span>
