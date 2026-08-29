@@ -149,7 +149,7 @@ ${customerEmail ? `✉️ *Email:* ${customerEmail}\n` : ''}
 ${interestsText}
 
 📝 *EVENT DETAILS / REQUESTS:*
-${eventDetails.trim() || 'None'}
+${eventDetails.trim() || 'None'}`;
 
     // Save enquiry to database for admin review
     enquiryService.submitCateringEnquiry({
@@ -520,11 +520,12 @@ ${eventDetails.trim() || 'None'}
                           isSelected ? "border-primary bg-primary/20" : "border-card-border"
                         )}
                       >
-                        <div className={`w-5 h-5 rounded-md flex items-center justify-center border mt-0.5 shrink-0 transition-all ${
+                        <div className={cn(
+                          "w-5 h-5 rounded-md flex items-center justify-center border mt-0.5 shrink-0 transition-all",
                           isSelected 
-                            ? 'bg-primary border-primary text-white' 
-                            : 'border-border bg-white group-hover:border-primary/50'
-                        }`}>
+                            ? "bg-primary border-primary text-white" 
+                            : "border-border bg-white group-hover:border-primary/50"
+                        )}>
                           {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                         </div>
                         <div className="flex-1 space-y-1">
