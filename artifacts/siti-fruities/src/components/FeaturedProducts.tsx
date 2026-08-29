@@ -148,23 +148,22 @@ function SandwichCard() {
   const [eggOption, setEggOption] = useState('Fried');
   
   const typePrices: Record<string, number> = {
-    'Chicken Sandwich': 3000,
-    'Beef Sandwich': 3000,
-    'Chicken & Egg': 5000
+    'Chicken & Egg': 4000,
+    'Beef & Egg': 4000,
+    'Egg Sandwich': 3000
   };
 
   const handleAdd = () => {
-    const opts = [{ name: 'Type', value: type }];
-    if (type.includes('Egg')) {
-      opts.push({ name: 'Egg', value: eggOption });
-    }
     addItem({
       productId: 'sandwich',
-      name: 'Sandwich',
+      name: 'Fresh Club Sandwich',
       image: sandwichImg,
       price: typePrices[type],
       quantity,
-      options: opts
+      options: [
+        { name: 'Type', value: type },
+        { name: 'Egg Option', value: eggOption }
+      ]
     });
     setQuantity(1);
   };
@@ -172,41 +171,48 @@ function SandwichCard() {
   return (
     <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <img src={sandwichImg} alt="Sandwich" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <img src={sandwichImg} alt="Sandwiches" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
+          {formatPrice(typePrices[type])}
+        </div>
       </div>
       <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
         <div>
-          <h3 className="text-xl font-bold font-serif mb-2">Signature Sandwich</h3>
-          <p className="text-sm text-muted-foreground line-clamp-2">Made with fresh bread, cabbage, carrot, premium protein and SITI FRUITIES in-house cream.</p>
+          <h3 className="text-xl font-bold font-serif mb-2">Fresh Club Sandwich</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Fresh bread layered with protein, egg, vegetables and special creamy sauce.
+          </p>
         </div>
 
         <div className="space-y-4 flex-1">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Protein</label>
-            <select 
-              value={type} 
-              onChange={(e) => setType(e.target.value)}
-              className="w-full bg-white border border-border rounded-xl px-4 py-3 text-sm font-semibold appearance-none focus:outline-none focus:ring-2 focus:ring-primary/50"
-            >
-              {Object.entries(typePrices).map(([s, p]) => (
-                <option key={s} value={s}>{s} — {formatPrice(p)}</option>
+            <label className="text-xs font-bold text-muted-foreground uppercase">Sandwich Type</label>
+            <div className="flex flex-col gap-2">
+              {Object.keys(typePrices).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setType(t)}
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold text-left transition-all border flex justify-between items-center ${
+                    type === t 
+                      ? 'bg-primary/5 border-primary text-primary' 
+                      : 'bg-white border-border text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  <span>{t}</span>
+                  <span className="font-mono text-muted-foreground">{formatPrice(typePrices[t])}</span>
+                </button>
               ))}
-            </select>
-          </div>
-          
-          {type.includes('Egg') && (
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase">Egg Preparation</label>
-              <PillToggle options={['Boiled', 'Fried']} selected={eggOption} onChange={setEggOption} />
             </div>
-          )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase">Egg Preparation</label>
+            <PillToggle options={['Fried', 'Boiled']} selected={eggOption} onChange={setEggOption} />
+          </div>
         </div>
 
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
-          <div className="flex flex-col">
-            <span className="text-lg font-black text-foreground">{formatPrice(typePrices[type] * quantity)}</span>
-            <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
-          </div>
+          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
           <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
             Add to Cart
           </Button>
@@ -219,18 +225,26 @@ function SandwichCard() {
 function BananaBreadCard() {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [flavour, setFlavour] = useState('Chocolate');
-  
-  const price = 2500;
+  const [size, setSize] = useState('Loaf');
+  const [addIn, setAddIn] = useState('Chocolate');
+
+  const sizePrices: Record<string, number> = {
+    'Slice': 1500,
+    'Mini Loaf': 3500,
+    'Loaf': 6500
+  };
 
   const handleAdd = () => {
     addItem({
       productId: 'banana-bread',
       name: 'Whole Wheat Banana Bread',
       image: bananaBreadImg,
-      price,
+      price: sizePrices[size],
       quantity,
-      options: [{ name: 'Flavour', value: flavour }]
+      options: [
+        { name: 'Size', value: size },
+        { name: 'Add-In', value: addIn }
+      ]
     });
     setQuantity(1);
   };
@@ -240,19 +254,25 @@ function BananaBreadCard() {
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img src={bananaBreadImg} alt="Banana Bread" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          {formatPrice(price)}
+          {formatPrice(sizePrices[size])}
         </div>
       </div>
       <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
         <div>
           <h3 className="text-xl font-bold font-serif mb-2">Whole Wheat Banana Bread</h3>
-          <p className="text-sm text-muted-foreground line-clamp-2">Healthy whole wheat banana bread baked fresh with premium ingredients.</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            100% Whole wheat, naturally sweetened with ripe bananas. Moist and wholesome.
+          </p>
         </div>
 
         <div className="space-y-4 flex-1">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Flavour Mix-in</label>
-            <PillToggle options={['Chocolate', 'Raisin', 'Coconut']} selected={flavour} onChange={setFlavour} />
+            <label className="text-xs font-bold text-muted-foreground uppercase">Size</label>
+            <PillToggle options={['Slice', 'Mini Loaf', 'Loaf']} selected={size} onChange={setSize} />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase">Flavour / Add-in</label>
+            <PillToggle options={['Chocolate', 'Raisins', 'Coconut']} selected={addIn} onChange={setAddIn} />
           </div>
         </div>
 
@@ -270,15 +290,29 @@ function BananaBreadCard() {
 function TreatBoxCard() {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const price = 36500;
+  const [selectedBox, setSelectedBox] = useState<'A' | 'B'>('A');
+
+  const boxDetails = {
+    A: {
+      name: 'Treat Box A',
+      price: 15500,
+      items: ['Healthy Chicken Salad', '500ml Greek Yoghurt', '500ml Parfait', 'Loaf of Banana Bread']
+    },
+    B: {
+      name: 'Treat Box B',
+      price: 13000,
+      items: ['Healthy Chicken Salad', '500ml Greek Yoghurt', '330ml Parfait', 'Loaf of Banana Bread']
+    }
+  };
 
   const handleAdd = () => {
     addItem({
-      productId: 'treat-box',
-      name: 'Deluxe Healthy Treat Box',
+      productId: `treat-box-${selectedBox.toLowerCase()}`,
+      name: boxDetails[selectedBox].name,
       image: treatBoxImg,
-      price,
-      quantity
+      price: boxDetails[selectedBox].price,
+      quantity,
+      options: [{ name: 'Package', value: selectedBox }]
     });
     setQuantity(1);
   };
@@ -287,101 +321,51 @@ function TreatBoxCard() {
     <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img src={treatBoxImg} alt="Treat Box" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div className="absolute top-3 left-3 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1">
-          <span>🎁</span> Beautiful Gift
-        </div>
-      </div>
-      <div className="p-5 md:p-6 flex flex-col flex-1 gap-4">
-        <div>
-          <h3 className="text-xl font-bold font-serif mb-2">Deluxe Healthy Treat Box</h3>
-          <div className="text-lg font-black text-primary">{formatPrice(price)}</div>
-        </div>
-
-        <div className="flex-1 bg-muted/50 rounded-xl p-4">
-          <ul className="space-y-2 text-sm text-foreground/80 font-medium">
-            <li className="flex items-start gap-2"><span className="text-secondary">🌿</span> Healthy Chicken Salad</li>
-            <li className="flex items-start gap-2"><span className="text-secondary">🌿</span> 500ml Greek Yoghurt</li>
-            <li className="flex items-start gap-2"><span className="text-secondary">🌿</span> 550ml Exotic Parfait</li>
-            <li className="flex items-start gap-2"><span className="text-secondary">🌿</span> Exotic Fruit Salad</li>
-            <li className="flex items-start gap-2"><span className="text-secondary">🌿</span> 50cl Tigernut & Zobo</li>
-            <li className="flex items-start gap-2"><span className="text-secondary">🌿</span> Granola</li>
-          </ul>
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-2 gap-4">
-          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
-          <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
-            Add to Cart
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ParfaitCard() {
-  const { addItem } = useCart();
-  const [quantity, setQuantity] = useState(1);
-  const [sweetness, setSweetness] = useState('Sweetened');
-  const [size, setSize] = useState('550ml');
-  
-  const sizePrices: Record<string, number> = {
-    '330ml': 5000,
-    '500ml': 8000,
-    '550ml': 9000,
-    '1L': 13500
-  };
-
-  const handleAdd = () => {
-    addItem({
-      productId: 'parfait',
-      name: 'Exotic Parfait',
-      image: parfaitImg,
-      price: sizePrices[size],
-      quantity,
-      options: [
-        { name: 'Size', value: size },
-        { name: 'Type', value: sweetness }
-      ]
-    });
-    setQuantity(1);
-  };
-
-  return (
-    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 ring-2 ring-primary/20">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <img src={parfaitImg} alt="Exotic Parfait" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div className="absolute top-3 left-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1">
-          ⭐ #1 Signature Product
-        </div>
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          From {formatPrice(5000)}
+          {formatPrice(boxDetails[selectedBox].price)}
         </div>
       </div>
       <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
         <div>
-          <h3 className="text-xl font-bold font-serif mb-2">Exotic Parfait</h3>
-          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-            Greek Yogurt, Apple, Coconut, Grapes, Granola with rolled oats, Cashew nuts, Kiwi, Strawberry, Raisins
+          <h3 className="text-xl font-bold font-serif mb-2">Juicy Treat Box</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Curated gift & feast boxes combining your favourite SITI treats in one pack.
           </p>
         </div>
 
         <div className="space-y-4 flex-1">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Type</label>
-            <PillToggle options={['Sweetened', 'Unsweetened']} selected={sweetness} onChange={setSweetness} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Size & Price</label>
-            <select 
-              value={size} 
-              onChange={(e) => setSize(e.target.value)}
-              className="w-full bg-white border border-border rounded-xl px-4 py-3 text-sm font-semibold appearance-none focus:outline-none focus:ring-2 focus:ring-primary/50"
-            >
-              {Object.entries(sizePrices).map(([s, p]) => (
-                <option key={s} value={s}>{s} — {formatPrice(p)}</option>
+            <label className="text-xs font-bold text-muted-foreground uppercase">Select Package</label>
+            <div className="grid grid-cols-2 gap-2">
+              {(['A', 'B'] as const).map((b) => (
+                <button
+                  key={b}
+                  onClick={() => setSelectedBox(b)}
+                  className={`p-3 rounded-xl text-xs font-bold border transition-all text-center ${
+                    selectedBox === b 
+                      ? 'bg-primary border-primary text-white shadow-md' 
+                      : 'bg-white border-border text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  <div>Treat Box {b}</div>
+                  <div className={`text-[10px] font-mono mt-0.5 ${selectedBox === b ? 'text-white/80' : 'text-muted-foreground'}`}>
+                    {formatPrice(boxDetails[b].price)}
+                  </div>
+                </button>
               ))}
-            </select>
+            </div>
+          </div>
+
+          <div className="bg-muted/40 rounded-xl p-3 border border-border">
+            <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider block mb-1.5">Includes:</span>
+            <ul className="text-xs space-y-1 text-foreground">
+              {boxDetails[selectedBox].items.map((item, i) => (
+                <li key={i} className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
@@ -398,185 +382,141 @@ function ParfaitCard() {
 
 function CateringCard() {
   const { addItem } = useCart();
-  const [isOpen, setIsOpen] = useState(false);
-  const [type, setType] = useState('Indoor Catering');
-  
-  // State for catering items
-  const [items, setItems] = useState({
-    Parfait: 0,
-    Sandwiches: 0,
-    Smoothies: 0,
-    Juice: 0,
-    Yoghurt: 0,
-    FruitSalad: 0,
-    BananaBread: 0
-  });
+  const [quantity, setQuantity] = useState(2); // Minimum 2
 
-  const prices = {
-    Parfait: 9000,
-    Sandwiches: 3000,
-    Smoothies: 3500,
-    Juice: 2500,
-    Yoghurt: 6500,
-    FruitSalad: 3500,
-    BananaBread: 2500
-  };
-
-  const labels = {
-    Parfait: "Exotic Parfait",
-    Sandwiches: "Chicken & Egg Sandwiches",
-    Smoothies: "Healthy Smoothies",
-    Juice: "Cold Pressed Juice",
-    Yoghurt: "Greek Yoghurt (500ml)",
-    FruitSalad: "Exotic Fruit Salad",
-    BananaBread: "Banana Bread Loaves"
-  };
-
-  const estimatedTotal = Object.entries(items).reduce(
-    (acc, [key, qty]) => acc + (prices[key as keyof typeof prices] * qty), 0
-  );
-
-  const handleUpdateItem = (key: keyof typeof items, delta: number) => {
-    setItems(prev => ({
-      ...prev,
-      [key]: Math.max(0, prev[key] + delta)
-    }));
-  };
-
-  const handleAddToCart = () => {
-    if (estimatedTotal === 0) return;
-    
-    // Add individual items to cart or add as one big catering bundle?
-    // The prompt says "Add everything to cart". Adding as one bundle with details makes sense.
-    
-    const details = Object.entries(items)
-      .filter(([_, qty]) => qty > 0)
-      .map(([key, qty]) => `${qty}x ${labels[key as keyof typeof labels]}`)
-      .join(', ');
-
+  const handleAdd = () => {
     addItem({
-      productId: `catering-${Date.now()}`,
-      name: `Event Catering (${type})`,
+      productId: 'smallie-parfait',
+      name: 'Smallie Parfait (Events Cup)',
       image: cateringImg,
-      price: estimatedTotal,
-      quantity: 1,
-      options: [{ name: 'Includes', value: details }]
+      price: 4000,
+      quantity,
+      options: [{ name: 'Category', value: 'Events & Catering' }]
     });
-
-    setIsOpen(false);
-    // Reset
-    setItems({ Parfait: 0, Sandwiches: 0, Smoothies: 0, Juice: 0, Yoghurt: 0, FruitSalad: 0, BananaBread: 0 });
+    setQuantity(2);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
-        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-          <img src={cateringImg} alt="Event Catering" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-        </div>
-        <div className="p-5 md:p-6 flex flex-col flex-1 items-center justify-center text-center gap-4">
-          <h3 className="text-2xl font-bold font-serif">Event Catering</h3>
-          <p className="text-sm text-muted-foreground mb-4">Indoor, outdoor, and bulk food supply for your special events. Customise your menu.</p>
-          
-          <DialogTrigger asChild>
-            <Button variant="outline" className="w-full border-2 border-secondary text-secondary hover:bg-secondary hover:text-white rounded-full font-bold h-12">
-              Configure Catering
-            </Button>
-          </DialogTrigger>
+    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        <img src={cateringImg} alt="Events & Catering" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
+          {formatPrice(4000)} / cup
         </div>
       </div>
-
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto rounded-3xl p-0">
-        <div className="p-6 md:p-8">
-          <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl font-bold font-serif">Configure Catering Order</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-8">
-            {/* Step 1 */}
-            <div className="space-y-4">
-              <h4 className="font-bold text-foreground flex items-center gap-2">
-                <span className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> 
-                Choose Event Type
-              </h4>
-              <PillToggle 
-                options={['Indoor Catering', 'Outdoor Catering', 'Bulk Food Supply']} 
-                selected={type} 
-                onChange={setType} 
-              />
-            </div>
-
-            {/* Step 2 */}
-            <div className="space-y-4">
-              <h4 className="font-bold text-foreground flex items-center gap-2">
-                <span className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> 
-                Select Items & Quantities
-              </h4>
-              
-              <div className="bg-muted/30 rounded-2xl p-4 border border-border space-y-4">
-                {(Object.keys(items) as Array<keyof typeof items>).map(key => (
-                  <div key={key} className="flex items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="font-semibold text-sm">{labels[key]}</div>
-                      <div className="text-xs text-muted-foreground">{formatPrice(prices[key])} ea</div>
-                    </div>
-                    <div className="flex items-center bg-white rounded-full p-1 border border-border shadow-sm">
-                      <button onClick={() => handleUpdateItem(key, -1)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted text-foreground">
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="w-8 text-center font-bold text-sm">{items[key]}</span>
-                      <button onClick={() => handleUpdateItem(key, 1)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted text-foreground">
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Total & Submit */}
-            <div className="bg-secondary/10 p-6 rounded-2xl border border-secondary/20 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                <div className="text-sm font-bold text-secondary uppercase tracking-wider mb-1">Estimated Total</div>
-                <div className="text-3xl font-black text-primary">{formatPrice(estimatedTotal)}</div>
-              </div>
-              <Button 
-                onClick={handleAddToCart}
-                disabled={estimatedTotal === 0}
-                className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white rounded-full px-8 h-12 font-bold shadow-lg disabled:opacity-50"
-              >
-                Continue to Cart
-              </Button>
-            </div>
-          </div>
+      <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
+        <div>
+          <h3 className="text-xl font-bold font-serif mb-2">Smallie Parfait (Events)</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            330ml cup layered with Greek yogurt, fruit and crunchy granola. Minimum 2 cups order.
+          </p>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        <div className="space-y-3 flex-1">
+          <div className="bg-sky-50 border border-sky-200/60 rounded-xl p-3 text-sky-900 text-xs leading-relaxed font-medium">
+            Planning a bigger gathering? We cater for office meetings, birthdays, weddings, and parties.
+          </div>
+          <Link href="/catering-events" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+            <span>Explore full catering options →</span>
+          </Link>
+        </div>
+
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
+          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
+          <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
+            Add ({formatPrice(4000 * quantity)})
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
-// --- MAIN SECTION EXPORT --- //
+function ParfaitCard() {
+  const { addItem } = useCart();
+  const [quantity, setQuantity] = useState(1);
 
-import { productService } from '@/services/product.service';
-import type { Product as DomainProduct } from '@/types/domain';
+  const handleAdd = () => {
+    addItem({
+      productId: 'vvip-parfait-featured',
+      name: 'VVIP Exotic Parfait Bowl',
+      image: parfaitImg,
+      price: 15000,
+      quantity,
+      options: [{ name: 'Size', value: '1 Litre (Ay Bowl)' }]
+    });
+    setQuantity(1);
+  };
+
+  return (
+    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        <img src={parfaitImg} alt="VVIP Exotic Parfait" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
+          {formatPrice(15000)}
+        </div>
+      </div>
+      <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
+        <div>
+          <h3 className="text-xl font-bold font-serif mb-2">VVIP Ay Bowl Parfait</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            1 Litre loaded bowl of fresh kiwi, strawberries, grapes, cashew nuts and thick yogurt.
+          </p>
+        </div>
+
+        <div className="space-y-2 flex-1">
+          <div className="flex flex-wrap gap-1.5">
+            {['1 Litre Bowl', 'Exotic Fruits', 'Cashew Nuts', 'Probiotic Base'].map(chip => (
+              <span key={chip} className="text-[10px] uppercase tracking-wider font-bold bg-primary/10 text-primary px-2 py-1 rounded-full">{chip}</span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
+          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
+          <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
+            Add to Cart
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- MAIN FEATURED PRODUCTS COMPONENT --- //
 
 export default function FeaturedProducts() {
-  const [featuredProducts, setFeaturedProducts] = useState<DomainProduct[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
+  // Auto-scroll the Featured Products carousel smoothly
   useEffect(() => {
-    productService.getFeaturedProducts().then(setFeaturedProducts).catch(console.error);
-  }, []);
+    if (isHovered) return;
 
-  // Map known slugs to their rich components
+    const scrollTimer = setInterval(() => {
+      if (scrollContainerRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+        const maxScroll = scrollWidth - clientWidth;
+        if (scrollLeft >= maxScroll - 20) {
+          scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scrollContainerRef.current.scrollBy({ left: 350, behavior: 'smooth' });
+        }
+      }
+    }, 4500);
+
+    return () => clearInterval(scrollTimer);
+  }, [isHovered]);
+
   const renderCardForSlug = (slug: string) => {
     switch (slug) {
       case 'vvip-exotic-parfait':
-      case 'vip-exotic-parfait':
       case 'parfait':
         return <ParfaitCard key="parfait" />;
       case 'greek-yogurt':
-        return <GreekYoghurtCard key="greek-yogurt" />;
+      case 'greek-yoghurt':
+        return <GreekYoghurtCard key="yoghurt" />;
       case 'chicken-sandwich':
       case 'sandwich':
         return <SandwichCard key="sandwich" />;
@@ -594,8 +534,6 @@ export default function FeaturedProducts() {
     }
   };
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: -360, behavior: 'smooth' });
@@ -609,8 +547,42 @@ export default function FeaturedProducts() {
   };
 
   return (
-    <section className="py-20 bg-background relative border-t border-border/20">
-      <div className="container mx-auto px-4 md:px-8">
+    <section 
+      className="py-20 bg-background relative border-t border-border/20 overflow-hidden"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsHovered(true)}
+      onTouchEnd={() => setIsHovered(false)}
+    >
+      {/* Soft ambient food fresh glow */}
+      <div className="absolute top-1/3 -left-36 w-80 h-80 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-10 -right-36 w-80 h-80 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
+
+      {/* Subtle background decorative fruit elements (outer edges, low-opacity, behind content) */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
+        {/* Top-right: Strawberry & Mint */}
+        <div className="absolute top-12 right-4 lg:right-10 opacity-20 hidden md:block">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 6C15 6 9 14 9 24C9 34 16 40 22 40C28 40 35 34 35 24C35 14 29 6 22 6Z" fill="#EF4444" />
+            <path d="M16 8C19 10 22 7 22 7C22 7 25 10 28 8C27 12 24 13 22 13C20 13 17 12 16 8Z" fill="#10B981" />
+            <circle cx="16" cy="20" r="1" fill="#FEF08A" />
+            <circle cx="22" cy="22" r="1" fill="#FEF08A" />
+            <circle cx="28" cy="20" r="1" fill="#FEF08A" />
+            <circle cx="22" cy="32" r="1" fill="#FEF08A" />
+          </svg>
+        </div>
+
+        {/* Bottom-left: Mango piece & Blueberry */}
+        <div className="absolute bottom-16 left-4 lg:left-10 opacity-20 hidden md:block">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="12" width="20" height="20" rx="5" fill="#F59E0B" />
+            <circle cx="34" cy="26" r="7" fill="#1D4ED8" />
+            <circle cx="32" cy="24" r="2" fill="#93C5FD" opacity="0.6" />
+          </svg>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 md:px-8 relative z-10">
         
         {/* Header with Scroll Controls */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6">
@@ -619,7 +591,7 @@ export default function FeaturedProducts() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-bold font-serif text-foreground mb-4"
+              className="text-4xl md:text-5xl font-bold font-serif text-foreground mb-4 leading-tight"
             >
               Our Favourites
             </motion.h2>
@@ -628,7 +600,7 @@ export default function FeaturedProducts() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-lg text-muted-foreground font-medium"
+              className="text-base sm:text-lg text-muted-foreground font-medium leading-relaxed"
             >
               Crafted fresh, every single day with premium ingredients and zero artificial additives.
             </motion.p>
@@ -637,22 +609,22 @@ export default function FeaturedProducts() {
           <div className="flex items-center gap-2">
             <button 
               onClick={scrollLeft}
-              className="w-12 h-12 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-colors shadow-sm"
+              className="w-11 h-11 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-all shadow-sm active:scale-95"
               aria-label="Scroll left"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
             <button 
               onClick={scrollRight}
-              className="w-12 h-12 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-colors shadow-sm"
+              className="w-11 h-11 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-all shadow-sm active:scale-95"
               aria-label="Scroll right"
             >
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Swipeable & Scrollable Horizontal Carousel */}
+        {/* Auto-advancing Swipeable & Scrollable Horizontal Carousel */}
         <div 
           ref={scrollContainerRef}
           className="flex gap-6 overflow-x-auto pb-8 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

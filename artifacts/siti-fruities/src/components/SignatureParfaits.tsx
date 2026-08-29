@@ -1,14 +1,30 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Real product images from SITI FRUITIES photography
-const vvipParfaitImg = '/assets/IMG_8455_parfait_bowls.jpg';
-const vipParfaitImg = '/assets/IMG_6519_parfait_500ml.jpg';
-const greekYoghurtImg = '/assets/Screenshot_20260729-212331_1785360049844.jpg';
-const customParfaitImg = '/assets/IMG_8435_parfait_multi.jpg';
+const vvipParfaitImages = [
+  '/assets/IMG_8455_parfait_bowls.jpg',
+  '/assets/IMG_1639_parfait_1l.jpg',
+  '/assets/IMG_8435_parfait_multi.jpg',
+];
+
+const vipParfaitImages = [
+  '/assets/IMG_6519_parfait_500ml.jpg',
+  '/assets/IMG_6519_parfait_side.jpg',
+];
+
+const greekYoghurtImages = [
+  '/assets/Screenshot_20260729-212331_1785360049844.jpg',
+  '/assets/IMG_8428_parfait_stack.jpg',
+];
+
+const customParfaitImages = [
+  '/assets/IMG_8435_parfait_multi.jpg',
+  '/assets/IMG_8428_parfait_stack.jpg',
+];
 
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
@@ -18,7 +34,7 @@ interface ParfaitProduct {
   name: string;
   tagline: string;
   desc: string;
-  image: string;
+  images: string[];
   basePrice: number;
   sizes: Record<string, number>;
   defaultSize: string;
@@ -31,7 +47,7 @@ const PARFAIT_PRODUCTS: ParfaitProduct[] = [
     name: 'VVIP Exotic Parfait',
     tagline: 'The Ultimate Creamy Feast',
     desc: 'Greek Yogurt, Apple, Coconut, Grapes, Strawberries, Kiwi, Granola, Raisins, Cashew nuts.',
-    image: vvipParfaitImg,
+    images: vvipParfaitImages,
     basePrice: 8500,
     sizes: {
       'Mini (330ml)': 6000,
@@ -48,7 +64,7 @@ const PARFAIT_PRODUCTS: ParfaitProduct[] = [
     name: 'VIP Exotic Parfait',
     tagline: 'Classic Honeyed Delight',
     desc: 'Greek Yogurt, Apple, Coconut, Grapes, Granola with rolled oats, Raisins, Cashew nuts.',
-    image: vipParfaitImg,
+    images: vipParfaitImages,
     basePrice: 8000,
     sizes: {
       'Mini (330ml)': 5000,
@@ -64,7 +80,7 @@ const PARFAIT_PRODUCTS: ParfaitProduct[] = [
     name: 'Probiotic Greek Yogurt',
     tagline: '100% Raw Creamy Wholesomeness',
     desc: 'Thick, creamy, protein-packed probiotic Greek yogurt. No artificial additives.',
-    image: greekYoghurtImg,
+    images: greekYoghurtImages,
     basePrice: 6500,
     sizes: {
       '330ml': 4500,
@@ -80,13 +96,43 @@ const PARFAIT_PRODUCTS: ParfaitProduct[] = [
 export default function SignatureParfaits() {
   const { addItem } = useCart();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Custom states for each product
+  const [isHovered, setIsHovered] = useState(false);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+
+  // Custom options state for each product
   const [selections, setSelections] = useState<Record<string, { size: string; type: string; qty: number }>>({
     'vvip-exotic-parfait': { size: 'Medium (500ml)', type: 'Sweetened', qty: 1 },
     'vip-exotic-parfait': { size: 'Medium (500ml)', type: 'Sweetened', qty: 1 },
     'greek-yogurt': { size: '500ml', type: 'Sweetened', qty: 1 }
   });
+
+  // Rotate individual card images gently every 4 seconds
+  useEffect(() => {
+    const imgTimer = setInterval(() => {
+      setActiveImageIdx((prev) => (prev + 1) % 4);
+    }, 4000);
+    return () => clearInterval(imgTimer);
+  }, []);
+
+  // Automatic slow carousel advancement across cards (every 4.8s)
+  useEffect(() => {
+    if (isHovered) return;
+    const scrollTimer = setInterval(() => {
+      if (scrollContainerRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+        const maxScroll = scrollWidth - clientWidth;
+        if (scrollLeft >= maxScroll - 20) {
+          // Loop back smoothly to start
+          scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          // Advance by one card width
+          scrollContainerRef.current.scrollBy({ left: 340, behavior: 'smooth' });
+        }
+      }
+    }, 4800);
+
+    return () => clearInterval(scrollTimer);
+  }, [isHovered]);
 
   const handleUpdateSelection = (slug: string, field: 'size' | 'type' | 'qty', value: any) => {
     setSelections(prev => ({
@@ -105,7 +151,7 @@ export default function SignatureParfaits() {
     addItem({
       productId: product.slug,
       name: product.name,
-      image: product.image,
+      image: product.images[0],
       price: price,
       quantity: sel.qty,
       options: [
@@ -131,49 +177,96 @@ export default function SignatureParfaits() {
   };
 
   return (
-    <section className="py-20 relative overflow-hidden bg-gradient-to-b from-secondary/5 via-white to-background border-y border-border/40">
+    <section 
+      className="py-20 relative overflow-hidden bg-gradient-to-b from-secondary/5 via-white to-background border-y border-border/40"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsHovered(true)}
+      onTouchEnd={() => setIsHovered(false)}
+    >
+      {/* Soft appetizing ambient food glow & creamy swirl accents */}
+      <div className="absolute -top-32 -left-32 w-80 h-80 bg-primary/8 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-amber-500/8 rounded-full blur-[100px] pointer-events-none" />
       
-      {/* Abstract yogurt swirl decorative background */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-secondary/5 rounded-full blur-[100px] pointer-events-none" />
+      {/* Subtle background decorative fruit elements (outer edges, low-opacity, behind content) */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
+        {/* Top-right: Strawberry & Mint */}
+        <div className="absolute top-10 right-4 lg:right-10 opacity-20 hidden md:block">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 6C15 6 9 14 9 24C9 34 16 40 22 40C28 40 35 34 35 24C35 14 29 6 22 6Z" fill="#EF4444" />
+            <path d="M16 8C19 10 22 7 22 7C22 7 25 10 28 8C27 12 24 13 22 13C20 13 17 12 16 8Z" fill="#10B981" />
+            <circle cx="16" cy="20" r="1" fill="#FEF08A" />
+            <circle cx="22" cy="22" r="1" fill="#FEF08A" />
+            <circle cx="28" cy="20" r="1" fill="#FEF08A" />
+            <circle cx="19" cy="28" r="1" fill="#FEF08A" />
+            <circle cx="25" cy="28" r="1" fill="#FEF08A" />
+            <circle cx="22" cy="34" r="1" fill="#FEF08A" />
+          </svg>
+        </div>
+
+        {/* Bottom-left: Kiwi slice */}
+        <div className="absolute bottom-12 left-4 lg:left-10 opacity-20 hidden md:block">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="26" cy="26" r="24" fill="#10B981" />
+            <circle cx="26" cy="26" r="19" fill="#34D399" />
+            <ellipse cx="26" cy="26" rx="7" ry="9" fill="#ECFDF5" />
+            <circle cx="26" cy="14" r="1" fill="#1F2937" />
+            <circle cx="34" cy="19" r="1" fill="#1F2937" />
+            <circle cx="36" cy="27" r="1" fill="#1F2937" />
+            <circle cx="32" cy="35" r="1" fill="#1F2937" />
+            <circle cx="25" cy="37" r="1" fill="#1F2937" />
+            <circle cx="18" cy="34" r="1" fill="#1F2937" />
+            <circle cx="16" cy="26" r="1" fill="#1F2937" />
+            <circle cx="19" cy="18" r="1" fill="#1F2937" />
+          </svg>
+        </div>
+
+        {/* Middle-right: Mint leaf accent */}
+        <div className="absolute top-1/2 right-2 lg:right-6 -translate-y-1/2 opacity-15 hidden lg:block">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 32C4 32 10 30 16 24C23 17 32 11 32 4C32 4 25 13 18 20C12 26 4 32 4 32Z" fill="#10B981" />
+            <path d="M4 32C10 26 21 16 32 4" stroke="#047857" strokeWidth="1.5" />
+          </svg>
+        </div>
+      </div>
       
       <div className="container mx-auto px-4 md:px-8">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-xl">
-            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-xs">
               <Sparkles className="w-3.5 h-3.5 fill-primary/10" />
               Siti Signature
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold font-serif text-foreground mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold font-serif text-foreground mb-4 leading-tight">
               Signature Parfaits
             </h2>
-            <p className="text-muted-foreground font-medium text-lg leading-relaxed">
+            <p className="text-muted-foreground font-medium text-base sm:text-lg leading-relaxed">
               Creamy. Fruity. Loaded with goodness. Handcrafted with probiotic yogurt and fresh farm-picked ingredients.
             </p>
           </div>
           
-          {/* Scroll Buttons */}
+          {/* Scroll Controls */}
           <div className="flex items-center gap-2">
             <button 
               onClick={scrollLeft}
-              className="w-12 h-12 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-colors shadow-sm"
+              className="w-11 h-11 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-all shadow-sm active:scale-95"
               aria-label="Scroll left"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
             <button 
               onClick={scrollRight}
-              className="w-12 h-12 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-colors shadow-sm"
+              className="w-11 h-11 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-all shadow-sm active:scale-95"
               aria-label="Scroll right"
             >
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Horizontal Scroll Carousel */}
+        {/* Auto-advancing Horizontal Scroll Carousel */}
         <div 
           ref={scrollContainerRef}
           className="flex gap-6 overflow-x-auto pb-8 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -181,6 +274,7 @@ export default function SignatureParfaits() {
           {PARFAIT_PRODUCTS.map((prod) => {
             const sel = selections[prod.slug];
             const currentPrice = prod.sizes[sel.size] || prod.basePrice;
+            const currentImg = prod.images[activeImageIdx % prod.images.length] || prod.images[0];
             
             return (
               <div 
@@ -189,17 +283,25 @@ export default function SignatureParfaits() {
               >
                 <div className="bg-card rounded-3xl shadow-md border border-card-border overflow-hidden flex flex-col h-full group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   
-                  {/* Image container */}
+                  {/* Image container with subtle automatic crossfade between variations */}
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-                    <img 
-                      src={prod.image} 
-                      alt={prod.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute top-3 left-3 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                    <AnimatePresence mode="wait">
+                      <motion.img 
+                        key={currentImg}
+                        src={currentImg} 
+                        alt={prod.name} 
+                        initial={{ opacity: 0.6 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0.6 }}
+                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </AnimatePresence>
+                    
+                    <div className="absolute top-3 left-3 bg-primary/95 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                       {prod.tagline}
                     </div>
-                    <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm px-3.5 py-1 rounded-full text-sm font-black text-foreground shadow-sm">
+                    <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs sm:text-sm font-black text-foreground shadow-sm">
                       {formatPrice(currentPrice * sel.qty)}
                     </div>
                   </div>
@@ -306,12 +408,12 @@ export default function SignatureParfaits() {
                 </div>
               </div>
 
-              {/* Decorative graphic preview */}
+              {/* Graphic preview */}
               <div className="relative h-28 my-2 overflow-hidden bg-primary/5 rounded-2xl flex items-center justify-center group-hover:bg-primary/10 transition-colors">
                 <img 
-                  src={customParfaitImg} 
+                  src={customParfaitImages[activeImageIdx % customParfaitImages.length]} 
                   alt="Custom Parfait ingredients" 
-                  className="w-full h-full object-cover opacity-80 mix-blend-multiply"
+                  className="w-full h-full object-cover opacity-85 mix-blend-multiply transition-all duration-[1500ms]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/15 via-transparent to-transparent" />
               </div>
