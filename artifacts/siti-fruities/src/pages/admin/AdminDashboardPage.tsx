@@ -6,7 +6,9 @@ import { deliveryService } from '@/services/delivery.service';
 import { orderService } from '@/services/order.service';
 import { whatsAppService } from '@/services/whatsapp.service';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import type { Product, Category, DeliveryZone, Coupon, Promotion, Order, OrderStatus, CateringEnquiry, CustomParfaitQuote } from '@/types/domain';
+import type { Product, Category, DeliveryZone, Coupon, Promotion, Order, OrderStatus, CateringEnquiry, CustomParfaitQuote, ProductOption } from '@/types/domain';
+import ImageUpload from '@/components/admin/ImageUpload';
+import ProductOptionsBuilder from '@/components/admin/ProductOptionsBuilder';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,13 +30,9 @@ import {
   Trash2,
   CheckCircle2,
   Clock,
-  Check,
-  X,
-  Search,
   DollarSign,
-  TrendingUp,
   PackageCheck,
-  AlertTriangle,
+  Layers,
 } from 'lucide-react';
 import { SiWhatsapp } from 'react-icons/si';
 
@@ -55,27 +53,35 @@ export default function AdminDashboardPage() {
   const [cateringEnquiries, setCateringEnquiries] = useState<CateringEnquiry[]>([]);
   const [parfaitQuotes, setParfaitQuotes] = useState<CustomParfaitQuote[]>([]);
 
-  // Modals
+  // Modals & Forms State
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Product Modal State
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
+  const [isUploadingProductImage, setIsUploadingProductImage] = useState(false);
 
+  // Category Modal State
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Partial<Category> | null>(null);
+  const [isUploadingCategoryImage, setIsUploadingCategoryImage] = useState(false);
+
+  // Zone Modal State
   const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
   const [newZoneName, setNewZoneName] = useState('');
   const [newZoneFee, setNewZoneFee] = useState(1000);
 
+  // Coupon Modal State
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newCouponType, setNewCouponType] = useState<'percentage' | 'fixed_amount'>('percentage');
   const [newCouponValue, setNewCouponValue] = useState(10);
   const [newCouponMin, setNewCouponMin] = useState(3000);
 
+  // Promotion Modal State
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
-  const [newPromoTitle, setNewPromoTitle] = useState('');
-  const [newPromoDesc, setNewPromoDesc] = useState('');
-  const [newPromoFlyer, setNewPromoFlyer] = useState('/assets/IMG_8455_parfait_bowls.jpg');
-  const [newPromoCtaLabel, setNewPromoCtaLabel] = useState('Order Now');
-  const [newPromoCtaLink, setNewPromoCtaLink] = useState('/greek-yogurt-parfaits');
+  const [editingPromo, setEditingPromo] = useState<Partial<Promotion> | null>(null);
+  const [isUploadingPromoFlyer, setIsUploadingPromoFlyer] = useState(false);
 
   // Load all dashboard data
   const loadData = async () => {
@@ -177,7 +183,77 @@ export default function AdminDashboardPage() {
     setLocation('/admin/login');
   };
 
+  // ==========================================
+  // Category Actions
+  // ==========================================
+  const toggleCategoryActive = async (category: Category) => {
+    const next = !category.is_active;
+    setCategories((prev) => prev.map((c) => (c.id === category.id ? { ...c, is_active: next } : c)));
+    if (isSupabaseConfigured()) {
+      await supabase.from('categories').update({ is_active: next }).eq('id', category.id);
+    }
+  };
+
+  const handleSaveCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCategory?.name || !editingCategory?.slug) return;
+
+    const payload: Partial<Category> = {
+      name: editingCategory.name.trim(),
+      slug: editingCategory.slug.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') as any,
+      description: editingCategory.description?.trim() || '',
+      image_url: editingCategory.image_url || null,
+      display_order: Number(editingCategory.display_order || categories.length + 1),
+      is_active: editingCategory.is_active !== false,
+    };
+
+    if (editingCategory.id) {
+      // Update
+      setCategories((prev) => prev.map((c) => (c.id === editingCategory.id ? ({ ...c, ...payload } as Category) : c)));
+      if (isSupabaseConfigured()) {
+        await supabase.from('categories').update(payload).eq('id', editingCategory.id);
+      }
+    } else {
+      // Create
+      const newCat: Category = {
+        id: crypto.randomUUID(),
+        slug: payload.slug as any,
+        name: payload.name!,
+        description: payload.description!,
+        image_url: payload.image_url || null,
+        display_order: payload.display_order!,
+        is_active: payload.is_active!,
+      };
+      setCategories((prev) => [...prev, newCat]);
+      if (isSupabaseConfigured()) {
+        await supabase.from('categories').insert(newCat);
+      }
+    }
+
+    setIsCategoryModalOpen(false);
+    setEditingCategory(null);
+  };
+
+  const handleDeleteCategory = async (category: Category) => {
+    const assignedCount = products.filter((p) => p.category_id === category.id).length;
+    if (assignedCount > 0) {
+      alert(`Cannot delete category "${category.name}" because ${assignedCount} product(s) are currently assigned to it. Please reassign those products or deactivate this category instead.`);
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete category "${category.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setCategories((prev) => prev.filter((c) => c.id !== category.id));
+    if (isSupabaseConfigured()) {
+      await supabase.from('categories').delete().eq('id', category.id);
+    }
+  };
+
+  // ==========================================
   // Product Actions
+  // ==========================================
   const toggleProductAvailability = async (product: Product) => {
     const nextState = !product.is_available;
     setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, is_available: nextState } : p)));
@@ -200,9 +276,34 @@ export default function AdminDashboardPage() {
     e.preventDefault();
     if (!editingProduct?.name || !editingProduct?.slug) return;
 
+    // Clean and sanitize options to ensure valid structure
+    const cleanedOptions: ProductOption[] = (editingProduct.options || [])
+      .filter((opt) => opt.name && opt.name.trim() !== '')
+      .map((opt) => ({
+        name: opt.name.trim(),
+        choices: (opt.choices || [])
+          .filter((c) => c.value && c.value.trim() !== '')
+          .map((c) => ({
+            value: c.value.trim(),
+            price_modifier: c.price_modifier !== undefined && !isNaN(Number(c.price_modifier)) && Number(c.price_modifier) !== 0 ? Number(c.price_modifier) : undefined,
+          })),
+      }))
+      .filter((opt) => opt.choices.length > 0);
+
     const payload: Partial<Product> = {
-      ...editingProduct,
+      category_id: editingProduct.category_id || categories[0]?.id || '1',
+      name: editingProduct.name.trim(),
+      slug: editingProduct.slug.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      description: editingProduct.description?.trim() || '',
+      ingredients: editingProduct.ingredients?.trim() || null,
       base_price: Number(editingProduct.base_price || 0),
+      image_url: editingProduct.image_url || '/assets/IMG_8455_parfait_bowls.jpg',
+      product_type: editingProduct.product_type || 'standard',
+      is_available: editingProduct.is_available !== false,
+      is_featured: editingProduct.is_featured || false,
+      featured_order: editingProduct.is_featured ? (editingProduct.featured_order || 1) : null,
+      display_order: Number(editingProduct.display_order || products.length + 1),
+      options: cleanedOptions,
     };
 
     if (editingProduct.id) {
@@ -215,22 +316,11 @@ export default function AdminDashboardPage() {
       // Create
       const newProd: Product = {
         id: crypto.randomUUID(),
-        category_id: editingProduct.category_id || categories[0]?.id || '1',
-        name: editingProduct.name,
-        slug: editingProduct.slug,
-        description: editingProduct.description || '',
-        ingredients: editingProduct.ingredients || null,
-        base_price: Number(editingProduct.base_price || 0),
-        image_url: editingProduct.image_url || '/assets/IMG_8455_parfait_bowls.jpg',
-        product_type: editingProduct.product_type || 'standard',
-        is_available: editingProduct.is_available !== false,
-        is_featured: editingProduct.is_featured || false,
-        featured_order: editingProduct.featured_order || null,
-        display_order: Number(editingProduct.display_order || products.length + 1),
-        options: editingProduct.options || [],
+        ...payload,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      };
+      } as Product;
+
       setProducts((prev) => [...prev, newProd]);
       if (isSupabaseConfigured()) {
         await supabase.from('products').insert(newProd);
@@ -241,7 +331,9 @@ export default function AdminDashboardPage() {
     setEditingProduct(null);
   };
 
+  // ==========================================
   // Order Actions
+  // ==========================================
   const handleUpdateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, order_status: newStatus } : o)));
     if (selectedOrder && selectedOrder.id === orderId) {
@@ -255,7 +347,9 @@ export default function AdminDashboardPage() {
     window.open(waUrl, '_blank');
   };
 
+  // ==========================================
   // Delivery Zone Actions
+  // ==========================================
   const handleAddZone = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newZoneName.trim()) return;
@@ -276,7 +370,9 @@ export default function AdminDashboardPage() {
     setNewZoneFee(1000);
   };
 
+  // ==========================================
   // Coupon Actions
+  // ==========================================
   const handleAddCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCouponCode.trim()) return;
@@ -310,32 +406,47 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // ==========================================
   // Promotion Actions
-  const handleAddPromo = async (e: React.FormEvent) => {
+  // ==========================================
+  const handleSavePromo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPromoTitle.trim()) return;
+    if (!editingPromo?.title?.trim()) return;
 
-    const newPromo: Promotion = {
-      id: crypto.randomUUID(),
-      title: newPromoTitle.trim(),
-      description: newPromoDesc.trim() || null,
-      flyer_url: newPromoFlyer.trim(),
-      cta_label: newPromoCtaLabel.trim(),
-      cta_link: newPromoCtaLink.trim(),
-      is_active: true,
-      display_order: promotions.length + 1,
-      starts_at: null,
-      ends_at: null,
-      created_at: new Date().toISOString(),
+    const payload: Partial<Promotion> = {
+      title: editingPromo.title.trim(),
+      description: editingPromo.description?.trim() || null,
+      flyer_url: editingPromo.flyer_url?.trim() || '/assets/IMG_8455_parfait_bowls.jpg',
+      cta_label: editingPromo.cta_label?.trim() || 'Order Now',
+      cta_link: editingPromo.cta_link?.trim() || '/greek-yogurt-parfaits',
+      is_active: editingPromo.is_active !== false,
+      display_order: Number(editingPromo.display_order || promotions.length + 1),
     };
 
-    setPromotions((prev) => [...prev, newPromo]);
-    if (isSupabaseConfigured()) {
-      await supabase.from('promotions').insert(newPromo);
+    if (editingPromo.id) {
+      // Update
+      setPromotions((prev) => prev.map((p) => (p.id === editingPromo.id ? ({ ...p, ...payload } as Promotion) : p)));
+      if (isSupabaseConfigured()) {
+        await supabase.from('promotions').update(payload).eq('id', editingPromo.id);
+      }
+    } else {
+      // Create
+      const newPromo: Promotion = {
+        id: crypto.randomUUID(),
+        ...payload,
+        starts_at: null,
+        ends_at: null,
+        created_at: new Date().toISOString(),
+      } as Promotion;
+
+      setPromotions((prev) => [...prev, newPromo]);
+      if (isSupabaseConfigured()) {
+        await supabase.from('promotions').insert(newPromo);
+      }
     }
+
     setIsPromoModalOpen(false);
-    setNewPromoTitle('');
-    setNewPromoDesc('');
+    setEditingPromo(null);
   };
 
   const togglePromoActive = async (promo: Promotion) => {
@@ -343,6 +454,16 @@ export default function AdminDashboardPage() {
     setPromotions((prev) => prev.map((p) => (p.id === promo.id ? { ...p, is_active: next } : p)));
     if (isSupabaseConfigured()) {
       await supabase.from('promotions').update({ is_active: next }).eq('id', promo.id);
+    }
+  };
+
+  const handleDeletePromo = async (promo: Promotion) => {
+    if (!confirm(`Are you sure you want to remove promotion "${promo.title}"?`)) {
+      return;
+    }
+    setPromotions((prev) => prev.filter((p) => p.id !== promo.id));
+    if (isSupabaseConfigured()) {
+      await supabase.from('promotions').delete().eq('id', promo.id);
     }
   };
 
@@ -387,26 +508,26 @@ export default function AdminDashboardPage() {
 
       {/* Main Body */}
       <div className="flex-1 flex flex-col md:flex-row">
-        {/* Sidebar Nav */}
-        <aside className="w-full md:w-64 bg-card border-r border-border p-4 flex md:flex-col gap-1.5 overflow-x-auto shrink-0">
+        {/* Sidebar Nav (Mobile scrollable, desktop column) */}
+        <aside className="w-full md:w-64 bg-card border-r border-border p-3 sm:p-4 flex md:flex-col gap-1.5 overflow-x-auto shrink-0 shadow-2xs">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
               activeTab === 'overview' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
-            <LayoutDashboard className="w-4 h-4" />
+            <LayoutDashboard className="w-4 h-4 shrink-0" />
             <span>Overview</span>
           </button>
 
           <button
             onClick={() => setActiveTab('orders')}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left ${
+            className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
               activeTab === 'orders' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
             <div className="flex items-center gap-3">
-              <ClipboardList className="w-4 h-4" />
+              <ClipboardList className="w-4 h-4 shrink-0" />
               <span>Orders</span>
             </div>
             {pendingOrdersCount > 0 && (
@@ -418,51 +539,61 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('products')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
               activeTab === 'products' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className="w-4 h-4 shrink-0" />
             <span>Products</span>
           </button>
 
           <button
+            onClick={() => setActiveTab('categories')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+              activeTab === 'categories' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            }`}
+          >
+            <FolderTree className="w-4 h-4 shrink-0" />
+            <span>Categories</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('delivery')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
               activeTab === 'delivery' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
-            <Truck className="w-4 h-4" />
+            <Truck className="w-4 h-4 shrink-0" />
             <span>Delivery Zones</span>
           </button>
 
           <button
             onClick={() => setActiveTab('coupons')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
               activeTab === 'coupons' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
-            <Tag className="w-4 h-4" />
+            <Tag className="w-4 h-4 shrink-0" />
             <span>Coupons</span>
           </button>
 
           <button
             onClick={() => setActiveTab('promotions')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
               activeTab === 'promotions' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
-            <Megaphone className="w-4 h-4" />
+            <Megaphone className="w-4 h-4 shrink-0" />
             <span>Promotions</span>
           </button>
 
           <button
             onClick={() => setActiveTab('enquiries')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
               activeTab === 'enquiries' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
-            <MessageSquareQuote className="w-4 h-4" />
+            <MessageSquareQuote className="w-4 h-4 shrink-0" />
             <span>Catering & Quotes</span>
           </button>
         </aside>
@@ -729,10 +860,10 @@ export default function AdminDashboardPage() {
              ========================================================================= */}
           {activeTab === 'products' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h2 className="text-2xl font-serif font-black text-foreground">Products Catalogue</h2>
-                  <p className="text-sm text-muted-foreground">Manage menu items, prices, availability, and featured ordering</p>
+                  <p className="text-sm text-muted-foreground">Manage menu items, prices, photo uploads, variants, and featured ordering</p>
                 </div>
                 <Button
                   onClick={() => {
@@ -744,10 +875,11 @@ export default function AdminDashboardPage() {
                       is_featured: false,
                       category_id: categories[0]?.id || '1',
                       options: [],
+                      product_type: 'standard',
                     });
                     setIsProductModalOpen(true);
                   }}
-                  className="rounded-2xl gap-2 font-bold shadow-xs"
+                  className="rounded-2xl gap-2 font-bold shadow-xs self-start sm:self-auto"
                 >
                   <Plus className="w-4 h-4" />
                   Add Product
@@ -760,74 +892,193 @@ export default function AdminDashboardPage() {
                     <thead>
                       <tr className="border-b border-border text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
                         <th className="pb-3">Product</th>
+                        <th className="pb-3">Category</th>
                         <th className="pb-3">Base Price</th>
-                        <th className="pb-3">Type</th>
+                        <th className="pb-3">Options</th>
                         <th className="pb-3">Featured</th>
                         <th className="pb-3">Availability</th>
                         <th className="pb-3 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {products.map((product) => (
-                        <tr key={product.id} className="hover:bg-muted/30">
-                          <td className="py-3 flex items-center gap-3">
-                            <img
-                              src={product.image_url || '/assets/IMG_8455_parfait_bowls.jpg'}
-                              alt={product.name}
-                              className="w-10 h-10 rounded-xl object-cover bg-muted shrink-0"
-                            />
-                            <div>
-                              <span className="font-bold text-foreground block">{product.name}</span>
-                              <span className="text-[11px] text-muted-foreground line-clamp-1">{product.description}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 font-bold text-foreground">{formatPrice(product.base_price)}</td>
-                          <td className="py-3">
-                            <span className="bg-muted text-muted-foreground font-semibold px-2 py-0.5 rounded-full text-[10px]">
-                              {product.product_type}
-                            </span>
-                          </td>
-                          <td className="py-3">
-                            <button
-                              onClick={() => toggleProductFeatured(product)}
-                              className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                                product.is_featured ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
-                              }`}
-                            >
-                              {product.is_featured ? `★ Featured (${product.featured_order || '-'})` : 'No'}
-                            </button>
-                          </td>
-                          <td className="py-3">
-                            <button
-                              onClick={() => toggleProductAvailability(product)}
-                              className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                                product.is_available
-                                  ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                                  : 'bg-destructive/10 text-destructive hover:bg-destructive/20'
-                              }`}
-                            >
-                              {product.is_available ? 'Available' : 'Unavailable'}
-                            </button>
-                          </td>
-                          <td className="py-3 text-right">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                setEditingProduct(product);
-                                setIsProductModalOpen(true);
-                              }}
-                              className="h-8 rounded-xl text-xs gap-1"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                              Edit
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
+                      {products.map((product) => {
+                        const cat = categories.find((c) => c.id === product.category_id);
+                        return (
+                          <tr key={product.id} className="hover:bg-muted/30">
+                            <td className="py-3 flex items-center gap-3">
+                              <img
+                                src={product.image_url || '/assets/IMG_8455_parfait_bowls.jpg'}
+                                alt={product.name}
+                                className="w-11 h-11 rounded-xl object-cover bg-muted shrink-0 border border-border"
+                              />
+                              <div className="min-w-0 max-w-[200px] sm:max-w-xs">
+                                <span className="font-bold text-foreground block truncate">{product.name}</span>
+                                <span className="text-[11px] text-muted-foreground line-clamp-1">{product.description}</span>
+                              </div>
+                            </td>
+                            <td className="py-3">
+                              <span className="bg-muted text-muted-foreground font-semibold px-2 py-0.5 rounded-lg text-[10px]">
+                                {cat ? cat.name : 'General'}
+                              </span>
+                            </td>
+                            <td className="py-3 font-bold text-foreground">{formatPrice(product.base_price)}</td>
+                            <td className="py-3">
+                              {product.options && product.options.length > 0 ? (
+                                <span className="bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-md text-[10px] flex items-center gap-1 w-fit">
+                                  <Layers className="w-3 h-3" />
+                                  {product.options.length} Group{product.options.length === 1 ? '' : 's'}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground text-[11px]">None</span>
+                              )}
+                            </td>
+                            <td className="py-3">
+                              <button
+                                onClick={() => toggleProductFeatured(product)}
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                  product.is_featured ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                                }`}
+                              >
+                                {product.is_featured ? `★ Featured (${product.featured_order || '-'})` : 'No'}
+                              </button>
+                            </td>
+                            <td className="py-3">
+                              <button
+                                onClick={() => toggleProductAvailability(product)}
+                                className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                                  product.is_available
+                                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                    : 'bg-destructive/10 text-destructive hover:bg-destructive/20'
+                                }`}
+                              >
+                                {product.is_available ? 'Available' : 'Unavailable'}
+                              </button>
+                            </td>
+                            <td className="py-3 text-right">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setEditingProduct(product);
+                                  setIsProductModalOpen(true);
+                                }}
+                                className="h-8 rounded-xl text-xs gap-1"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                                Edit
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB: CATEGORIES (NEW SECTION)
+             ========================================================================= */}
+          {activeTab === 'categories' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-2xl font-serif font-black text-foreground">Category Management</h2>
+                  <p className="text-sm text-muted-foreground">Manage product categories, display ordering, and storefront visibility</p>
+                </div>
+                <Button
+                  onClick={() => {
+                    setEditingCategory({
+                      name: '',
+                      slug: '' as any,
+                      description: '',
+                      image_url: null,
+                      display_order: categories.length + 1,
+                      is_active: true,
+                    });
+                    setIsCategoryModalOpen(true);
+                  }}
+                  className="rounded-2xl gap-2 font-bold shadow-xs self-start sm:self-auto"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Category
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categories.map((category) => {
+                  const assignedCount = products.filter((p) => p.category_id === category.id).length;
+                  return (
+                    <div key={category.id} className="bg-card p-5 rounded-3xl border border-border shadow-xs flex flex-col justify-between gap-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            {category.image_url ? (
+                              <img
+                                src={category.image_url}
+                                alt={category.name}
+                                className="w-12 h-12 rounded-2xl object-cover bg-muted shrink-0 border border-border"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
+                                <FolderTree className="w-6 h-6" />
+                              </div>
+                            )}
+                            <div>
+                              <h3 className="font-bold text-base text-foreground leading-tight">{category.name}</h3>
+                              <span className="font-mono text-[11px] text-muted-foreground">/{category.slug}</span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => toggleCategoryActive(category)}
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-black shrink-0 ${
+                              category.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-muted text-muted-foreground'
+                            }`}
+                          >
+                            {category.is_active ? 'ACTIVE' : 'INACTIVE'}
+                          </button>
+                        </div>
+
+                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                          {category.description || 'No description provided.'}
+                        </p>
+                      </div>
+
+                      <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
+                        <span className="text-[11px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-lg">
+                          {assignedCount} Product{assignedCount === 1 ? '' : 's'} · Pos: {category.display_order}
+                        </span>
+
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setEditingCategory(category);
+                              setIsCategoryModalOpen(true);
+                            }}
+                            className="h-8 rounded-xl text-xs gap-1"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteCategory(category)}
+                            className="h-8 rounded-xl text-xs text-destructive hover:bg-destructive/10"
+                            title={assignedCount > 0 ? 'Cannot delete category with active products' : 'Delete category'}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -919,12 +1170,26 @@ export default function AdminDashboardPage() {
              ========================================================================= */}
           {activeTab === 'promotions' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h2 className="text-2xl font-serif font-black text-foreground">Homepage Promotional Banners</h2>
                   <p className="text-sm text-muted-foreground">Appears directly below the Hero section on the homepage</p>
                 </div>
-                <Button onClick={() => setIsPromoModalOpen(true)} className="rounded-2xl gap-2 font-bold shadow-xs">
+                <Button
+                  onClick={() => {
+                    setEditingPromo({
+                      title: '',
+                      description: '',
+                      flyer_url: '/assets/IMG_8455_parfait_bowls.jpg',
+                      cta_label: 'Order Now',
+                      cta_link: '/greek-yogurt-parfaits',
+                      is_active: true,
+                      display_order: promotions.length + 1,
+                    });
+                    setIsPromoModalOpen(true);
+                  }}
+                  className="rounded-2xl gap-2 font-bold shadow-xs self-start sm:self-auto"
+                >
                   <Plus className="w-4 h-4" />
                   Add Promotion
                 </Button>
@@ -933,20 +1198,61 @@ export default function AdminDashboardPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {promotions.map((p) => (
                   <div key={p.id} className="bg-card p-5 rounded-3xl border border-border shadow-xs flex flex-col justify-between gap-4">
-                    <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-bold text-base text-foreground leading-tight">{p.title}</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={p.flyer_url}
+                            alt={p.title}
+                            className="w-14 h-14 rounded-2xl object-cover bg-muted shrink-0 border border-border"
+                          />
+                          <div>
+                            <h3 className="font-bold text-base text-foreground leading-tight">{p.title}</h3>
+                            <span className="text-[11px] text-primary font-semibold block mt-0.5">
+                              {p.cta_label} → {p.cta_link}
+                            </span>
+                          </div>
+                        </div>
+
                         <button
                           onClick={() => togglePromoActive(p)}
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-black ${
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-black shrink-0 ${
                             p.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-muted text-muted-foreground'
                           }`}
                         >
                           {p.is_active ? 'ACTIVE' : 'INACTIVE'}
                         </button>
                       </div>
-                      <p className="text-xs text-muted-foreground">{p.description}</p>
-                      <div className="text-[11px] text-primary font-bold mt-2">CTA: {p.cta_label} → {p.cta_link}</div>
+
+                      <p className="text-xs text-muted-foreground leading-relaxed">{p.description}</p>
+                    </div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
+                      <span className="text-[11px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-lg">
+                        Pos: {p.display_order}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingPromo(p);
+                            setIsPromoModalOpen(true);
+                          }}
+                          className="h-8 rounded-xl text-xs gap-1"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeletePromo(p)}
+                          className="h-8 rounded-xl text-xs text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1154,40 +1460,68 @@ export default function AdminDashboardPage() {
       )}
 
       {/* =========================================================================
-          PRODUCT EDIT/ADD MODAL
+          PRODUCT EDIT/ADD MODAL (WITH IMAGE UPLOAD & OPTIONS BUILDER)
          ========================================================================= */}
       {isProductModalOpen && (
         <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
-          <DialogContent className="sm:max-w-[540px] p-6 rounded-3xl bg-card border-border max-h-[90dvh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[640px] p-6 rounded-3xl bg-card border-border max-h-[90dvh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-serif font-bold text-foreground">
                 {editingProduct?.id ? 'Edit Product' : 'Add New Product'}
               </DialogTitle>
+              <DialogDescription>Configure menu details, pricing, cover image, and customization options.</DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSaveProduct} className="space-y-4 pt-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold">Product Name *</Label>
-                <Input
-                  required
-                  value={editingProduct?.name || ''}
-                  onChange={(e) => setEditingProduct((p) => ({ ...p, name: e.target.value }))}
-                  placeholder="e.g. Avocado Toast"
-                  className="rounded-xl bg-white"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold">Slug (Unique) *</Label>
+            <form onSubmit={handleSaveProduct} className="space-y-5 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label className="text-xs font-bold">Product Name *</Label>
                   <Input
                     required
-                    value={editingProduct?.slug || ''}
-                    onChange={(e) => setEditingProduct((p) => ({ ...p, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
-                    placeholder="e.g. avocado-toast"
-                    className="rounded-xl bg-white"
+                    value={editingProduct?.name || ''}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setEditingProduct((p) => ({
+                        ...p,
+                        name,
+                        slug: (p?.slug && p?.id) ? p.slug : name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-'),
+                      }));
+                    }}
+                    placeholder="e.g. VVIP Exotic Parfait"
+                    className="rounded-xl bg-white text-xs"
                   />
                 </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Category *</Label>
+                  <select
+                    required
+                    value={editingProduct?.category_id || categories[0]?.id || ''}
+                    onChange={(e) => setEditingProduct((p) => ({ ...p, category_id: e.target.value }))}
+                    className="w-full h-10 rounded-xl bg-white border border-input px-3 text-xs font-medium focus:ring-1 focus:ring-primary"
+                  >
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Product Type</Label>
+                  <select
+                    value={editingProduct?.product_type || 'standard'}
+                    onChange={(e) => setEditingProduct((p) => ({ ...p, product_type: e.target.value as any }))}
+                    className="w-full h-10 rounded-xl bg-white border border-input px-3 text-xs font-medium"
+                  >
+                    <option value="standard">Standard (Cartable)</option>
+                    <option value="bundle">Bundle / Treat Box</option>
+                    <option value="quote-only">Quote Only (Custom Parfait)</option>
+                    <option value="enquiry-only">Enquiry Only (Catering)</option>
+                  </select>
+                </div>
+
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold">Base Price (₦) *</Label>
                   <Input
@@ -1195,7 +1529,18 @@ export default function AdminDashboardPage() {
                     required
                     value={editingProduct?.base_price ?? 3000}
                     onChange={(e) => setEditingProduct((p) => ({ ...p, base_price: Number(e.target.value) }))}
-                    className="rounded-xl bg-white"
+                    className="rounded-xl bg-white text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Slug (Unique identifier) *</Label>
+                  <Input
+                    required
+                    value={editingProduct?.slug || ''}
+                    onChange={(e) => setEditingProduct((p) => ({ ...p, slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-') }))}
+                    placeholder="e.g. vvip-exotic-parfait"
+                    className="rounded-xl bg-white font-mono text-xs"
                   />
                 </div>
               </div>
@@ -1205,27 +1550,171 @@ export default function AdminDashboardPage() {
                 <Textarea
                   value={editingProduct?.description || ''}
                   onChange={(e) => setEditingProduct((p) => ({ ...p, description: e.target.value }))}
-                  placeholder="Delicious ingredients and preparation details..."
-                  className="rounded-xl bg-white resize-none h-18"
+                  placeholder="Luscious layers of fresh Greek yogurt, cashew nuts, and fruits..."
+                  className="rounded-xl bg-white resize-none h-16 text-xs"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold">Image URL</Label>
+                <Label className="text-xs font-bold">Ingredients (Optional)</Label>
                 <Input
-                  value={editingProduct?.image_url || ''}
-                  onChange={(e) => setEditingProduct((p) => ({ ...p, image_url: e.target.value }))}
-                  placeholder="/assets/IMG_8455_parfait_bowls.jpg"
-                  className="rounded-xl bg-white"
+                  value={editingProduct?.ingredients || ''}
+                  onChange={(e) => setEditingProduct((p) => ({ ...p, ingredients: e.target.value }))}
+                  placeholder="e.g. Greek Yogurt, Apple, Coconut, Grapes, Granola, Cashew nuts"
+                  className="rounded-xl bg-white text-xs"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
+              {/* Product Cover Image Upload via Supabase Storage */}
+              <ImageUpload
+                bucket="product-images"
+                value={editingProduct?.image_url}
+                onChange={(url) => setEditingProduct((p) => ({ ...p, image_url: url }))}
+                label="Product Image"
+                helperText="Upload a crisp photo of this menu item (under 5MB)"
+                onUploadingChange={setIsUploadingProductImage}
+              />
+
+              {/* Visual Nested Product Options Builder */}
+              <ProductOptionsBuilder
+                options={editingProduct?.options || []}
+                onChange={(opts) => setEditingProduct((p) => ({ ...p, options: opts }))}
+              />
+
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="prod_is_available"
+                    checked={editingProduct?.is_available !== false}
+                    onChange={(e) => setEditingProduct((p) => ({ ...p, is_available: e.target.checked }))}
+                    className="w-4 h-4 rounded text-primary border-border focus:ring-primary"
+                  />
+                  <Label htmlFor="prod_is_available" className="text-xs font-bold cursor-pointer">
+                    Available in Store
+                  </Label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="prod_is_featured"
+                    checked={editingProduct?.is_featured || false}
+                    onChange={(e) => setEditingProduct((p) => ({ ...p, is_featured: e.target.checked }))}
+                    className="w-4 h-4 rounded text-primary border-border focus:ring-primary"
+                  />
+                  <Label htmlFor="prod_is_featured" className="text-xs font-bold cursor-pointer">
+                    Feature on Homepage
+                  </Label>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-border">
                 <Button type="button" variant="ghost" onClick={() => setIsProductModalOpen(false)} className="rounded-xl">
                   Cancel
                 </Button>
-                <Button type="submit" className="rounded-xl font-bold px-6">
-                  Save Product
+                <Button type="submit" disabled={isUploadingProductImage} className="rounded-xl font-bold px-6">
+                  {isUploadingProductImage ? 'Uploading Image...' : 'Save Product'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* =========================================================================
+          CATEGORY ADD / EDIT MODAL (NEW)
+         ========================================================================= */}
+      {isCategoryModalOpen && (
+        <Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
+          <DialogContent className="sm:max-w-[480px] p-6 rounded-3xl bg-card border-border max-h-[90dvh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-serif font-bold text-foreground">
+                {editingCategory?.id ? 'Edit Category' : 'Add New Category'}
+              </DialogTitle>
+              <DialogDescription>Create or modify category name, slug, and storefront banner.</DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handleSaveCategory} className="space-y-4 pt-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold">Category Name *</Label>
+                <Input
+                  required
+                  value={editingCategory?.name || ''}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setEditingCategory((c) => ({
+                      ...c,
+                      name,
+                      slug: (c?.slug && c?.id) ? c.slug : name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') as any,
+                    }));
+                  }}
+                  placeholder="e.g. Parfaits & Bowls"
+                  className="rounded-xl bg-white text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Slug (URL identifier) *</Label>
+                  <Input
+                    required
+                    value={editingCategory?.slug || ''}
+                    onChange={(e) => setEditingCategory((c) => ({ ...c, slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-') as any }))}
+                    placeholder="e.g. parfaits-bowls"
+                    className="rounded-xl bg-white font-mono text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Display Order</Label>
+                  <Input
+                    type="number"
+                    value={editingCategory?.display_order ?? categories.length + 1}
+                    onChange={(e) => setEditingCategory((c) => ({ ...c, display_order: Number(e.target.value) }))}
+                    className="rounded-xl bg-white text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold">Description</Label>
+                <Textarea
+                  value={editingCategory?.description || ''}
+                  onChange={(e) => setEditingCategory((c) => ({ ...c, description: e.target.value }))}
+                  placeholder="Short overview of what is in this category..."
+                  className="rounded-xl bg-white resize-none h-16 text-xs"
+                />
+              </div>
+
+              <ImageUpload
+                bucket="product-images"
+                value={editingCategory?.image_url}
+                onChange={(url) => setEditingCategory((c) => ({ ...c, image_url: url }))}
+                label="Category Banner / Cover Image"
+                helperText="Recommended: 4:3 or 16:9 banner image under 5MB"
+                onUploadingChange={setIsUploadingCategoryImage}
+              />
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="cat_is_active"
+                  checked={editingCategory?.is_active !== false}
+                  onChange={(e) => setEditingCategory((c) => ({ ...c, is_active: e.target.checked }))}
+                  className="w-4 h-4 rounded text-primary border-border focus:ring-primary"
+                />
+                <Label htmlFor="cat_is_active" className="text-xs font-bold cursor-pointer">
+                  Active (Visible on Storefront)
+                </Label>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                <Button type="button" variant="ghost" onClick={() => setIsCategoryModalOpen(false)} className="rounded-xl">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isUploadingCategoryImage} className="rounded-xl font-bold px-6">
+                  {isUploadingCategoryImage ? 'Uploading Image...' : 'Save Category'}
                 </Button>
               </div>
             </form>
@@ -1250,7 +1739,7 @@ export default function AdminDashboardPage() {
                   value={newZoneName}
                   onChange={(e) => setNewZoneName(e.target.value)}
                   placeholder="e.g. Parakin Estate"
-                  className="rounded-xl bg-white"
+                  className="rounded-xl bg-white text-xs"
                 />
               </div>
               <div className="space-y-1.5">
@@ -1260,7 +1749,7 @@ export default function AdminDashboardPage() {
                   required
                   value={newZoneFee}
                   onChange={(e) => setNewZoneFee(Number(e.target.value))}
-                  className="rounded-xl bg-white"
+                  className="rounded-xl bg-white text-xs"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
@@ -1293,7 +1782,7 @@ export default function AdminDashboardPage() {
                   value={newCouponCode}
                   onChange={(e) => setNewCouponCode(e.target.value.toUpperCase())}
                   placeholder="e.g. FRESH20"
-                  className="rounded-xl bg-white uppercase font-mono"
+                  className="rounded-xl bg-white uppercase font-mono text-xs"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -1315,7 +1804,7 @@ export default function AdminDashboardPage() {
                     required
                     value={newCouponValue}
                     onChange={(e) => setNewCouponValue(Number(e.target.value))}
-                    className="rounded-xl bg-white"
+                    className="rounded-xl bg-white text-xs"
                   />
                 </div>
               </div>
@@ -1325,7 +1814,7 @@ export default function AdminDashboardPage() {
                   type="number"
                   value={newCouponMin}
                   onChange={(e) => setNewCouponMin(Number(e.target.value))}
-                  className="rounded-xl bg-white"
+                  className="rounded-xl bg-white text-xs"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
@@ -1342,60 +1831,77 @@ export default function AdminDashboardPage() {
       )}
 
       {/* =========================================================================
-          ADD PROMOTION MODAL
+          PROMOTION ADD / EDIT MODAL
          ========================================================================= */}
       {isPromoModalOpen && (
         <Dialog open={isPromoModalOpen} onOpenChange={setIsPromoModalOpen}>
-          <DialogContent className="sm:max-w-[480px] p-6 rounded-3xl bg-card border-border">
+          <DialogContent className="sm:max-w-[480px] p-6 rounded-3xl bg-card border-border max-h-[90dvh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-lg font-serif font-bold text-foreground">Add Homepage Promotion</DialogTitle>
+              <DialogTitle className="text-lg font-serif font-bold text-foreground">
+                {editingPromo?.id ? 'Edit Homepage Promotion' : 'Add Homepage Promotion'}
+              </DialogTitle>
+              <DialogDescription>Upload a flyer and configure the headline and call-to-action.</DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleAddPromo} className="space-y-4 pt-2">
+
+            <form onSubmit={handleSavePromo} className="space-y-4 pt-2">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold">Title *</Label>
                 <Input
                   required
-                  value={newPromoTitle}
-                  onChange={(e) => setNewPromoTitle(e.target.value)}
+                  value={editingPromo?.title || ''}
+                  onChange={(e) => setEditingPromo((p) => ({ ...p, title: e.target.value }))}
                   placeholder="e.g. Parfait Friday Deal"
-                  className="rounded-xl bg-white"
+                  className="rounded-xl bg-white text-xs"
                 />
               </div>
+
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold">Description</Label>
                 <Input
-                  value={newPromoDesc}
-                  onChange={(e) => setNewPromoDesc(e.target.value)}
+                  value={editingPromo?.description || ''}
+                  onChange={(e) => setEditingPromo((p) => ({ ...p, description: e.target.value }))}
                   placeholder="Special weekend combo discount..."
-                  className="rounded-xl bg-white"
+                  className="rounded-xl bg-white text-xs"
                 />
               </div>
+
+              {/* Promo Flyer Image Upload */}
+              <ImageUpload
+                bucket="promo-flyers"
+                value={editingPromo?.flyer_url}
+                onChange={(url) => setEditingPromo((p) => ({ ...p, flyer_url: url }))}
+                label="Promotional Flyer Image"
+                helperText="Upload banner flyer for the homepage (under 5MB)"
+                onUploadingChange={setIsUploadingPromoFlyer}
+              />
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold">Button Label</Label>
                   <Input
-                    value={newPromoCtaLabel}
-                    onChange={(e) => setNewPromoCtaLabel(e.target.value)}
+                    value={editingPromo?.cta_label || ''}
+                    onChange={(e) => setEditingPromo((p) => ({ ...p, cta_label: e.target.value }))}
                     placeholder="Order Now"
-                    className="rounded-xl bg-white"
+                    className="rounded-xl bg-white text-xs"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold">Link Route</Label>
                   <Input
-                    value={newPromoCtaLink}
-                    onChange={(e) => setNewPromoCtaLink(e.target.value)}
+                    value={editingPromo?.cta_link || ''}
+                    onChange={(e) => setEditingPromo((p) => ({ ...p, cta_link: e.target.value }))}
                     placeholder="/greek-yogurt-parfaits"
-                    className="rounded-xl bg-white"
+                    className="rounded-xl bg-white text-xs"
                   />
                 </div>
               </div>
+
               <div className="flex justify-end gap-2 pt-2">
                 <Button type="button" variant="ghost" onClick={() => setIsPromoModalOpen(false)} className="rounded-xl">
                   Cancel
                 </Button>
-                <Button type="submit" className="rounded-xl font-bold">
-                  Save Promotion
+                <Button type="submit" disabled={isUploadingPromoFlyer} className="rounded-xl font-bold">
+                  {isUploadingPromoFlyer ? 'Uploading Flyer...' : 'Save Promotion'}
                 </Button>
               </div>
             </form>

@@ -515,9 +515,10 @@ ${eventDetails.trim() || 'None'}
                       <div 
                         key={prod.name}
                         onClick={() => handleInterestToggle(mappedInterest)}
-                        className={`bg-card rounded-2xl p-5 border shadow-sm flex items-start gap-4 transition-all cursor-pointer hover:shadow-md hover:border-primary/30 group ${
-                          isSelected ? 'border-primary bg-primary/2 flex' : 'border-card-border'
-                        }`}
+                        className={cn(
+                          "bg-card rounded-2xl p-5 border shadow-sm flex items-start gap-4 transition-all cursor-pointer hover:shadow-md hover:border-primary/30 group",
+                          isSelected ? "border-primary bg-primary/20" : "border-card-border"
+                        )}
                       >
                         <div className={`w-5 h-5 rounded-md flex items-center justify-center border mt-0.5 shrink-0 transition-all ${
                           isSelected 

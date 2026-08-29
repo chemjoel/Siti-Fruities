@@ -120,7 +120,21 @@ $$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public, pg_temp;
 CREATE OR REPLACE FUNCTION public.prevent_role_escalation()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.role <> OLD.role AND NOT public.is_admin() THEN
+    -- If role is being changed:
+    IF NEW.role <> OLD.role THEN
+        -- Allow database administrators, service_role, and direct SQL Editor operations (where auth.uid() is null)
+        IF current_user IN ('postgres', 'service_role', 'supabase_admin') 
+           OR auth.role() = 'service_role' 
+           OR auth.uid() IS NULL THEN
+            RETURN NEW;
+        END IF;
+
+        -- Allow existing admin users authenticated through the app
+        IF public.is_admin() THEN
+            RETURN NEW;
+        END IF;
+
+        -- Strictly block customer self-escalation
         RAISE EXCEPTION 'Security violation: Customers cannot modify their own user role.';
     END IF;
     RETURN NEW;
@@ -550,8 +564,11 @@ BEGIN
         RETURN NEW;
     END IF;
 
-    -- Allow admin override
-    IF public.is_admin() THEN
+    -- Allow admin, superuser, and SQL Editor override
+    IF current_user IN ('postgres', 'service_role', 'supabase_admin') 
+       OR auth.role() = 'service_role' 
+       OR auth.uid() IS NULL 
+       OR public.is_admin() THEN
         RETURN NEW;
     END IF;
 

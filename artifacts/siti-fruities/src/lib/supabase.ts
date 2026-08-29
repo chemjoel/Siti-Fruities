@@ -241,6 +241,7 @@ export const supabase = {
               headers: {
                 apikey: SUPABASE_ANON_KEY,
                 Authorization: `Bearer ${token}`,
+                'x-upsert': 'true',
               },
               body: formData,
             });
