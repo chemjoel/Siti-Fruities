@@ -109,44 +109,44 @@ function JuiceCard({ juice }: { juice: JuiceProduct }) {
         </div>
 
         {/* Card Footer - Price, Quantity & Add to Cart */}
-        <div className="mt-auto border-t border-border pt-4 flex flex-col sm:flex-row items-center gap-4">
-          <div className="flex flex-col w-full sm:w-auto">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total Price</span>
-            <span className="text-xl font-black text-primary leading-none mt-1">
-              {formatPrice(totalPrice)}
-            </span>
-          </div>
+        <div className="mt-auto border-t border-border pt-4 flex flex-col gap-3">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total Price</span>
+              <span className="text-xl font-black text-primary leading-tight mt-0.5">
+                {formatPrice(totalPrice)}
+              </span>
+            </div>
 
-          <div className="flex items-center gap-3 w-full sm:flex-1 justify-end">
             {/* Quantity Selector */}
-            <div className="flex items-center bg-muted rounded-full p-1 border border-border shrink-0">
+            <div className="flex items-center bg-muted rounded-full p-0.5 border border-border shrink-0">
               <button 
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50"
+                className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50"
                 disabled={quantity <= 1}
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
-              <span className="w-8 text-center font-bold text-sm text-foreground">{quantity}</span>
+              <span className="w-7 text-center font-bold text-xs text-foreground">{quantity}</span>
               <button 
                 type="button"
                 onClick={() => setQuantity(quantity + 1)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors"
+                className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
-
-            {/* Add to Cart Button */}
-            <Button 
-              onClick={handleAdd}
-              className="flex-1 sm:flex-initial bg-secondary hover:bg-secondary/90 hover:shadow-md active:scale-95 text-white font-bold rounded-full h-10 px-5 text-sm transition-all flex items-center justify-center gap-2"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span>Add to Order</span>
-            </Button>
           </div>
+
+          {/* Add to Order Button */}
+          <Button 
+            onClick={handleAdd}
+            className="w-full bg-secondary hover:bg-secondary/90 hover:shadow-md active:scale-95 text-white font-bold rounded-full h-10 px-4 text-sm transition-all flex items-center justify-center gap-2"
+          >
+            <ShoppingBag className="w-4 h-4 shrink-0" />
+            <span className="truncate">Add to Order</span>
+          </Button>
         </div>
 
       </div>

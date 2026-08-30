@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Leaf, Ban, Sunrise, ChefHat, Gift, Users } from 'lucide-react';
+import { StrawberryDecoration, MintLeafDecoration, KiwiSliceDecoration } from './FruitAtmosphere';
+
 const parfaitImg = '/assets/Screenshot_20260729-212242_1785360049881.jpg';
 const yoghurtImg = '/assets/Screenshot_20260729-212331_1785360049844.jpg';
 const chefImg = '/assets/Screenshot_20260729-212642_1785360049574.jpg';
@@ -52,6 +54,19 @@ export default function WhySiti() {
     <section className="py-24 bg-card relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-[80px]" />
+      
+      {/* Clearly visible background decorative fruit elements in outer margins */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
+        <div className="absolute top-16 right-4 lg:right-10 opacity-80 hidden md:block">
+          <StrawberryDecoration size={54} />
+        </div>
+        <div className="absolute bottom-12 left-4 lg:left-10 opacity-75 hidden md:block">
+          <KiwiSliceDecoration size={58} />
+        </div>
+        <div className="absolute top-1/2 left-2 lg:left-6 -translate-y-1/2 opacity-70 hidden xl:block">
+          <MintLeafDecoration size={46} />
+        </div>
+      </div>
       
       <div className="container mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-16">

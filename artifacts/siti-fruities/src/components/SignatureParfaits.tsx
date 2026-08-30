@@ -3,6 +3,14 @@ import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  StrawberryDecoration, 
+  KiwiSliceDecoration, 
+  BlueberryDecoration, 
+  MintLeafDecoration, 
+  CashewDecoration, 
+  MangoDecoration 
+} from './FruitAtmosphere';
 
 // Real product images from SITI FRUITIES photography
 const vvipParfaitImages = [
@@ -106,7 +114,7 @@ export default function SignatureParfaits() {
     'greek-yogurt': { size: '500ml', type: 'Sweetened', qty: 1 }
   });
 
-  // Rotate individual card images gently every 4 seconds
+  // Rotate individual card images gently every 4 seconds (1.0s transition duration)
   useEffect(() => {
     const imgTimer = setInterval(() => {
       setActiveImageIdx((prev) => (prev + 1) % 4);
@@ -122,10 +130,8 @@ export default function SignatureParfaits() {
         const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
         const maxScroll = scrollWidth - clientWidth;
         if (scrollLeft >= maxScroll - 20) {
-          // Loop back smoothly to start
           scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
-          // Advance by one card width
           scrollContainerRef.current.scrollBy({ left: 340, behavior: 'smooth' });
         }
       }
@@ -184,53 +190,35 @@ export default function SignatureParfaits() {
       onTouchStart={() => setIsHovered(true)}
       onTouchEnd={() => setIsHovered(false)}
     >
-      {/* Soft appetizing ambient food glow & creamy swirl accents */}
-      <div className="absolute -top-32 -left-32 w-80 h-80 bg-primary/8 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-amber-500/8 rounded-full blur-[100px] pointer-events-none" />
+      {/* Soft ambient lighting glows */}
+      <div className="absolute -top-32 -left-32 w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none" />
       
-      {/* Subtle background decorative fruit elements (outer edges, low-opacity, behind content) */}
+      {/* Clearly visible decorative fruit elements around outer margins */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
-        {/* Top-right: Strawberry & Mint */}
-        <div className="absolute top-10 right-4 lg:right-10 opacity-20 hidden md:block">
-          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 6C15 6 9 14 9 24C9 34 16 40 22 40C28 40 35 34 35 24C35 14 29 6 22 6Z" fill="#EF4444" />
-            <path d="M16 8C19 10 22 7 22 7C22 7 25 10 28 8C27 12 24 13 22 13C20 13 17 12 16 8Z" fill="#10B981" />
-            <circle cx="16" cy="20" r="1" fill="#FEF08A" />
-            <circle cx="22" cy="22" r="1" fill="#FEF08A" />
-            <circle cx="28" cy="20" r="1" fill="#FEF08A" />
-            <circle cx="19" cy="28" r="1" fill="#FEF08A" />
-            <circle cx="25" cy="28" r="1" fill="#FEF08A" />
-            <circle cx="22" cy="34" r="1" fill="#FEF08A" />
-          </svg>
+        {/* Top-Right: Fresh Strawberry */}
+        <div className="absolute top-10 right-4 lg:right-12 opacity-80 hidden md:block">
+          <StrawberryDecoration size={56} />
         </div>
-
-        {/* Bottom-left: Kiwi slice */}
-        <div className="absolute bottom-12 left-4 lg:left-10 opacity-20 hidden md:block">
-          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="26" cy="26" r="24" fill="#10B981" />
-            <circle cx="26" cy="26" r="19" fill="#34D399" />
-            <ellipse cx="26" cy="26" rx="7" ry="9" fill="#ECFDF5" />
-            <circle cx="26" cy="14" r="1" fill="#1F2937" />
-            <circle cx="34" cy="19" r="1" fill="#1F2937" />
-            <circle cx="36" cy="27" r="1" fill="#1F2937" />
-            <circle cx="32" cy="35" r="1" fill="#1F2937" />
-            <circle cx="25" cy="37" r="1" fill="#1F2937" />
-            <circle cx="18" cy="34" r="1" fill="#1F2937" />
-            <circle cx="16" cy="26" r="1" fill="#1F2937" />
-            <circle cx="19" cy="18" r="1" fill="#1F2937" />
-          </svg>
+        {/* Bottom-Left: Fresh Kiwi Slice */}
+        <div className="absolute bottom-12 left-4 lg:left-12 opacity-80 hidden md:block">
+          <KiwiSliceDecoration size={60} />
         </div>
-
-        {/* Middle-right: Mint leaf accent */}
-        <div className="absolute top-1/2 right-2 lg:right-6 -translate-y-1/2 opacity-15 hidden lg:block">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 32C4 32 10 30 16 24C23 17 32 11 32 4C32 4 25 13 18 20C12 26 4 32 4 32Z" fill="#10B981" />
-            <path d="M4 32C10 26 21 16 32 4" stroke="#047857" strokeWidth="1.5" />
-          </svg>
+        {/* Middle-Right: Toasted Cashew */}
+        <div className="absolute top-1/2 right-2 lg:right-8 -translate-y-1/2 opacity-75 hidden lg:block">
+          <CashewDecoration size={48} />
+        </div>
+        {/* Top-Left: Mint Leaf */}
+        <div className="absolute top-16 left-4 lg:left-10 opacity-75 hidden md:block">
+          <MintLeafDecoration size={46} />
+        </div>
+        {/* Bottom-Right: Blueberries */}
+        <div className="absolute bottom-14 right-8 lg:right-20 opacity-80 hidden lg:block">
+          <BlueberryDecoration size={50} />
         </div>
       </div>
       
-      <div className="container mx-auto px-4 md:px-8">
+      <div className="container mx-auto px-4 md:px-8 relative z-10">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
@@ -283,7 +271,7 @@ export default function SignatureParfaits() {
               >
                 <div className="bg-card rounded-3xl shadow-md border border-card-border overflow-hidden flex flex-col h-full group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   
-                  {/* Image container with subtle automatic crossfade between variations */}
+                  {/* Image container with automatic 1.0s crossfade between variations */}
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
                     <AnimatePresence mode="wait">
                       <motion.img 
@@ -293,7 +281,7 @@ export default function SignatureParfaits() {
                         initial={{ opacity: 0.6 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0.6 }}
-                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                        transition={{ duration: 1.0, ease: "easeInOut" }}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     </AnimatePresence>
@@ -413,7 +401,7 @@ export default function SignatureParfaits() {
                 <img 
                   src={customParfaitImages[activeImageIdx % customParfaitImages.length]} 
                   alt="Custom Parfait ingredients" 
-                  className="w-full h-full object-cover opacity-85 mix-blend-multiply transition-all duration-[1500ms]"
+                  className="w-full h-full object-cover opacity-85 mix-blend-multiply transition-all duration-1000"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/15 via-transparent to-transparent" />
               </div>

@@ -33,10 +33,38 @@ import {
   DollarSign,
   PackageCheck,
   Layers,
+  Download,
 } from 'lucide-react';
 import { SiWhatsapp } from 'react-icons/si';
 
 const formatPrice = (price: number) => `₦${Number(price).toLocaleString()}`;
+
+const generateProductSlug = (name: string, existingProducts: Product[], currentProductId?: string): string => {
+  const base = name
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, ' ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  if (!base) return '';
+
+  const otherSlugs = new Set(
+    existingProducts
+      .filter((p) => p.id !== currentProductId && p.slug)
+      .map((p) => p.slug.toLowerCase().trim())
+  );
+
+  if (!otherSlugs.has(base)) {
+    return base;
+  }
+
+  let counter = 2;
+  while (otherSlugs.has(`${base}-${counter}`)) {
+    counter++;
+  }
+  return `${base}-${counter}`;
+};
 
 export default function AdminDashboardPage() {
   const [, setLocation] = useLocation();
@@ -60,6 +88,7 @@ export default function AdminDashboardPage() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [isUploadingProductImage, setIsUploadingProductImage] = useState(false);
+  const [isSlugOverridden, setIsSlugOverridden] = useState(false);
 
   // Category Modal State
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -68,15 +97,23 @@ export default function AdminDashboardPage() {
 
   // Zone Modal State
   const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
+  const [editingZone, setEditingZone] = useState<Partial<DeliveryZone> | null>(null);
   const [newZoneName, setNewZoneName] = useState('');
   const [newZoneFee, setNewZoneFee] = useState(1000);
 
+  // Zone Delete Confirm
+  const [zoneToDelete, setZoneToDelete] = useState<DeliveryZone | null>(null);
+
   // Coupon Modal State
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<Partial<Coupon> | null>(null);
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newCouponType, setNewCouponType] = useState<'percentage' | 'fixed_amount'>('percentage');
   const [newCouponValue, setNewCouponValue] = useState(10);
   const [newCouponMin, setNewCouponMin] = useState(3000);
+
+  // Coupon Delete Confirm
+  const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
 
   // Promotion Modal State
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
@@ -254,6 +291,28 @@ export default function AdminDashboardPage() {
   // ==========================================
   // Product Actions
   // ==========================================
+  const openAddProduct = () => {
+    setEditingProduct({
+      name: '',
+      slug: '',
+      base_price: 3000,
+      is_available: true,
+      is_featured: false,
+      category_id: categories[0]?.id || '1',
+      options: [],
+      product_type: 'standard',
+    });
+    setIsSlugOverridden(false);
+    setIsProductModalOpen(true);
+  };
+
+  const openEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    const autoSlug = generateProductSlug(product.name, products, product.id);
+    setIsSlugOverridden(Boolean(product.slug && product.slug !== autoSlug));
+    setIsProductModalOpen(true);
+  };
+
   const toggleProductAvailability = async (product: Product) => {
     const nextState = !product.is_available;
     setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, is_available: nextState } : p)));
@@ -274,7 +333,14 @@ export default function AdminDashboardPage() {
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingProduct?.name || !editingProduct?.slug) return;
+    if (!editingProduct?.name || !editingProduct?.name.trim()) return;
+
+    // Determine final valid slug (override if provided, otherwise auto-generate uniquely)
+    const finalSlug = (
+      editingProduct.slug && editingProduct.slug.trim()
+        ? editingProduct.slug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '')
+        : generateProductSlug(editingProduct.name, products, editingProduct.id)
+    ) || `product-${Date.now().toString(36)}`;
 
     // Clean and sanitize options to ensure valid structure
     const cleanedOptions: ProductOption[] = (editingProduct.options || [])
@@ -293,7 +359,7 @@ export default function AdminDashboardPage() {
     const payload: Partial<Product> = {
       category_id: editingProduct.category_id || categories[0]?.id || '1',
       name: editingProduct.name.trim(),
-      slug: editingProduct.slug.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      slug: finalSlug,
       description: editingProduct.description?.trim() || '',
       ingredients: editingProduct.ingredients?.trim() || null,
       base_price: Number(editingProduct.base_price || 0),
@@ -329,6 +395,7 @@ export default function AdminDashboardPage() {
 
     setIsProductModalOpen(false);
     setEditingProduct(null);
+    setIsSlugOverridden(false);
   };
 
   // ==========================================
@@ -350,52 +417,126 @@ export default function AdminDashboardPage() {
   // ==========================================
   // Delivery Zone Actions
   // ==========================================
-  const handleAddZone = async (e: React.FormEvent) => {
+  const openAddZone = () => {
+    setEditingZone({ name: '', delivery_fee: 1000, display_order: zones.length + 1 });
+    setNewZoneName('');
+    setNewZoneFee(1000);
+    setIsZoneModalOpen(true);
+  };
+
+  const openEditZone = (zone: DeliveryZone) => {
+    setEditingZone(zone);
+    setNewZoneName(zone.name);
+    setNewZoneFee(zone.delivery_fee);
+    setIsZoneModalOpen(true);
+  };
+
+  const handleSaveZone = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newZoneName.trim()) return;
 
-    const newZone: DeliveryZone = {
-      id: crypto.randomUUID(),
-      name: newZoneName.trim(),
-      delivery_fee: Number(newZoneFee),
-      display_order: zones.length + 1,
-    };
-
-    setZones((prev) => [...prev, newZone]);
-    if (isSupabaseConfigured()) {
-      await supabase.from('delivery_zones').insert(newZone);
+    if (editingZone?.id) {
+      // Update existing
+      const updated = { ...editingZone, name: newZoneName.trim(), delivery_fee: Number(newZoneFee) };
+      setZones((prev) => prev.map((z) => (z.id === editingZone.id ? { ...z, name: updated.name!, delivery_fee: updated.delivery_fee! } : z)));
+      if (isSupabaseConfigured()) {
+        await supabase.from('delivery_zones').update({ name: updated.name, delivery_fee: updated.delivery_fee }).eq('id', editingZone.id);
+      }
+    } else {
+      // Create new
+      const newZone: DeliveryZone = {
+        id: crypto.randomUUID(),
+        name: newZoneName.trim(),
+        delivery_fee: Number(newZoneFee),
+        display_order: zones.length + 1,
+      };
+      setZones((prev) => [...prev, newZone]);
+      if (isSupabaseConfigured()) {
+        await supabase.from('delivery_zones').insert(newZone);
+      }
     }
     setIsZoneModalOpen(false);
+    setEditingZone(null);
     setNewZoneName('');
     setNewZoneFee(1000);
+  };
+
+  const handleDeleteZone = async (zone: DeliveryZone) => {
+    setZones((prev) => prev.filter((z) => z.id !== zone.id));
+    if (isSupabaseConfigured()) {
+      await supabase.from('delivery_zones').delete().eq('id', zone.id);
+    }
+    setZoneToDelete(null);
   };
 
   // ==========================================
   // Coupon Actions
   // ==========================================
-  const handleAddCoupon = async (e: React.FormEvent) => {
+  const openAddCoupon = () => {
+    setEditingCoupon({ code: '', discount_type: 'percentage', discount_value: 10, is_active: true, minimum_order_amount: 3000, usage_limit: 500, used_count: 0, expires_at: null });
+    setNewCouponCode('');
+    setNewCouponType('percentage');
+    setNewCouponValue(10);
+    setNewCouponMin(3000);
+    setIsCouponModalOpen(true);
+  };
+
+  const openEditCoupon = (coupon: Coupon) => {
+    setEditingCoupon(coupon);
+    setNewCouponCode(coupon.code);
+    setNewCouponType(coupon.discount_type);
+    setNewCouponValue(coupon.discount_value);
+    setNewCouponMin(coupon.minimum_order_amount ?? 0);
+    setIsCouponModalOpen(true);
+  };
+
+  const handleSaveCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCouponCode.trim()) return;
 
-    const newCoupon: Coupon = {
-      id: crypto.randomUUID(),
-      code: newCouponCode.trim().toUpperCase(),
-      discount_type: newCouponType,
-      discount_value: Number(newCouponValue),
-      is_active: true,
-      expires_at: null,
-      minimum_order_amount: Number(newCouponMin) || null,
-      usage_limit: 500,
-      used_count: 0,
-      created_at: new Date().toISOString(),
-    };
-
-    setCoupons((prev) => [newCoupon, ...prev]);
-    if (isSupabaseConfigured()) {
-      await supabase.from('coupons').insert(newCoupon);
+    if (editingCoupon?.id) {
+      // Update existing
+      const payload: Partial<Coupon> = {
+        code: newCouponCode.trim().toUpperCase(),
+        discount_type: newCouponType,
+        discount_value: Number(newCouponValue),
+        minimum_order_amount: Number(newCouponMin) || null,
+        is_active: editingCoupon.is_active !== false,
+      };
+      setCoupons((prev) => prev.map((c) => (c.id === editingCoupon.id ? { ...c, ...payload } as Coupon : c)));
+      if (isSupabaseConfigured()) {
+        await supabase.from('coupons').update(payload).eq('id', editingCoupon.id);
+      }
+    } else {
+      // Create new
+      const newCoupon: Coupon = {
+        id: crypto.randomUUID(),
+        code: newCouponCode.trim().toUpperCase(),
+        discount_type: newCouponType,
+        discount_value: Number(newCouponValue),
+        is_active: true,
+        expires_at: null,
+        minimum_order_amount: Number(newCouponMin) || null,
+        usage_limit: 500,
+        used_count: 0,
+        created_at: new Date().toISOString(),
+      };
+      setCoupons((prev) => [newCoupon, ...prev]);
+      if (isSupabaseConfigured()) {
+        await supabase.from('coupons').insert(newCoupon);
+      }
     }
     setIsCouponModalOpen(false);
+    setEditingCoupon(null);
     setNewCouponCode('');
+  };
+
+  const handleDeleteCoupon = async (coupon: Coupon) => {
+    setCoupons((prev) => prev.filter((c) => c.id !== coupon.id));
+    if (isSupabaseConfigured()) {
+      await supabase.from('coupons').delete().eq('id', coupon.id);
+    }
+    setCouponToDelete(null);
   };
 
   const toggleCouponActive = async (coupon: Coupon) => {
@@ -403,6 +544,72 @@ export default function AdminDashboardPage() {
     setCoupons((prev) => prev.map((c) => (c.id === coupon.id ? { ...c, is_active: next } : c)));
     if (isSupabaseConfigured()) {
       await supabase.from('coupons').update({ is_active: next }).eq('id', coupon.id);
+    }
+  };
+
+  // ==========================================
+  // Order Export (CSV + lightweight print-PDF)
+  // ==========================================
+  const handleExportCSV = () => {
+    if (orders.length === 0) return;
+    const header = ['Order Number', 'Date', 'Customer Name', 'Customer Phone', 'Delivery Zone', 'Delivery Address', 'Timing', 'Subtotal', 'Discount', 'Delivery Fee', 'Total', 'Payment Status', 'Order Status', 'Coupon Code', 'Paystack Ref', 'Items'];
+    const rows = orders.map((o) => [
+      o.order_number,
+      new Date(o.created_at).toLocaleString(),
+      o.customer_name,
+      o.customer_phone,
+      o.delivery_zone_name,
+      `"${(o.delivery_address || '').replace(/"/g, '""')}"`,
+      o.delivery_timing === 'asap' ? 'ASAP' : `Scheduled: ${o.scheduled_date} ${o.scheduled_time}`,
+      o.subtotal,
+      o.discount_amount,
+      o.delivery_fee,
+      o.total,
+      o.payment_status,
+      o.order_status,
+      o.coupon_code || '',
+      o.paystack_reference || '',
+      `"${(o.items || []).map((i) => `${i.product_name} x${i.quantity}`).join('; ')}"`,
+    ]);
+    const csv = [header.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `siti-fruities-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrintPDF = () => {
+    if (orders.length === 0) return;
+    const rows = orders.map((o) => `
+      <tr>
+        <td>${o.order_number}</td>
+        <td>${new Date(o.created_at).toLocaleDateString()}</td>
+        <td>${o.customer_name}<br/><small>${o.customer_phone}</small></td>
+        <td>${o.delivery_zone_name}</td>
+        <td style="text-align:right">₦${Number(o.total).toLocaleString()}</td>
+        <td>${o.payment_status.toUpperCase()}</td>
+        <td>${o.order_status.replace(/_/g, ' ').toUpperCase()}</td>
+      </tr>`).join('');
+    const html = `<!DOCTYPE html><html><head><title>SITI FRUITIES Orders</title>
+      <style>body{font-family:sans-serif;font-size:12px;padding:20px}
+      h1{font-size:18px;margin-bottom:4px}p{margin:0 0 12px;color:#666}
+      table{width:100%;border-collapse:collapse}
+      th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}
+      th{background:#f5f5f5;font-weight:bold;font-size:10px;text-transform:uppercase}
+      tr:nth-child(even){background:#fafafa}</style></head>
+      <body><h1>SITI FRUITIES — Orders Report</h1>
+      <p>Exported: ${new Date().toLocaleString()} · Total orders: ${orders.length}</p>
+      <table><thead><tr><th>Order #</th><th>Date</th><th>Customer</th><th>Zone</th><th>Total</th><th>Payment</th><th>Status</th></tr></thead>
+      <tbody>${rows}</tbody></table></body></html>`;
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      setTimeout(() => { win.print(); }, 400);
     }
   };
 
@@ -470,6 +677,8 @@ export default function AdminDashboardPage() {
   // KPI Calculations
   const totalRevenue = orders.filter((o) => o.payment_status === 'paid').reduce((sum, o) => sum + Number(o.total || 0), 0);
   const pendingOrdersCount = orders.filter((o) => o.order_status === 'pending_payment' || o.order_status === 'confirmed' || o.order_status === 'preparing').length;
+  // Total enquiries (catering + parfait quotes) — shown as badge since there is no read/unread status field
+  const enquiryCount = cateringEnquiries.length + parfaitQuotes.length;
 
   return (
     <div className="min-h-[100dvh] bg-muted/20 flex flex-col">
@@ -589,12 +798,19 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('enquiries')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+            className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
               activeTab === 'enquiries' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
-            <MessageSquareQuote className="w-4 h-4 shrink-0" />
-            <span>Catering & Quotes</span>
+            <div className="flex items-center gap-3">
+              <MessageSquareQuote className="w-4 h-4 shrink-0" />
+              <span>Catering &amp; Quotes</span>
+            </div>
+            {enquiryCount > 0 && (
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${activeTab === 'enquiries' ? 'bg-white text-primary' : 'bg-primary text-white'}`}>
+                {enquiryCount}
+              </span>
+            )}
           </button>
         </aside>
 
@@ -762,10 +978,34 @@ export default function AdminDashboardPage() {
              ========================================================================= */}
           {activeTab === 'orders' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h2 className="text-2xl font-serif font-black text-foreground">Order Management</h2>
                   <p className="text-sm text-muted-foreground">Manage and track customer order delivery progression</p>
+                </div>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleExportCSV}
+                    disabled={orders.length === 0}
+                    className="rounded-xl text-xs gap-1.5 font-bold"
+                    title={orders.length === 0 ? 'No orders to export' : 'Export all orders as CSV'}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    CSV
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handlePrintPDF}
+                    disabled={orders.length === 0}
+                    className="rounded-xl text-xs gap-1.5 font-bold"
+                    title={orders.length === 0 ? 'No orders to export' : 'Print / Save as PDF'}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    PDF
+                  </Button>
                 </div>
               </div>
 
@@ -866,19 +1106,7 @@ export default function AdminDashboardPage() {
                   <p className="text-sm text-muted-foreground">Manage menu items, prices, photo uploads, variants, and featured ordering</p>
                 </div>
                 <Button
-                  onClick={() => {
-                    setEditingProduct({
-                      name: '',
-                      slug: '',
-                      base_price: 3000,
-                      is_available: true,
-                      is_featured: false,
-                      category_id: categories[0]?.id || '1',
-                      options: [],
-                      product_type: 'standard',
-                    });
-                    setIsProductModalOpen(true);
-                  }}
+                  onClick={openAddProduct}
                   className="rounded-2xl gap-2 font-bold shadow-xs self-start sm:self-auto"
                 >
                   <Plus className="w-4 h-4" />
@@ -958,10 +1186,7 @@ export default function AdminDashboardPage() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => {
-                                  setEditingProduct(product);
-                                  setIsProductModalOpen(true);
-                                }}
+                                onClick={() => openEditProduct(product)}
                                 className="h-8 rounded-xl text-xs gap-1"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
@@ -1090,10 +1315,10 @@ export default function AdminDashboardPage() {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-2xl font-serif font-black text-foreground">Delivery Zones & Fees</h2>
+                  <h2 className="text-2xl font-serif font-black text-foreground">Delivery Zones &amp; Fees</h2>
                   <p className="text-sm text-muted-foreground">Admin-controlled pricing per delivery zone (No hardcoded threshold)</p>
                 </div>
-                <Button onClick={() => setIsZoneModalOpen(true)} className="rounded-2xl gap-2 font-bold shadow-xs">
+                <Button onClick={openAddZone} className="rounded-2xl gap-2 font-bold shadow-xs">
                   <Plus className="w-4 h-4" />
                   Add Zone
                 </Button>
@@ -1101,16 +1326,38 @@ export default function AdminDashboardPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {zones.map((zone) => (
-                  <div key={zone.id} className="bg-card p-5 rounded-3xl border border-border shadow-xs flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-sm text-foreground block">{zone.name}</span>
-                      <span className="text-xs text-primary font-black mt-1 block">
-                        {zone.delivery_fee === 0 ? 'FREE (₦0)' : formatPrice(zone.delivery_fee)}
+                  <div key={zone.id} className="bg-card p-5 rounded-3xl border border-border shadow-xs flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="font-bold text-sm text-foreground block">{zone.name}</span>
+                        <span className="text-xs text-primary font-black mt-1 block">
+                          {zone.delivery_fee === 0 ? 'FREE (₦0)' : formatPrice(zone.delivery_fee)}
+                        </span>
+                      </div>
+                      <span className="bg-muted text-muted-foreground text-[10px] font-bold px-2 py-1 rounded-full shrink-0">
+                        Pos: {zone.display_order}
                       </span>
                     </div>
-                    <span className="bg-muted text-muted-foreground text-[10px] font-bold px-2 py-1 rounded-full">
-                      Pos: {zone.display_order}
-                    </span>
+                    <div className="flex items-center gap-1 pt-2 border-t border-border">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => openEditZone(zone)}
+                        className="h-8 rounded-xl text-xs gap-1 flex-1"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setZoneToDelete(zone)}
+                        className="h-8 rounded-xl text-xs text-destructive hover:bg-destructive/10 flex-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1127,7 +1374,7 @@ export default function AdminDashboardPage() {
                   <h2 className="text-2xl font-serif font-black text-foreground">Coupon Codes</h2>
                   <p className="text-sm text-muted-foreground">Manage discounts and promotional checkout coupons</p>
                 </div>
-                <Button onClick={() => setIsCouponModalOpen(true)} className="rounded-2xl gap-2 font-bold shadow-xs">
+                <Button onClick={openAddCoupon} className="rounded-2xl gap-2 font-bold shadow-xs">
                   <Plus className="w-4 h-4" />
                   Create Coupon
                 </Button>
@@ -1158,6 +1405,27 @@ export default function AdminDashboardPage() {
                       <div>
                         Used: {c.used_count} / {c.usage_limit || '∞'}
                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 pt-1 border-t border-border">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => openEditCoupon(c)}
+                        className="h-8 rounded-xl text-xs gap-1 flex-1"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setCouponToDelete(c)}
+                        className="h-8 rounded-xl text-xs text-destructive hover:bg-destructive/10 flex-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -1463,7 +1731,16 @@ export default function AdminDashboardPage() {
           PRODUCT EDIT/ADD MODAL (WITH IMAGE UPLOAD & OPTIONS BUILDER)
          ========================================================================= */}
       {isProductModalOpen && (
-        <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
+        <Dialog
+          open={isProductModalOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setIsProductModalOpen(false);
+              setEditingProduct(null);
+              setIsSlugOverridden(false);
+            }
+          }}
+        >
           <DialogContent className="sm:max-w-[640px] p-6 rounded-3xl bg-card border-border max-h-[90dvh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl font-serif font-bold text-foreground">
@@ -1481,11 +1758,17 @@ export default function AdminDashboardPage() {
                     value={editingProduct?.name || ''}
                     onChange={(e) => {
                       const name = e.target.value;
-                      setEditingProduct((p) => ({
-                        ...p,
-                        name,
-                        slug: (p?.slug && p?.id) ? p.slug : name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-'),
-                      }));
+                      setEditingProduct((p) => {
+                        if (!p) return null;
+                        const nextSlug = isSlugOverridden
+                          ? (p.slug || '')
+                          : generateProductSlug(name, products, p.id);
+                        return {
+                          ...p,
+                          name,
+                          slug: nextSlug,
+                        };
+                      });
                     }}
                     placeholder="e.g. VVIP Exotic Parfait"
                     className="rounded-xl bg-white text-xs"
@@ -1534,14 +1817,33 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold">Slug (Unique identifier) *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-bold">Slug (Unique identifier)</Label>
+                    {isSlugOverridden && editingProduct?.name && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSlugOverridden(false);
+                          setEditingProduct((p) => (p ? { ...p, slug: generateProductSlug(p.name || '', products, p.id) } : null));
+                        }}
+                        className="text-[10px] text-primary hover:underline font-semibold"
+                      >
+                        Reset to Auto
+                      </button>
+                    )}
+                  </div>
                   <Input
-                    required
                     value={editingProduct?.slug || ''}
-                    onChange={(e) => setEditingProduct((p) => ({ ...p, slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-') }))}
-                    placeholder="e.g. vvip-exotic-parfait"
-                    className="rounded-xl bg-white font-mono text-xs"
+                    onChange={(e) => {
+                      setIsSlugOverridden(true);
+                      setEditingProduct((p) => (p ? { ...p, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, '-') } : null));
+                    }}
+                    placeholder="Auto-generated from name..."
+                    className="rounded-xl bg-muted/40 font-mono text-xs text-muted-foreground focus:text-foreground"
                   />
+                  <p className="text-[10px] text-muted-foreground">
+                    {isSlugOverridden ? 'Manual override. Unique identifier for URLs.' : 'Automatically generated from product name.'}
+                  </p>
                 </div>
               </div>
 
@@ -1610,7 +1912,16 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="flex justify-end gap-2 pt-4 border-t border-border">
-                <Button type="button" variant="ghost" onClick={() => setIsProductModalOpen(false)} className="rounded-xl">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setIsProductModalOpen(false);
+                    setEditingProduct(null);
+                    setIsSlugOverridden(false);
+                  }}
+                  className="rounded-xl"
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isUploadingProductImage} className="rounded-xl font-bold px-6">
@@ -1723,15 +2034,17 @@ export default function AdminDashboardPage() {
       )}
 
       {/* =========================================================================
-          ADD DELIVERY ZONE MODAL
+          ADD / EDIT DELIVERY ZONE MODAL
          ========================================================================= */}
       {isZoneModalOpen && (
-        <Dialog open={isZoneModalOpen} onOpenChange={setIsZoneModalOpen}>
+        <Dialog open={isZoneModalOpen} onOpenChange={(open) => { if (!open) { setIsZoneModalOpen(false); setEditingZone(null); } }}>
           <DialogContent className="sm:max-w-[420px] p-6 rounded-3xl bg-card border-border">
             <DialogHeader>
-              <DialogTitle className="text-lg font-serif font-bold text-foreground">Add Delivery Zone</DialogTitle>
+              <DialogTitle className="text-lg font-serif font-bold text-foreground">
+                {editingZone?.id ? 'Edit Delivery Zone' : 'Add Delivery Zone'}
+              </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddZone} className="space-y-4 pt-2">
+            <form onSubmit={handleSaveZone} className="space-y-4 pt-2">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold">Zone / Area Name *</Label>
                 <Input
@@ -1753,11 +2066,11 @@ export default function AdminDashboardPage() {
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="ghost" onClick={() => setIsZoneModalOpen(false)} className="rounded-xl">
+                <Button type="button" variant="ghost" onClick={() => { setIsZoneModalOpen(false); setEditingZone(null); }} className="rounded-xl">
                   Cancel
                 </Button>
                 <Button type="submit" className="rounded-xl font-bold">
-                  Save Zone
+                  {editingZone?.id ? 'Update Zone' : 'Save Zone'}
                 </Button>
               </div>
             </form>
@@ -1765,16 +2078,41 @@ export default function AdminDashboardPage() {
         </Dialog>
       )}
 
+      {/* Zone Delete Confirmation */}
+      {zoneToDelete && (
+        <Dialog open={Boolean(zoneToDelete)} onOpenChange={(open) => !open && setZoneToDelete(null)}>
+          <DialogContent className="sm:max-w-[380px] p-6 rounded-3xl bg-card border-border">
+            <DialogHeader>
+              <DialogTitle className="text-base font-serif font-bold text-foreground">Delete Delivery Zone?</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete <strong>{zoneToDelete.name}</strong>? This cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="ghost" onClick={() => setZoneToDelete(null)} className="rounded-xl">Cancel</Button>
+              <Button
+                onClick={() => handleDeleteZone(zoneToDelete)}
+                className="rounded-xl font-bold bg-destructive text-white hover:bg-destructive/90"
+              >
+                Delete Zone
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* =========================================================================
-          ADD COUPON MODAL
+          ADD / EDIT COUPON MODAL
          ========================================================================= */}
       {isCouponModalOpen && (
-        <Dialog open={isCouponModalOpen} onOpenChange={setIsCouponModalOpen}>
+        <Dialog open={isCouponModalOpen} onOpenChange={(open) => { if (!open) { setIsCouponModalOpen(false); setEditingCoupon(null); } }}>
           <DialogContent className="sm:max-w-[440px] p-6 rounded-3xl bg-card border-border">
             <DialogHeader>
-              <DialogTitle className="text-lg font-serif font-bold text-foreground">Create Coupon Code</DialogTitle>
+              <DialogTitle className="text-lg font-serif font-bold text-foreground">
+                {editingCoupon?.id ? 'Edit Coupon Code' : 'Create Coupon Code'}
+              </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddCoupon} className="space-y-4 pt-2">
+            <form onSubmit={handleSaveCoupon} className="space-y-4 pt-2">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold">Coupon Code *</Label>
                 <Input
@@ -1818,14 +2156,37 @@ export default function AdminDashboardPage() {
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="ghost" onClick={() => setIsCouponModalOpen(false)} className="rounded-xl">
+                <Button type="button" variant="ghost" onClick={() => { setIsCouponModalOpen(false); setEditingCoupon(null); }} className="rounded-xl">
                   Cancel
                 </Button>
                 <Button type="submit" className="rounded-xl font-bold">
-                  Save Coupon
+                  {editingCoupon?.id ? 'Update Coupon' : 'Save Coupon'}
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Coupon Delete Confirmation */}
+      {couponToDelete && (
+        <Dialog open={Boolean(couponToDelete)} onOpenChange={(open) => !open && setCouponToDelete(null)}>
+          <DialogContent className="sm:max-w-[380px] p-6 rounded-3xl bg-card border-border">
+            <DialogHeader>
+              <DialogTitle className="text-base font-serif font-bold text-foreground">Delete Coupon?</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete coupon <strong className="font-mono">{couponToDelete.code}</strong>? This cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="ghost" onClick={() => setCouponToDelete(null)} className="rounded-xl">Cancel</Button>
+              <Button
+                onClick={() => handleDeleteCoupon(couponToDelete)}
+                className="rounded-xl font-bold bg-destructive text-white hover:bg-destructive/90"
+              >
+                Delete Coupon
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       )}

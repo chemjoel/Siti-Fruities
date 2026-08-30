@@ -6,6 +6,14 @@ import {
   Sparkles,
   Utensils
 } from 'lucide-react';
+import { 
+  StrawberryDecoration, 
+  KiwiSliceDecoration, 
+  BlueberryDecoration, 
+  MintLeafDecoration, 
+  CashewDecoration, 
+  MangoDecoration 
+} from './FruitAtmosphere';
 
 // Import Assets
 const smoothieImg = '/assets/Screenshot_20260729-212748_1785360013740.jpg';
@@ -131,28 +139,30 @@ export default function CategorySection() {
       onTouchEnd={() => setIsPaused(false)}
     >
       {/* Subtle appetizing ambient lighting accent */}
-      <div className="absolute top-1/2 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-[110px] pointer-events-none" />
-      <div className="absolute bottom-10 -left-40 w-96 h-96 bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 -right-40 w-96 h-96 bg-primary/8 rounded-full blur-[110px] pointer-events-none" />
+      <div className="absolute bottom-10 -left-40 w-96 h-96 bg-amber-500/8 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Subtle background decorative fruit elements (outer edges, low-opacity, behind content) */}
+      {/* Clearly visible background decorative fruit elements in outer margins */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
-        {/* Top-left: Mango piece & Blueberry */}
-        <div className="absolute top-12 left-4 lg:left-8 opacity-20 hidden md:block">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="8" y="8" width="22" height="22" rx="6" fill="#F59E0B" />
-            <path d="M12 12C16 10 22 14 26 12" stroke="#FDE68A" strokeWidth="1.5" strokeLinecap="round" />
-            <circle cx="36" cy="30" r="8" fill="#1E40AF" />
-            <circle cx="34" cy="28" r="2" fill="#60A5FA" opacity="0.6" />
-            <circle cx="28" cy="36" r="6" fill="#1D4ED8" />
-          </svg>
+        {/* Top-Left: Golden Mango */}
+        <div className="absolute top-12 left-4 lg:left-10 opacity-80 hidden md:block">
+          <MangoDecoration size={54} />
         </div>
-
-        {/* Bottom-right: Cashew nut & Mint leaf */}
-        <div className="absolute bottom-16 right-4 lg:right-8 opacity-20 hidden md:block">
-          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14 18C16 12 24 10 30 14C36 18 36 28 32 34C28 40 18 38 16 32C14 26 20 22 24 24" fill="#FDE68A" stroke="#D97706" strokeWidth="1.2" strokeLinecap="round" />
-            <path d="M30 36C38 32 44 24 44 14C34 14 26 20 22 28" fill="#10B981" opacity="0.8" />
-          </svg>
+        {/* Top-Right: Fresh Strawberry */}
+        <div className="absolute top-16 right-6 lg:right-12 opacity-80 hidden md:block">
+          <StrawberryDecoration size={56} />
+        </div>
+        {/* Bottom-Right: Cashew Nut */}
+        <div className="absolute bottom-16 right-4 lg:right-10 opacity-75 hidden md:block">
+          <CashewDecoration size={48} />
+        </div>
+        {/* Bottom-Left: Blueberries */}
+        <div className="absolute bottom-12 left-6 lg:left-12 opacity-80 hidden md:block">
+          <BlueberryDecoration size={52} />
+        </div>
+        {/* Center-Right: Mint Leaf */}
+        <div className="absolute top-1/2 right-2 lg:right-6 -translate-y-1/2 opacity-70 hidden xl:block">
+          <MintLeafDecoration size={46} />
         </div>
       </div>
 

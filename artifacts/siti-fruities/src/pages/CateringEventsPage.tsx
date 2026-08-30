@@ -270,30 +270,30 @@ ${eventDetails.trim() || 'None'}`;
                   </div>
                 </div>
 
-                <div className="border-t border-border pt-4 flex flex-col sm:flex-row items-center gap-6 justify-between">
-                  <div className="flex flex-col w-full sm:w-auto">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total price</span>
+                <div className="border-t border-border pt-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total price</span>
                     <span className="text-xl font-black text-primary leading-none mt-1">
                       {formatPrice(4000 * parfaitQty)}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                  <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-start sm:justify-end">
                     {/* Quantity controls (minimum 2) */}
-                    <div className="flex items-center bg-muted rounded-full p-1 border border-border shrink-0">
+                    <div className="flex items-center bg-muted rounded-full p-0.5 border border-border shrink-0">
                       <button 
                         type="button"
                         onClick={() => setParfaitQty(Math.max(2, parfaitQty - 1))}
-                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50 disabled:shadow-none"
+                        className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50 disabled:shadow-none"
                         disabled={parfaitQty <= 2}
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="w-8 text-center font-bold text-sm text-foreground">{parfaitQty}</span>
+                      <span className="w-7 text-center font-bold text-xs text-foreground">{parfaitQty}</span>
                       <button 
                         type="button"
                         onClick={() => setParfaitQty(parfaitQty + 1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors"
+                        className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -301,10 +301,10 @@ ${eventDetails.trim() || 'None'}`;
 
                     <Button 
                       onClick={handleAddParfait}
-                      className="bg-secondary hover:bg-secondary/90 hover:shadow-md text-white font-bold rounded-full h-10 px-5 text-sm transition-all flex items-center justify-center gap-2"
+                      className="bg-secondary hover:bg-secondary/90 hover:shadow-md active:scale-95 text-white font-bold rounded-full h-10 px-5 text-sm transition-all flex items-center justify-center gap-2"
                     >
-                      <ShoppingBag className="w-4 h-4" />
-                      <span>Add to Order</span>
+                      <ShoppingBag className="w-4 h-4 shrink-0" />
+                      <span className="truncate">Add to Order</span>
                     </Button>
                   </div>
                 </div>

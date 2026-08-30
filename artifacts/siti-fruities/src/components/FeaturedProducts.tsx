@@ -5,6 +5,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Minus, Info, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
+import { 
+  StrawberryDecoration, 
+  KiwiSliceDecoration, 
+  BlueberryDecoration, 
+  MintLeafDecoration, 
+  CashewDecoration, 
+  MangoDecoration 
+} from './FruitAtmosphere';
 
 // Assets
 const greekYoghurtImg = '/assets/Screenshot_20260729-212331_1785360049844.jpg';
@@ -558,27 +566,27 @@ export default function FeaturedProducts() {
       <div className="absolute top-1/3 -left-36 w-80 h-80 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-10 -right-36 w-80 h-80 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Subtle background decorative fruit elements (outer edges, low-opacity, behind content) */}
+      {/* Clearly visible background decorative fruit elements in outer margins */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
-        {/* Top-right: Strawberry & Mint */}
-        <div className="absolute top-12 right-4 lg:right-10 opacity-20 hidden md:block">
-          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 6C15 6 9 14 9 24C9 34 16 40 22 40C28 40 35 34 35 24C35 14 29 6 22 6Z" fill="#EF4444" />
-            <path d="M16 8C19 10 22 7 22 7C22 7 25 10 28 8C27 12 24 13 22 13C20 13 17 12 16 8Z" fill="#10B981" />
-            <circle cx="16" cy="20" r="1" fill="#FEF08A" />
-            <circle cx="22" cy="22" r="1" fill="#FEF08A" />
-            <circle cx="28" cy="20" r="1" fill="#FEF08A" />
-            <circle cx="22" cy="32" r="1" fill="#FEF08A" />
-          </svg>
+        {/* Top-Right: Fresh Strawberry */}
+        <div className="absolute top-12 right-4 lg:right-12 opacity-80 hidden md:block">
+          <StrawberryDecoration size={56} />
         </div>
-
-        {/* Bottom-left: Mango piece & Blueberry */}
-        <div className="absolute bottom-16 left-4 lg:left-10 opacity-20 hidden md:block">
-          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="6" y="12" width="20" height="20" rx="5" fill="#F59E0B" />
-            <circle cx="34" cy="26" r="7" fill="#1D4ED8" />
-            <circle cx="32" cy="24" r="2" fill="#93C5FD" opacity="0.6" />
-          </svg>
+        {/* Bottom-Left: Golden Mango */}
+        <div className="absolute bottom-16 left-4 lg:left-12 opacity-80 hidden md:block">
+          <MangoDecoration size={54} />
+        </div>
+        {/* Top-Left: Kiwi Slice */}
+        <div className="absolute top-14 left-4 lg:left-10 opacity-75 hidden md:block">
+          <KiwiSliceDecoration size={58} />
+        </div>
+        {/* Bottom-Right: Blueberries */}
+        <div className="absolute bottom-12 right-6 lg:right-16 opacity-80 hidden md:block">
+          <BlueberryDecoration size={52} />
+        </div>
+        {/* Middle-Left: Cashew Nut */}
+        <div className="absolute top-1/2 left-2 lg:left-8 -translate-y-1/2 opacity-70 hidden xl:block">
+          <CashewDecoration size={46} />
         </div>
       </div>
 
