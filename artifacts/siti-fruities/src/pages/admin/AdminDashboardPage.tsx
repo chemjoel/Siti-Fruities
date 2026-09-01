@@ -34,6 +34,8 @@ import {
   PackageCheck,
   Layers,
   Download,
+  Menu,
+  X,
 } from 'lucide-react';
 import { SiWhatsapp } from 'react-icons/si';
 
@@ -89,6 +91,7 @@ export default function AdminDashboardPage() {
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [isUploadingProductImage, setIsUploadingProductImage] = useState(false);
   const [isSlugOverridden, setIsSlugOverridden] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Category Modal State
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -683,14 +686,22 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-[100dvh] bg-muted/20 flex flex-col">
       {/* Top Navbar */}
-      <header className="bg-card border-b border-border sticky top-0 z-30 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-xs">
+      <header className="bg-card border-b border-border sticky top-0 z-30 px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3">
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={() => setIsMobileNavOpen(true)}
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-serif font-black text-lg">
             S
           </div>
           <div>
             <h1 className="font-bold font-serif text-lg leading-tight text-foreground">SITI FRUITIES Admin</h1>
-            <span className="text-xs text-muted-foreground">Store Operations & Management</span>
+            <span className="text-xs text-muted-foreground">Store Operations &amp; Management</span>
           </div>
         </div>
 
@@ -715,13 +726,80 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
+      {/* =========================================================================
+          MOBILE NAV DRAWER — shown only on <md screens, slides in from left
+         ========================================================================= */}
+      {isMobileNavOpen && (
+        <>
+          {/* Backdrop — tap outside to close */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50"
+            onClick={() => setIsMobileNavOpen(false)}
+            aria-hidden="true"
+          />
+          {/* Drawer panel */}
+          <div className="fixed inset-y-0 left-0 z-50 w-72 bg-card shadow-2xl flex flex-col">
+            {/* Drawer header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-serif font-black text-base">
+                  S
+                </div>
+                <span className="font-bold font-serif text-sm text-foreground leading-tight">SITI FRUITIES Admin</span>
+              </div>
+              <button
+                onClick={() => setIsMobileNavOpen(false)}
+                className="flex items-center justify-center w-9 h-9 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                aria-label="Close navigation menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Nav items */}
+            <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+              {(
+                [
+                  { tab: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4 shrink-0" /> },
+                  { tab: 'orders', label: 'Orders', icon: <ClipboardList className="w-4 h-4 shrink-0" />, badge: pendingOrdersCount > 0 ? pendingOrdersCount : null },
+                  { tab: 'products', label: 'Products', icon: <ShoppingBag className="w-4 h-4 shrink-0" /> },
+                  { tab: 'categories', label: 'Categories', icon: <FolderTree className="w-4 h-4 shrink-0" /> },
+                  { tab: 'delivery', label: 'Delivery Zones', icon: <Truck className="w-4 h-4 shrink-0" /> },
+                  { tab: 'coupons', label: 'Coupons', icon: <Tag className="w-4 h-4 shrink-0" /> },
+                  { tab: 'promotions', label: 'Promotions', icon: <Megaphone className="w-4 h-4 shrink-0" /> },
+                  { tab: 'enquiries', label: 'Catering & Quotes', icon: <MessageSquareQuote className="w-4 h-4 shrink-0" />, badge: enquiryCount > 0 ? enquiryCount : null },
+                ] as { tab: typeof activeTab; label: string; icon: React.ReactNode; badge?: number | null }[]
+              ).map(({ tab, label, icon, badge }) => (
+                <button
+                  key={tab}
+                  onClick={() => { setActiveTab(tab); setIsMobileNavOpen(false); }}
+                  className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
+                    activeTab === tab ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {icon}
+                    <span>{label}</span>
+                  </div>
+                  {badge != null && (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${activeTab === tab ? 'bg-white text-primary' : 'bg-primary text-white'}`}>
+                      {badge}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </>
+      )}
+
       {/* Main Body */}
-      <div className="flex-1 flex flex-col md:flex-row">
-        {/* Sidebar Nav (Mobile scrollable, desktop column) */}
-        <aside className="w-full md:w-64 bg-card border-r border-border p-3 sm:p-4 flex md:flex-col gap-1.5 overflow-x-auto shrink-0 shadow-2xs">
+      <div className="flex-1 flex flex-row">
+        {/* Sidebar Nav — desktop only (md+) */}
+        <aside className="hidden md:flex md:w-64 bg-card border-r border-border p-4 flex-col gap-1.5 shrink-0 shadow-2xs">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
               activeTab === 'overview' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
@@ -731,7 +809,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('orders')}
-            className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+            className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
               activeTab === 'orders' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
@@ -748,7 +826,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('products')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
               activeTab === 'products' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
@@ -758,7 +836,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('categories')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
               activeTab === 'categories' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
@@ -768,7 +846,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('delivery')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
               activeTab === 'delivery' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
@@ -778,7 +856,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('coupons')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
               activeTab === 'coupons' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
@@ -788,7 +866,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('promotions')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
               activeTab === 'promotions' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
@@ -798,7 +876,7 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('enquiries')}
-            className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left shrink-0 md:shrink ${
+            className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
               activeTab === 'enquiries' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
@@ -815,7 +893,7 @@ export default function AdminDashboardPage() {
         </aside>
 
         {/* Content Area */}
-        <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-8 overflow-y-auto min-w-0">
           {/* =========================================================================
               TAB: OVERVIEW
              ========================================================================= */}

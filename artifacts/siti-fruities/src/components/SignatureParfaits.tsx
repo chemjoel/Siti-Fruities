@@ -5,11 +5,16 @@ import { Plus, Minus, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   StrawberryDecoration, 
+  StrawberryHalfDecoration,
   KiwiSliceDecoration, 
   BlueberryDecoration, 
   MintLeafDecoration, 
   CashewDecoration, 
-  MangoDecoration 
+  MangoDecoration,
+  GrapeClusterDecoration,
+  WatermelonSliceDecoration,
+  OrangeSliceDecoration,
+  YoghurtSwirlDecoration,
 } from './FruitAtmosphere';
 
 // Real product images from SITI FRUITIES photography
@@ -194,29 +199,76 @@ export default function SignatureParfaits() {
       <div className="absolute -top-32 -left-32 w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none" />
       
-      {/* Clearly visible decorative fruit elements around outer margins */}
+      {/* ================================================================
+          FRUIT & YOGHURT ATMOSPHERE — visible on ALL screen sizes
+         ================================================================ */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
-        {/* Top-Right: Fresh Strawberry */}
-        <div className="absolute top-10 right-4 lg:right-12 opacity-80 hidden md:block">
-          <StrawberryDecoration size={56} />
+
+        {/* ── TOP EDGE ── */}
+        {/* Top-left: large strawberry half peering from corner */}
+        <div className="absolute -top-4 -left-4 opacity-70" style={{ transform: 'rotate(-20deg)' }}>
+          <StrawberryHalfDecoration size={88} />
         </div>
-        {/* Bottom-Left: Fresh Kiwi Slice */}
-        <div className="absolute bottom-12 left-4 lg:left-12 opacity-80 hidden md:block">
-          <KiwiSliceDecoration size={60} />
+        {/* Top-centre-left: grape cluster */}
+        <div className="absolute top-2 left-[20%] opacity-60" style={{ transform: 'rotate(10deg)' }}>
+          <GrapeClusterDecoration size={66} />
         </div>
-        {/* Middle-Right: Toasted Cashew */}
-        <div className="absolute top-1/2 right-2 lg:right-8 -translate-y-1/2 opacity-75 hidden lg:block">
-          <CashewDecoration size={48} />
+        {/* Top-right: orange slice */}
+        <div className="absolute top-4 right-6 lg:right-16 opacity-75" style={{ transform: 'rotate(15deg)' }}>
+          <OrangeSliceDecoration size={70} />
         </div>
-        {/* Top-Left: Mint Leaf */}
-        <div className="absolute top-16 left-4 lg:left-10 opacity-75 hidden md:block">
-          <MintLeafDecoration size={46} />
+
+        {/* ── LEFT SIDE ── */}
+        {/* Upper-left: kiwi */}
+        <div className="absolute top-[22%] -left-3 opacity-70" style={{ transform: 'rotate(-8deg)' }}>
+          <KiwiSliceDecoration size={65} />
         </div>
-        {/* Bottom-Right: Blueberries */}
-        <div className="absolute bottom-14 right-8 lg:right-20 opacity-80 hidden lg:block">
-          <BlueberryDecoration size={50} />
+        {/* Mid-left: yoghurt swirl */}
+        <div className="absolute top-[42%] -left-6 opacity-55" style={{ transform: 'rotate(0deg)' }}>
+          <YoghurtSwirlDecoration size={90} />
+        </div>
+        {/* Lower-left: mango */}
+        <div className="absolute bottom-[20%] -left-2 opacity-75" style={{ transform: 'rotate(-12deg)' }}>
+          <MangoDecoration size={62} />
+        </div>
+
+        {/* ── RIGHT SIDE ── */}
+        {/* Upper-right: blueberries */}
+        <div className="absolute top-[18%] -right-2 opacity-75" style={{ transform: 'rotate(12deg)' }}>
+          <BlueberryDecoration size={62} />
+        </div>
+        {/* Mid-right: watermelon slice */}
+        <div className="absolute top-[40%] -right-4 opacity-65" style={{ transform: 'rotate(20deg)' }}>
+          <WatermelonSliceDecoration size={78} />
+        </div>
+        {/* Mid-right: cashew */}
+        <div className="absolute top-[58%] right-4 lg:right-10 opacity-65 hidden sm:block" style={{ transform: 'rotate(-5deg)' }}>
+          <CashewDecoration size={52} />
+        </div>
+
+        {/* ── BOTTOM EDGE ── */}
+        {/* Bottom-right: strawberry */}
+        <div className="absolute -bottom-4 -right-4 opacity-70" style={{ transform: 'rotate(18deg)' }}>
+          <StrawberryDecoration size={78} />
+        </div>
+        {/* Bottom-centre: pineapple replaced with kiwi + mint cluster */}
+        <div className="absolute bottom-0 left-[38%] opacity-55 hidden sm:block" style={{ transform: 'rotate(-8deg)' }}>
+          <MintLeafDecoration size={56} />
+        </div>
+        {/* Bottom-left: grape */}
+        <div className="absolute bottom-2 left-[12%] opacity-60" style={{ transform: 'rotate(5deg)' }}>
+          <GrapeClusterDecoration size={60} />
+        </div>
+
+        {/* ── INTERIOR ACCENT (desktop only) ── */}
+        <div className="absolute top-[65%] left-[20%] opacity-35 hidden lg:block" style={{ transform: 'rotate(-15deg)' }}>
+          <OrangeSliceDecoration size={50} />
+        </div>
+        <div className="absolute top-[20%] right-[22%] opacity-30 hidden lg:block" style={{ transform: 'rotate(20deg)' }}>
+          <WatermelonSliceDecoration size={52} />
         </div>
       </div>
+
       
       <div className="container mx-auto px-4 md:px-8 relative z-10">
         

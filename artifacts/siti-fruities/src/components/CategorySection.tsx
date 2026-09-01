@@ -8,11 +8,17 @@ import {
 } from 'lucide-react';
 import { 
   StrawberryDecoration, 
+  StrawberryHalfDecoration,
   KiwiSliceDecoration, 
   BlueberryDecoration, 
   MintLeafDecoration, 
   CashewDecoration, 
-  MangoDecoration 
+  MangoDecoration,
+  GrapeClusterDecoration,
+  WatermelonSliceDecoration,
+  OrangeSliceDecoration,
+  PineappleSliceDecoration,
+  YoghurtSwirlDecoration,
 } from './FruitAtmosphere';
 
 // Import Assets
@@ -142,27 +148,73 @@ export default function CategorySection() {
       <div className="absolute top-1/2 -right-40 w-96 h-96 bg-primary/8 rounded-full blur-[110px] pointer-events-none" />
       <div className="absolute bottom-10 -left-40 w-96 h-96 bg-amber-500/8 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Clearly visible background decorative fruit elements in outer margins */}
+      {/* ================================================================
+          FRUIT & YOGHURT ATMOSPHERE — visible on ALL screen sizes
+         ================================================================ */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
-        {/* Top-Left: Golden Mango */}
-        <div className="absolute top-12 left-4 lg:left-10 opacity-80 hidden md:block">
-          <MangoDecoration size={54} />
+
+        {/* ── TOP EDGE ── */}
+        {/* Top-left: pineapple slice */}
+        <div className="absolute -top-3 -left-3 opacity-70" style={{ transform: 'rotate(-15deg)' }}>
+          <PineappleSliceDecoration size={82} />
         </div>
-        {/* Top-Right: Fresh Strawberry */}
-        <div className="absolute top-16 right-6 lg:right-12 opacity-80 hidden md:block">
-          <StrawberryDecoration size={56} />
+        {/* Top-centre: grape cluster */}
+        <div className="absolute top-4 left-[28%] opacity-55" style={{ transform: 'rotate(8deg)' }}>
+          <GrapeClusterDecoration size={58} />
         </div>
-        {/* Bottom-Right: Cashew Nut */}
-        <div className="absolute bottom-16 right-4 lg:right-10 opacity-75 hidden md:block">
-          <CashewDecoration size={48} />
+        {/* Top-right: orange slice */}
+        <div className="absolute -top-2 right-8 lg:right-20 opacity-72" style={{ transform: 'rotate(20deg)' }}>
+          <OrangeSliceDecoration size={72} />
         </div>
-        {/* Bottom-Left: Blueberries */}
-        <div className="absolute bottom-12 left-6 lg:left-12 opacity-80 hidden md:block">
-          <BlueberryDecoration size={52} />
+
+        {/* ── LEFT SIDE ── */}
+        {/* Upper-left: blueberries */}
+        <div className="absolute top-[20%] -left-2 opacity-78" style={{ transform: 'rotate(-10deg)' }}>
+          <BlueberryDecoration size={64} />
         </div>
-        {/* Center-Right: Mint Leaf */}
-        <div className="absolute top-1/2 right-2 lg:right-6 -translate-y-1/2 opacity-70 hidden xl:block">
-          <MintLeafDecoration size={46} />
+        {/* Mid-left: yoghurt swirl */}
+        <div className="absolute top-[45%] -left-8 opacity-50" style={{ transform: 'rotate(0deg)' }}>
+          <YoghurtSwirlDecoration size={96} />
+        </div>
+        {/* Lower-left: kiwi */}
+        <div className="absolute bottom-[18%] -left-3 opacity-72" style={{ transform: 'rotate(-5deg)' }}>
+          <KiwiSliceDecoration size={68} />
+        </div>
+
+        {/* ── RIGHT SIDE ── */}
+        {/* Upper-right: mango */}
+        <div className="absolute top-[16%] -right-2 opacity-75" style={{ transform: 'rotate(14deg)' }}>
+          <MangoDecoration size={64} />
+        </div>
+        {/* Mid-right: watermelon */}
+        <div className="absolute top-[42%] -right-5 opacity-65" style={{ transform: 'rotate(22deg)' }}>
+          <WatermelonSliceDecoration size={80} />
+        </div>
+        {/* Lower-right: cashew */}
+        <div className="absolute bottom-[22%] right-2 lg:right-8 opacity-65 hidden sm:block" style={{ transform: 'rotate(-8deg)' }}>
+          <CashewDecoration size={54} />
+        </div>
+
+        {/* ── BOTTOM EDGE ── */}
+        {/* Bottom-left: strawberry half */}
+        <div className="absolute -bottom-4 -left-4 opacity-68" style={{ transform: 'rotate(15deg)' }}>
+          <StrawberryHalfDecoration size={84} />
+        </div>
+        {/* Bottom-centre: mint */}
+        <div className="absolute bottom-1 left-[42%] opacity-55 hidden sm:block" style={{ transform: 'rotate(-10deg)' }}>
+          <MintLeafDecoration size={58} />
+        </div>
+        {/* Bottom-right: grape */}
+        <div className="absolute -bottom-2 right-[14%] opacity-58" style={{ transform: 'rotate(-5deg)' }}>
+          <GrapeClusterDecoration size={62} />
+        </div>
+
+        {/* ── INTERIOR ACCENTS (desktop only) ── */}
+        <div className="absolute top-[28%] left-[18%] opacity-28 hidden xl:block" style={{ transform: 'rotate(25deg)' }}>
+          <StrawberryDecoration size={46} />
+        </div>
+        <div className="absolute top-[60%] right-[20%] opacity-28 hidden xl:block" style={{ transform: 'rotate(-18deg)' }}>
+          <OrangeSliceDecoration size={44} />
         </div>
       </div>
 
