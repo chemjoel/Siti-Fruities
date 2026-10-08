@@ -195,12 +195,23 @@ export const orderService: IOrderService = {
     }
   },
 
-  async confirmPayment(orderId: string, paystackReference: string): Promise<void> {
-    if (isSupabaseConfigured()) {
-      await supabase.rpc('confirm_order_payment', {
-        p_order_id: orderId,
-        p_paystack_ref: paystackReference,
-      });
+  async verifyPayment(orderId: string, paystackReference: string): Promise<void> {
+    const { data, error } = await supabase.functions.invoke<{
+      success?: boolean;
+      message?: string;
+      error?: string;
+    }>('verify-payment', {
+      body: {
+        reference: paystackReference,
+        order_id: orderId,
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+    if (!data?.success) {
+      throw new Error(data?.message || data?.error || 'Payment verification failed.');
     }
 
     const orders = getLocalOrders();

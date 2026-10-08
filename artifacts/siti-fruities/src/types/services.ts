@@ -166,11 +166,9 @@ export interface IOrderService {
   attachPaymentReference(orderId: string, reference: string): Promise<void>;
 
   /**
-   * Confirm payment after server-side Paystack verification.
-   * Moves order from `pending_payment` → `confirmed`.
-   * This must only be called from a trusted server context (Supabase Edge Function).
+   * Verify a Paystack payment through the trusted Supabase Edge Function.
    */
-  confirmPayment(orderId: string, paystackReference: string): Promise<void>;
+  verifyPayment(orderId: string, paystackReference: string): Promise<void>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
