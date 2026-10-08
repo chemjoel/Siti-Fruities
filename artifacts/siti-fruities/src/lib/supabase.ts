@@ -212,6 +212,40 @@ export const supabase = {
     }
   },
 
+  functions: {
+    async invoke<T = any>(functionName: string, options: { body?: unknown } = {}): Promise<{ data: T | null; error: Error | null }> {
+      if (!isSupabaseConfigured()) {
+        return { data: null, error: new Error('Supabase is not configured') };
+      }
+
+      try {
+        const session = getStoredSession();
+        const token = session?.access_token || SUPABASE_ANON_KEY;
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/${encodeURIComponent(functionName)}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(options.body || {}),
+        });
+
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+          return {
+            data,
+            error: new Error(data?.message || data?.error || `HTTP ${res.status}`),
+          };
+        }
+
+        return { data, error: null };
+      } catch (err: any) {
+        return { data: null, error: err };
+      }
+    },
+  },
+
   storage: {
     from(bucket: string) {
       return {

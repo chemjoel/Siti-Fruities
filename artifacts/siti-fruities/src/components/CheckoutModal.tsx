@@ -170,13 +170,18 @@ export default function CheckoutModal({ isOpen, onClose, subtotal }: CheckoutMod
           customer_phone: phone,
         },
         onSuccess: async (ref) => {
-          // Confirm payment locally/server
-          await orderService.confirmPayment(newOrder.id, ref);
-          const confirmed = await orderService.getOrderById(newOrder.id);
-          setCompletedOrder(confirmed || newOrder);
-          setIsSubmitting(false);
-          onClose();
-          setIsConfirmationOpen(true);
+          try {
+            await orderService.verifyPayment(newOrder.id, ref);
+            const confirmed = await orderService.getOrderById(newOrder.id);
+            setCompletedOrder(confirmed || newOrder);
+            setIsSubmitting(false);
+            onClose();
+            setIsConfirmationOpen(true);
+          } catch (err) {
+            console.error('Payment verification error:', err);
+            alert(err instanceof Error ? err.message : 'Payment verification failed. Please contact support if you were charged.');
+            setIsSubmitting(false);
+          }
         },
         onClose: () => {
           setIsSubmitting(false);
