@@ -22,7 +22,7 @@ export const deliveryService: IDeliveryService = {
   async getDeliveryZones(): Promise<DeliveryZone[]> {
     if (isSupabaseConfigured()) {
       const { data, error } = await supabase
-        .from<DeliveryZone>('delivery_zones')
+        .from<DeliveryZone[]>('delivery_zones')
         .select('*')
         .order('display_order', { ascending: true });
 

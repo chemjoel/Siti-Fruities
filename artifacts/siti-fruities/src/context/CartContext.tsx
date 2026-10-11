@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
+import { trackMetaEvent } from '@/lib/metaPixel';
+import { trackFirstPartyEvent } from '@/lib/firstPartyAnalytics';
 
 export type CartItemOption = {
   name: string;
@@ -21,15 +23,32 @@ interface CartContextType {
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
+  markCartOrderCompleted: () => void;
   totalItems: number;
   subtotal: number;
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
+  isCheckoutActive: boolean;
+  setCheckoutActive: (isActive: boolean) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = 'siti_fruities_cart';
+export const CART_ACTIVITY_STORAGE_KEY = 'siti_fruities_cart_activity_at';
+export const CART_COMPLETED_STORAGE_KEY = 'siti_fruities_completed_cart_signature';
+
+export function getCartSignature(items: CartItem[]) {
+  try {
+    return JSON.stringify(
+      items
+        .map((item) => [item.id, item.price, item.quantity])
+        .sort(([leftId], [rightId]) => String(leftId).localeCompare(String(rightId))),
+    );
+  } catch {
+    return '';
+  }
+}
 
 const getInitialCart = (): CartItem[] => {
   try {
@@ -46,13 +65,43 @@ const getInitialCart = (): CartItem[] => {
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(getInitialCart);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutActive, setCheckoutActive] = useState(false);
+  const previousCartSignature = useRef<string | null>(null);
 
   // Sync with localStorage
   React.useEffect(() => {
+    const signature = getCartSignature(items);
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch (err) {
       console.error('Failed to persist cart:', err);
+    }
+
+    try {
+      if (items.length === 0) {
+        localStorage.removeItem(CART_ACTIVITY_STORAGE_KEY);
+        localStorage.removeItem(CART_COMPLETED_STORAGE_KEY);
+      } else if (previousCartSignature.current === null) {
+        if (!localStorage.getItem(CART_ACTIVITY_STORAGE_KEY)) {
+          localStorage.setItem(CART_ACTIVITY_STORAGE_KEY, String(Date.now()));
+        }
+      } else if (signature !== previousCartSignature.current) {
+        const previousActivityAt = Number(localStorage.getItem(CART_ACTIVITY_STORAGE_KEY)) || 0;
+        localStorage.setItem(CART_ACTIVITY_STORAGE_KEY, String(Math.max(Date.now(), previousActivityAt + 1)));
+        localStorage.removeItem(CART_COMPLETED_STORAGE_KEY);
+      }
+    } catch (err) {
+      console.error('Failed to update cart reminder storage:', err);
+    }
+
+    previousCartSignature.current = signature;
+  }, [items]);
+
+  const markCartOrderCompleted = useCallback(() => {
+    try {
+      localStorage.setItem(CART_COMPLETED_STORAGE_KEY, getCartSignature(items));
+    } catch (err) {
+      console.error('Failed to update completed cart reminder state:', err);
     }
   }, [items]);
 
@@ -76,6 +125,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       
       return [...prev, { ...newItem, id }];
     });
+
+    trackMetaEvent('AddToCart', {
+      content_ids: [newItem.productId],
+      content_type: 'product',
+      value: newItem.price * newItem.quantity,
+      currency: 'NGN',
+    });
+    trackFirstPartyEvent('add_to_cart', { productId: newItem.productId });
     
     // Automatically open cart when adding
     setIsCartOpen(true);
@@ -115,10 +172,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeItem, 
         updateQuantity, 
         clearCart, 
+        markCartOrderCompleted,
         totalItems, 
         subtotal,
         isCartOpen,
-        setIsCartOpen
+        setIsCartOpen,
+        isCheckoutActive,
+        setCheckoutActive,
       }}
     >
       {children}

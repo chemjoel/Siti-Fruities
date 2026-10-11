@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus, ShoppingBag } from 'lucide-react';
+import { trackFirstPartyEvent } from '@/lib/firstPartyAnalytics';
 
 export interface ProductOptionChoice {
   value: string;
@@ -35,6 +36,34 @@ const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const isAvailable = product.isAvailable !== false;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const lastViewedProduct = useRef<string | null>(null);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card || !product.productId || !isAvailable) return;
+
+    const trackView = () => {
+      if (lastViewedProduct.current === product.productId) return;
+      lastViewedProduct.current = product.productId;
+      trackFirstPartyEvent('product_view', { productId: product.productId });
+    };
+
+    if (!('IntersectionObserver' in window)) {
+      trackView();
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+        trackView();
+        observer.disconnect();
+      }
+    }, { threshold: 0.5 });
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [product.productId, isAvailable]);
   
   // Initialize options state with first choice of each option
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
@@ -94,10 +123,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const IconComponent = product.placeholderIcon;
 
-  const isAvailable = product.isAvailable !== false;
-
   return (
-    <div className={`bg-card rounded-2xl shadow-md border border-card-border overflow-hidden flex flex-col group transition-all duration-300 ${!isAvailable ? 'opacity-75 grayscale-[20%]' : 'hover:shadow-xl'}`}>
+    <div ref={cardRef} className={`bg-card rounded-2xl shadow-md border border-card-border overflow-hidden flex flex-col group transition-all duration-300 ${!isAvailable ? 'opacity-75 grayscale-[20%]' : 'hover:shadow-xl'}`}>
       
       {/* Product Image or Polished Gradient Placeholder */}
       {product.image ? (

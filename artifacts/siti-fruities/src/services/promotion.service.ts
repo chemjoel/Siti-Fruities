@@ -28,7 +28,7 @@ export const promotionService: IPromotionService = {
   async getActivePromotions(): Promise<Promotion[]> {
     if (isSupabaseConfigured()) {
       const { data, error } = await supabase
-        .from<Promotion>('promotions')
+        .from<Promotion[]>('promotions')
         .select('*')
         .eq('is_active', true)
         .order('display_order', { ascending: true });

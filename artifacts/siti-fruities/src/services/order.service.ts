@@ -136,7 +136,7 @@ export const orderService: IOrderService = {
 
       if (!error && orderData) {
         const { data: items } = await supabase
-          .from<OrderItem>('order_items')
+          .from<OrderItem[]>('order_items')
           .select('*')
           .eq('order_id', orderData.id);
 
@@ -151,7 +151,7 @@ export const orderService: IOrderService = {
   async getOrdersByUser(userId: string): Promise<Order[]> {
     if (isSupabaseConfigured()) {
       const { data: orders, error } = await supabase
-        .from<Order>('orders')
+        .from<Order[]>('orders')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });

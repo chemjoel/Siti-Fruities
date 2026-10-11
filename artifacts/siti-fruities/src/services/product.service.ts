@@ -177,7 +177,7 @@ export const productService: IProductService = {
   async getCategories(): Promise<Category[]> {
     if (isSupabaseConfigured()) {
       const { data, error } = await supabase
-        .from<Category>('categories')
+        .from<Category[]>('categories')
         .select('*')
         .order('display_order', { ascending: true });
 
@@ -199,7 +199,7 @@ export const productService: IProductService = {
 
       if (cat) {
         const { data, error } = await supabase
-          .from<Product>('products')
+          .from<Product[]>('products')
           .select('*')
           .eq('category_id', cat.id)
           .order('display_order', { ascending: true });
@@ -231,7 +231,7 @@ export const productService: IProductService = {
   async getFeaturedProducts(): Promise<Product[]> {
     if (isSupabaseConfigured()) {
       const { data, error } = await supabase
-        .from<Product>('products')
+        .from<Product[]>('products')
         .select('*')
         .eq('is_featured', true)
         .order('featured_order', { ascending: true });
@@ -248,7 +248,7 @@ export const productService: IProductService = {
 
     if (isSupabaseConfigured() && productIds.length > 0) {
       const { data, error } = await supabase
-        .from<{ id: string; slug: string; is_available: boolean }>('products')
+        .from<{ id: string; slug: string; is_available: boolean }[]>('products')
         .select('id, slug, is_available');
 
       if (!error && data) {

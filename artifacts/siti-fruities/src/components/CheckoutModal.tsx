@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,8 @@ import { couponService } from '@/services/coupon.service';
 import { productService } from '@/services/product.service';
 import { orderService } from '@/services/order.service';
 import { payWithPaystack } from '@/lib/paystack';
+import { trackMetaEvent, trackMetaPurchaseOnce } from '@/lib/metaPixel';
+import { trackFirstPartyEvent } from '@/lib/firstPartyAnalytics';
 import OrderConfirmationModal from './OrderConfirmationModal';
 
 interface CheckoutModalProps {
@@ -23,7 +25,7 @@ interface CheckoutModalProps {
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
 export default function CheckoutModal({ isOpen, onClose, subtotal }: CheckoutModalProps) {
-  const { items } = useCart();
+  const { items, markCartOrderCompleted } = useCart();
 
   // Delivery Zones
   const [zones, setZones] = useState<DeliveryZone[]>([]);
@@ -51,6 +53,26 @@ export default function CheckoutModal({ isOpen, onClose, subtotal }: CheckoutMod
   // Completed Order Modal State
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const firstPartyCheckoutWasOpen = useRef(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      trackMetaEvent('InitiateCheckout', {
+        content_ids: items.map((item) => item.productId),
+        content_type: 'product',
+        num_items: items.reduce((total, item) => total + item.quantity, 0),
+        value: subtotal,
+        currency: 'NGN',
+      });
+    }
+  }, [isOpen, items.length]);
+
+  useEffect(() => {
+    if (isOpen && !firstPartyCheckoutWasOpen.current && items.length > 0) {
+      trackFirstPartyEvent('checkout_start');
+    }
+    firstPartyCheckoutWasOpen.current = isOpen;
+  }, [isOpen, items.length]);
 
   // Load delivery zones on open
   useEffect(() => {
@@ -172,7 +194,13 @@ export default function CheckoutModal({ isOpen, onClose, subtotal }: CheckoutMod
         onSuccess: async (ref) => {
           try {
             await orderService.verifyPayment(newOrder.id, ref);
+            markCartOrderCompleted();
             const confirmed = await orderService.getOrderById(newOrder.id);
+            if (confirmed?.payment_status === 'paid') {
+              trackMetaPurchaseOnce(confirmed.id, Number(confirmed.total));
+            } else {
+              console.error('Payment was verified, but the confirmed paid order could not be loaded for Meta Pixel tracking.');
+            }
             setCompletedOrder(confirmed || newOrder);
             setIsSubmitting(false);
             onClose();

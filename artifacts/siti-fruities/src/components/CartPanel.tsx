@@ -10,8 +10,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
 export default function CartPanel() {
-  const { items, isCartOpen, setIsCartOpen, updateQuantity, removeItem, subtotal } = useCart();
+  const { items, isCartOpen, setIsCartOpen, updateQuantity, removeItem, subtotal, setCheckoutActive } = useCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  React.useEffect(() => {
+    setCheckoutActive(isCheckoutOpen);
+    return () => setCheckoutActive(false);
+  }, [isCheckoutOpen, setCheckoutActive]);
 
   return (
     <>

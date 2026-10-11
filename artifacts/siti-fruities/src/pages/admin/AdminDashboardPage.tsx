@@ -9,6 +9,8 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Product, Category, DeliveryZone, Coupon, Promotion, Order, OrderStatus, CateringEnquiry, CustomParfaitQuote, ProductOption } from '@/types/domain';
 import ImageUpload from '@/components/admin/ImageUpload';
 import ProductOptionsBuilder from '@/components/admin/ProductOptionsBuilder';
+import MarketingAnalyticsPage from '@/pages/admin/MarketingAnalyticsPage';
+import SalesAnalyticsPage from '@/pages/admin/SalesAnalyticsPage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +25,7 @@ import {
   Tag,
   Megaphone,
   MessageSquareQuote,
+  BarChart3,
   LogOut,
   ExternalLink,
   Plus,
@@ -70,7 +73,7 @@ const generateProductSlug = (name: string, existingProducts: Product[], currentP
 
 export default function AdminDashboardPage() {
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'categories' | 'orders' | 'delivery' | 'coupons' | 'promotions' | 'enquiries'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'categories' | 'orders' | 'delivery' | 'coupons' | 'promotions' | 'enquiries' | 'marketing' | 'sales'>('overview');
   const [loading, setLoading] = useState(true);
 
   // Data States
@@ -133,7 +136,7 @@ export default function AdminDashboardPage() {
 
       let prods: Product[] = [];
       if (isSupabaseConfigured()) {
-        const { data } = await supabase.from<Product>('products').select('*').order('display_order', { ascending: true });
+        const { data } = await supabase.from<Product[]>('products').select('*').order('display_order', { ascending: true });
         prods = data || [];
       }
       if (prods.length === 0) {
@@ -148,7 +151,7 @@ export default function AdminDashboardPage() {
       // 3. Orders
       let ords: Order[] = [];
       if (isSupabaseConfigured()) {
-        const { data: oList } = await supabase.from<Order>('orders').select('*').order('created_at', { ascending: false });
+        const { data: oList } = await supabase.from<Order[]>('orders').select('*').order('created_at', { ascending: false });
         if (oList) {
           const { data: itemsList } = await supabase.from('order_items').select('*');
           ords = oList.map((o) => ({
@@ -168,7 +171,7 @@ export default function AdminDashboardPage() {
 
       // 4. Coupons
       if (isSupabaseConfigured()) {
-        const { data: cList } = await supabase.from<Coupon>('coupons').select('*').order('created_at', { ascending: false });
+        const { data: cList } = await supabase.from<Coupon[]>('coupons').select('*').order('created_at', { ascending: false });
         setCoupons(cList || []);
       } else {
         setCoupons([
@@ -179,7 +182,7 @@ export default function AdminDashboardPage() {
 
       // 5. Promotions
       if (isSupabaseConfigured()) {
-        const { data: pList } = await supabase.from<Promotion>('promotions').select('*').order('display_order', { ascending: true });
+        const { data: pList } = await supabase.from<Promotion[]>('promotions').select('*').order('display_order', { ascending: true });
         setPromotions(pList || []);
       } else {
         setPromotions([
@@ -189,10 +192,10 @@ export default function AdminDashboardPage() {
 
       // 6. Enquiries
       if (isSupabaseConfigured()) {
-        const { data: catEnq } = await supabase.from<CateringEnquiry>('catering_enquiries').select('*').order('created_at', { ascending: false });
+        const { data: catEnq } = await supabase.from<CateringEnquiry[]>('catering_enquiries').select('*').order('created_at', { ascending: false });
         setCateringEnquiries(catEnq || []);
 
-        const { data: pqList } = await supabase.from<CustomParfaitQuote>('custom_parfait_quotes').select('*').order('created_at', { ascending: false });
+        const { data: pqList } = await supabase.from<CustomParfaitQuote[]>('custom_parfait_quotes').select('*').order('created_at', { ascending: false });
         setParfaitQuotes(pqList || []);
       } else {
         try {
@@ -767,6 +770,8 @@ export default function AdminDashboardPage() {
                   { tab: 'delivery', label: 'Delivery Zones', icon: <Truck className="w-4 h-4 shrink-0" /> },
                   { tab: 'coupons', label: 'Coupons', icon: <Tag className="w-4 h-4 shrink-0" /> },
                   { tab: 'promotions', label: 'Promotions', icon: <Megaphone className="w-4 h-4 shrink-0" /> },
+                  { tab: 'sales', label: 'Sales Analytics', icon: <BarChart3 className="w-4 h-4 shrink-0" /> },
+                  { tab: 'marketing', label: 'Marketing Analytics', icon: <BarChart3 className="w-4 h-4 shrink-0" /> },
                   { tab: 'enquiries', label: 'Catering & Quotes', icon: <MessageSquareQuote className="w-4 h-4 shrink-0" />, badge: enquiryCount > 0 ? enquiryCount : null },
                 ] as { tab: typeof activeTab; label: string; icon: React.ReactNode; badge?: number | null }[]
               ).map(({ tab, label, icon, badge }) => (
@@ -890,10 +895,33 @@ export default function AdminDashboardPage() {
               </span>
             )}
           </button>
+
+          <button
+            onClick={() => setActiveTab('sales')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
+              activeTab === 'sales' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 shrink-0" />
+            <span>Sales Analytics</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('marketing')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${
+              activeTab === 'marketing' ? 'bg-primary text-white shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 shrink-0" />
+            <span>Marketing Analytics</span>
+          </button>
         </aside>
 
         {/* Content Area */}
         <main className="flex-1 p-4 sm:p-8 overflow-y-auto min-w-0">
+          {activeTab === 'sales' && <SalesAnalyticsPage />}
+          {activeTab === 'marketing' && <MarketingAnalyticsPage />}
+
           {/* =========================================================================
               TAB: OVERVIEW
              ========================================================================= */}
