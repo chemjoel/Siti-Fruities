@@ -134,16 +134,16 @@ async function getOrders(range: DateRange): Promise<AnalyticsOrder[]> {
   let offset = 0;
 
   while (true) {
-    const { data, error } = await (supabase
-      .from('orders')
-      .select('id, created_at, payment_status, order_status, total, discount_amount, coupon_id, coupon_code, delivery_zone_id, delivery_zone_name, delivery_fee, delivery_timing') as any)
+    const { data, error } = await supabase
+      .from<AnalyticsOrder[]>('orders')
+      .select('id, created_at, payment_status, order_status, total, discount_amount, coupon_id, coupon_code, delivery_zone_id, delivery_zone_name, delivery_fee, delivery_timing')
       .gte('created_at', range.start.toISOString())
       .lt('created_at', range.end.toISOString())
       .order('created_at', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1) as { data: AnalyticsOrder[] | null; error: { message: string } | null };
+      .range(offset, offset + PAGE_SIZE - 1);
 
     if (error) throw new Error(error.message);
-    const page = (data || []) as AnalyticsOrder[];
+    const page = data || [];
     results.push(...page);
     if (page.length < PAGE_SIZE) return results;
     offset += PAGE_SIZE;
@@ -155,13 +155,13 @@ async function getItems(orders: AnalyticsOrder[]): Promise<AnalyticsItem[]> {
   const ids = orders.map((order) => order.id);
 
   for (let index = 0; index < ids.length; index += ITEM_BATCH_SIZE) {
-    const { data, error } = await (supabase
-      .from('order_items')
-      .select('order_id, product_id, product_name, unit_price, quantity, line_total') as any)
-      .in('order_id', ids.slice(index, index + ITEM_BATCH_SIZE)) as { data: AnalyticsItem[] | null; error: { message: string } | null };
+    const { data, error } = await supabase
+      .from<AnalyticsItem[]>('order_items')
+      .select('order_id, product_id, product_name, unit_price, quantity, line_total')
+      .in('order_id', ids.slice(index, index + ITEM_BATCH_SIZE));
 
     if (error) throw new Error(error.message);
-    items.push(...((data || []) as AnalyticsItem[]));
+    items.push(...(data || []));
   }
 
   return items;

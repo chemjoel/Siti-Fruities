@@ -105,8 +105,32 @@ class QueryBuilder<T = any> {
     return this;
   }
 
+  gte(column: string, value: string | number): this {
+    this.queryParams.append(column, `gte.${value}`);
+    return this;
+  }
+
+  lt(column: string, value: string | number): this {
+    this.queryParams.append(column, `lt.${value}`);
+    return this;
+  }
+
+  in(column: string, values: readonly (string | number)[]): this {
+    const formattedValues = values
+      .map((value) => `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
+      .join(',');
+    this.queryParams.set(column, `in.(${formattedValues})`);
+    return this;
+  }
+
   or(filters: string): this {
     this.queryParams.set('or', `(${filters})`);
+    return this;
+  }
+
+  range(from: number, to: number): this {
+    this.queryParams.set('offset', from.toString());
+    this.queryParams.set('limit', (to - from + 1).toString());
     return this;
   }
 

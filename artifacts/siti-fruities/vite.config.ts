@@ -38,7 +38,11 @@ export default defineConfig({
     alias: {
       '@': path.resolve(import.meta.dirname, 'src'),
       '@assets': path.resolve(import.meta.dirname, 'src', 'assets'),
+      // Alias d3-interpolate to a local shim when the package cannot be resolved from pnpm store
+      'd3-interpolate': path.resolve(import.meta.dirname, 'src', 'shims', 'd3-interpolate.js'),
     },
+    // Keep React dedupe to avoid duplicate React copies
+
     dedupe: ['react', 'react-dom'],
   },
   root: path.resolve(import.meta.dirname),
