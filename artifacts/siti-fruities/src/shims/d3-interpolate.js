@@ -17,8 +17,16 @@ export function interpolate(a, b) {
   };
 }
 
+export function interpolateNumber(a, b) {
+  // numeric interpolation for d3.scale usage
+  const delta = (Number(b) || 0) - (Number(a) || 0);
+  return function(t) {
+    return (Number(a) || 0) + delta * t;
+  };
+}
+
 export function interpolateRound(a, b) {
-  const interp = interpolate(a, b);
+  const interp = interpolateNumber(a, b);
   return function(t) {
     return Math.round(interp(t));
   };
@@ -26,5 +34,6 @@ export function interpolateRound(a, b) {
 
 export default {
   interpolate,
+  interpolateNumber,
   interpolateRound,
 };
