@@ -32,8 +32,28 @@ export function interpolateRound(a, b) {
   };
 }
 
+export function piecewise(interpolateFunction, values) {
+  const count = values.length;
+  if (count === 0) return () => undefined;
+  if (count === 1) return () => values[0];
+
+  const interpolators = values.slice(1).map((value, index) =>
+    interpolateFunction(values[index], value),
+  );
+
+  return function(t) {
+    if (t <= 0) return values[0];
+    if (t >= 1) return values[count - 1];
+
+    const position = t * (count - 1);
+    const index = Math.floor(position);
+    return interpolators[index](position - index);
+  };
+}
+
 export default {
   interpolate,
   interpolateNumber,
   interpolateRound,
+  piecewise,
 };
