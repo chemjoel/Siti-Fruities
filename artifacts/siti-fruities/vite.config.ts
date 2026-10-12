@@ -39,6 +39,7 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, 'src'),
       '@assets': path.resolve(import.meta.dirname, 'src', 'assets'),
       // Alias d3-interpolate to a local shim when the package cannot be resolved from pnpm store
+      'd3-interpolate': path.resolve(import.meta.dirname, '..', '..', 'node_modules', 'd3-interpolate', 'index.js'),
     },
     // Keep React dedupe to avoid duplicate React copies
 
