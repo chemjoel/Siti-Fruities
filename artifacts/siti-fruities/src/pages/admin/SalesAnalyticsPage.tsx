@@ -126,7 +126,7 @@ function downloadCsv(filename: string, headers: string[], rows: (string | number
 }
 
 function isRevenueOrder(order: AnalyticsOrder) {
-  return order.payment_status === 'paid' && order.order_status !== 'cancelled';
+  return order.order_status === 'confirmed';
 }
 
 async function getOrders(range: DateRange): Promise<AnalyticsOrder[]> {
@@ -252,15 +252,15 @@ export default function SalesAnalyticsPage() {
   const calculations = useMemo(() => {
     if (!sales) return null;
 
-    const paidOrders = sales.orders.filter(isRevenueOrder);
-    const previousPaidOrders = sales.previousOrders.filter(isRevenueOrder);
+    const confirmedOrders = sales.orders.filter(isRevenueOrder);
+    const previousConfirmedOrders = sales.previousOrders.filter(isRevenueOrder);
     const productTotals = new Map<string, { name: string; quantity: number; revenue: number }>();
     const categoryNames = new Map(sales.categories.map((category) => [category.id, category.name]));
     const categoryTotals = new Map<string, { name: string; quantity: number; revenue: number }>();
-    const paidOrderIds = new Set(paidOrders.map((order) => order.id));
+    const confirmedOrderIds = new Set(confirmedOrders.map((order) => order.id));
 
     for (const item of sales.items) {
-      if (!paidOrderIds.has(item.order_id)) continue;
+      if (!confirmedOrderIds.has(item.order_id)) continue;
       const key = item.product_id || item.product_name;
       const product = productTotals.get(key) || { name: item.product_name, quantity: 0, revenue: 0 };
       product.quantity += Number(item.quantity || 0);
@@ -282,14 +282,14 @@ export default function SalesAnalyticsPage() {
     const categoryRows = Array.from(categoryTotals.values())
       .sort((a, b) => b.revenue - a.revenue || b.quantity - a.quantity);
 
-    const couponTotals = new Map<string, { uses: number; paidOrders: number; discounts: number; revenue: number }>();
+    const couponTotals = new Map<string, { uses: number; confirmedOrders: number; discounts: number; revenue: number }>();
     for (const order of sales.orders) {
       if (!order.coupon_id && !order.coupon_code) continue;
       const key = order.coupon_code || 'Coupon (code unavailable)';
-      const coupon = couponTotals.get(key) || { uses: 0, paidOrders: 0, discounts: 0, revenue: 0 };
+      const coupon = couponTotals.get(key) || { uses: 0, confirmedOrders: 0, discounts: 0, revenue: 0 };
       coupon.uses += 1;
       if (isRevenueOrder(order)) {
-        coupon.paidOrders += 1;
+        coupon.confirmedOrders += 1;
         coupon.discounts += Number(order.discount_amount || 0);
         coupon.revenue += Number(order.total || 0);
       }
@@ -301,9 +301,8 @@ export default function SalesAnalyticsPage() {
       .sort((a, b) => b.uses - a.uses || b.revenue - a.revenue);
 
     const zoneTotals = new Map<string, { name: string; orders: number; revenue: number }>();
-    const dailyTotals = new Map<string, { date: string; revenue: number; paidOrders: number; allOrders: number }>();
+    const dailyTotals = new Map<string, { date: string; revenue: number; confirmedOrders: number; allOrders: number }>();
     const statusTotals = new Map<string, number>();
-    const paymentTotals = new Map<string, number>([['Paid', 0], ['Pending payment', 0], ['Refunded', 0]]);
 
     let discounts = 0;
     let delivered = 0;
@@ -314,9 +313,6 @@ export default function SalesAnalyticsPage() {
 
     for (const order of sales.orders) {
       statusTotals.set(order.order_status, (statusTotals.get(order.order_status) || 0) + 1);
-      if (order.payment_status === 'paid') paymentTotals.set('Paid', (paymentTotals.get('Paid') || 0) + 1);
-      else if (order.payment_status === 'refunded') paymentTotals.set('Refunded', (paymentTotals.get('Refunded') || 0) + 1);
-      else paymentTotals.set('Pending payment', (paymentTotals.get('Pending payment') || 0) + 1);
 
       if (order.order_status === 'delivered') delivered += 1;
       if (order.payment_status === 'pending') pendingPayment += 1;
@@ -334,11 +330,11 @@ export default function SalesAnalyticsPage() {
       }
 
       const dateKey = localDateInput(new Date(order.created_at));
-      const dailyEntry = dailyTotals.get(dateKey) || { date: dateKey, revenue: 0, paidOrders: 0, allOrders: 0 };
+      const dailyEntry = dailyTotals.get(dateKey) || { date: dateKey, revenue: 0, confirmedOrders: 0, allOrders: 0 };
       dailyEntry.allOrders += 1;
       if (isRevenueOrder(order)) {
         dailyEntry.revenue += Number(order.total || 0);
-        dailyEntry.paidOrders += 1;
+        dailyEntry.confirmedOrders += 1;
       }
       dailyTotals.set(dateKey, dailyEntry);
     }
@@ -348,24 +344,23 @@ export default function SalesAnalyticsPage() {
     while (dayCursor < range.end) {
       const dateKey = localDateInput(dayCursor);
       if (!dailyTotals.has(dateKey)) {
-        dailyTotals.set(dateKey, { date: dateKey, revenue: 0, paidOrders: 0, allOrders: 0 });
+        dailyTotals.set(dateKey, { date: dateKey, revenue: 0, confirmedOrders: 0, allOrders: 0 });
       }
       dayCursor.setDate(dayCursor.getDate() + 1);
     }
 
-    const paidRevenue = paidOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-    const previousRevenue = previousPaidOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+    const confirmedRevenue = confirmedOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+    const previousRevenue = previousConfirmedOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
     const trends = Array.from(dailyTotals.values()).sort((a, b) => a.date.localeCompare(b.date));
     const statusRows = Array.from(statusTotals, ([name, value]) => ({ name, value }));
-    const paymentRows = Array.from(paymentTotals, ([name, value]) => ({ name, value }));
     const zoneRows = Array.from(zoneTotals.values()).sort((a, b) => b.revenue - a.revenue);
 
     return {
-      paidOrders,
-      paidRevenue,
-      previousPaidOrders,
+      confirmedOrders,
+      confirmedRevenue,
+      previousConfirmedOrders,
       previousRevenue,
-      averageOrderValue: paidOrders.length ? paidRevenue / paidOrders.length : 0,
+      averageOrderValue: confirmedOrders.length ? confirmedRevenue / confirmedOrders.length : 0,
       discounts,
       delivered,
       pendingPayment,
@@ -374,7 +369,6 @@ export default function SalesAnalyticsPage() {
       asap,
       trends,
       statusRows,
-      paymentRows,
       productRows,
       categoryRows,
       couponRows,
@@ -396,8 +390,8 @@ export default function SalesAnalyticsPage() {
 
     switch (reportType) {
       case 'trends':
-        headers = ['Date', 'Paid revenue', 'Paid orders', 'All orders'];
-        rows = calculations.trends.map((row) => [row.date, row.revenue, row.paidOrders, row.allOrders]);
+        headers = ['Date', 'Confirmed revenue', 'Confirmed orders', 'All orders'];
+        rows = calculations.trends.map((row) => [row.date, row.revenue, row.confirmedOrders, row.allOrders]);
         break;
       case 'products':
         headers = ['Product', 'Units sold', 'Revenue'];
@@ -408,12 +402,12 @@ export default function SalesAnalyticsPage() {
         rows = calculations.categoryRows.map((row) => [row.name, row.quantity, row.revenue]);
         break;
       case 'delivery':
-        headers = ['Delivery zone', 'Paid orders', 'Revenue'];
+        headers = ['Delivery zone', 'Confirmed orders', 'Revenue'];
         rows = calculations.zoneRows.map((row) => [row.name, row.orders, row.revenue]);
         break;
       case 'coupons':
-        headers = ['Coupon', 'Usage count', 'Paid orders', 'Discounts', 'Revenue'];
-        rows = calculations.couponRows.map((row) => [row.code, row.uses, row.paidOrders, row.discounts, row.revenue]);
+        headers = ['Coupon', 'Usage count', 'Confirmed orders', 'Discounts', 'Revenue'];
+        rows = calculations.couponRows.map((row) => [row.code, row.uses, row.confirmedOrders, row.discounts, row.revenue]);
         break;
       case 'statuses':
         headers = ['Order status', 'Orders'];
@@ -421,13 +415,13 @@ export default function SalesAnalyticsPage() {
         break;
       default:
         rows = [
-          ['Paid revenue', calculations.paidRevenue],
-          ['Paid orders', calculations.paidOrders.length],
-          ['Average paid order value', calculations.averageOrderValue],
+          ['Confirmed revenue', calculations.confirmedRevenue],
+          ['Confirmed orders', calculations.confirmedOrders.length],
+          ['Average confirmed order value', calculations.averageOrderValue],
           ['Delivered orders', calculations.delivered],
           ['Pending-payment orders', calculations.pendingPayment],
           ['Cancelled orders', calculations.cancelled],
-          ['Paid-order discounts', calculations.discounts],
+          ['Confirmed-order discounts', calculations.discounts],
         ];
     }
 
@@ -498,17 +492,6 @@ export default function SalesAnalyticsPage() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-amber-300/60 bg-amber-50/70 p-4 text-sm text-amber-950 dark:bg-amber-950/20 dark:text-amber-100">
-        <p>
-          Date trends use <strong>order creation time</strong>: the schema has no payment timestamp, so these are not payment-date trends.
-          Revenue includes orders currently marked paid and excludes pending, refunded, and cancelled orders.
-        </p>
-        <p>
-          Refund records contain no refund amount or timestamp. Refund totals and net-of-refund revenue cannot be calculated reliably.
-          Category mapping uses the product&apos;s current category because category is not snapshotted on order items.
-        </p>
-      </div>
-
       {invalidCustomRange && (
         <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
           The custom range start date must be on or before its end date.
@@ -557,29 +540,28 @@ export default function SalesAnalyticsPage() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {[
               {
-                label: 'Paid revenue',
-                value: money(calculations.paidRevenue),
-                compare: comparison(calculations.paidRevenue, calculations.previousRevenue, money),
+                label: 'Confirmed revenue',
+                value: money(calculations.confirmedRevenue),
+                compare: comparison(calculations.confirmedRevenue, calculations.previousRevenue, money),
               },
               {
-                label: 'Paid orders',
-                value: calculations.paidOrders.length.toLocaleString(),
-                compare: comparison(calculations.paidOrders.length, calculations.previousPaidOrders.length, (value) => value.toLocaleString()),
+                label: 'Confirmed orders',
+                value: calculations.confirmedOrders.length.toLocaleString(),
+                compare: comparison(calculations.confirmedOrders.length, calculations.previousConfirmedOrders.length, (value) => value.toLocaleString()),
               },
               {
                 label: 'Average order value',
                 value: money(calculations.averageOrderValue),
                 compare: comparison(
                   calculations.averageOrderValue,
-                  calculations.previousPaidOrders.length ? calculations.previousRevenue / calculations.previousPaidOrders.length : 0,
+                  calculations.previousConfirmedOrders.length ? calculations.previousRevenue / calculations.previousConfirmedOrders.length : 0,
                   money,
                 ),
               },
               { label: 'Delivered orders', value: calculations.delivered.toLocaleString(), compare: 'Current order status' },
               { label: 'Pending-payment orders', value: calculations.pendingPayment.toLocaleString(), compare: 'Current payment status' },
               { label: 'Cancelled orders', value: calculations.cancelled.toLocaleString(), compare: 'Current order status' },
-              { label: 'Paid-order discounts', value: money(calculations.discounts), compare: 'Snapshot discount amounts' },
-              { label: 'Refund totals', value: 'Unavailable', compare: 'No reliable refund amount records' },
+              { label: 'Confirmed-order discounts', value: money(calculations.discounts), compare: 'Snapshot discount amounts' },
             ].map((card) => (
               <div key={card.label} className="rounded-3xl border border-border bg-card p-5">
                 <p className="text-xs font-bold uppercase text-muted-foreground">{card.label}</p>
@@ -597,7 +579,7 @@ export default function SalesAnalyticsPage() {
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip formatter={(value) => money(Number(value))} />
-                  <Line type="monotone" dataKey="revenue" name="Paid revenue" stroke="#16834a" strokeWidth={3} dot={false} />
+                  <Line type="monotone" dataKey="revenue" name="Confirmed revenue" stroke="#16834a" strokeWidth={3} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </Panel>
@@ -609,7 +591,7 @@ export default function SalesAnalyticsPage() {
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                   <Tooltip />
-                  <Bar dataKey="paidOrders" name="Paid orders" fill="#16834a" radius={[5, 5, 0, 0]} />
+                  <Bar dataKey="confirmedOrders" name="Confirmed orders" fill="#16834a" radius={[5, 5, 0, 0]} />
                   <Bar dataKey="allOrders" name="All orders" fill="#93c5fd" radius={[5, 5, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -628,21 +610,6 @@ export default function SalesAnalyticsPage() {
               </ResponsiveContainer>
             </Panel>
 
-            <Panel title="Paid versus unpaid orders">
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={calculations.paymentRows} margin={{ top: 8, right: 12, left: 8, bottom: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Bar dataKey="value" name="Orders" radius={[5, 5, 0, 0]}>
-                    {calculations.paymentRows.map((entry, index) => (
-                      <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </Panel>
           </div>
 
           <div className="grid gap-6 xl:grid-cols-2">
@@ -669,7 +636,7 @@ export default function SalesAnalyticsPage() {
                   </table>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No paid product-item sales in this period.</p>
+                <p className="text-sm text-muted-foreground">No confirmed product-item sales in this period.</p>
               )}
             </Panel>
 
@@ -693,7 +660,7 @@ export default function SalesAnalyticsPage() {
                 <div className="space-y-3">
                   {calculations.zoneRows.map((row) => (
                     <div key={row.name} className="flex items-center justify-between gap-3 border-b border-border pb-2 text-sm last:border-0">
-                      <span className="truncate">{row.name} <span className="text-muted-foreground">({row.orders} paid orders)</span></span>
+                      <span className="truncate">{row.name} <span className="text-muted-foreground">({row.orders} confirmed orders)</span></span>
                       <strong>{money(row.revenue)}</strong>
                     </div>
                   ))}
