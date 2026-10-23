@@ -34,11 +34,6 @@ const greekYoghurtImages = [
   '/assets/IMG_8428_parfait_stack.jpg',
 ];
 
-const customParfaitImages = [
-  '/assets/IMG_8435_parfait_multi.jpg',
-  '/assets/IMG_8428_parfait_stack.jpg',
-];
-
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
 interface ParfaitProduct {
@@ -189,7 +184,7 @@ export default function SignatureParfaits() {
 
   return (
     <section 
-      className="py-20 relative overflow-hidden bg-gradient-to-b from-secondary/5 via-white to-background border-y border-border/40"
+      className="cream-wave-bottom py-20 relative overflow-hidden bg-gradient-to-b from-secondary/5 via-white to-background border-y border-border/40"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={() => setIsHovered(true)}
@@ -260,13 +255,6 @@ export default function SignatureParfaits() {
           <GrapeClusterDecoration size={60} />
         </div>
 
-        {/* ── INTERIOR ACCENT (desktop only) ── */}
-        <div className="absolute top-[65%] left-[20%] opacity-35 hidden lg:block" style={{ transform: 'rotate(-15deg)' }}>
-          <OrangeSliceDecoration size={50} />
-        </div>
-        <div className="absolute top-[20%] right-[22%] opacity-30 hidden lg:block" style={{ transform: 'rotate(20deg)' }}>
-          <WatermelonSliceDecoration size={52} />
-        </div>
       </div>
 
       
@@ -429,47 +417,6 @@ export default function SignatureParfaits() {
               </div>
             );
           })}
-
-          {/* Custom Parfait Card */}
-          <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always">
-            <div className="bg-[#FFFDF9] rounded-3xl shadow-md border-2 border-dashed border-primary/30 overflow-hidden flex flex-col h-full justify-between p-6 hover:shadow-xl hover:border-primary transition-all duration-300">
-              
-              <div className="flex flex-col gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Sparkles className="w-6 h-6 fill-primary/15" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold font-serif text-foreground mb-2">
-                    Build Your Own Parfait
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                    Have it your way! Choose your base, pick sweet fresh fruits, and stack your favorite nuts and toppings.
-                  </p>
-                </div>
-              </div>
-
-              {/* Graphic preview */}
-              <div className="relative h-28 my-2 overflow-hidden bg-primary/5 rounded-2xl flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                <img 
-                  src={customParfaitImages[activeImageIdx % customParfaitImages.length]} 
-                  alt="Custom Parfait ingredients" 
-                  className="w-full h-full object-cover opacity-85 mix-blend-multiply transition-all duration-1000"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/15 via-transparent to-transparent" />
-              </div>
-
-              <div className="pt-4">
-                <a href="/greek-yogurt-parfaits">
-                  <Button 
-                    className="w-full bg-secondary hover:bg-secondary/90 text-white rounded-full font-bold h-11 shadow-md"
-                  >
-                    Customize Now
-                  </Button>
-                </a>
-              </div>
-
-            </div>
-          </div>
 
         </div>
 

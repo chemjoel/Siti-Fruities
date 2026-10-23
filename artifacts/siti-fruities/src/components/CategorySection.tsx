@@ -7,7 +7,6 @@ import {
   Utensils
 } from 'lucide-react';
 import { 
-  StrawberryDecoration, 
   StrawberryHalfDecoration,
   KiwiSliceDecoration, 
   BlueberryDecoration, 
@@ -209,13 +208,6 @@ export default function CategorySection() {
           <GrapeClusterDecoration size={62} />
         </div>
 
-        {/* ── INTERIOR ACCENTS (desktop only) ── */}
-        <div className="absolute top-[28%] left-[18%] opacity-28 hidden xl:block" style={{ transform: 'rotate(25deg)' }}>
-          <StrawberryDecoration size={46} />
-        </div>
-        <div className="absolute top-[60%] right-[20%] opacity-28 hidden xl:block" style={{ transform: 'rotate(-18deg)' }}>
-          <OrangeSliceDecoration size={44} />
-        </div>
       </div>
 
       <div className="container mx-auto px-4 md:px-8 relative z-10">

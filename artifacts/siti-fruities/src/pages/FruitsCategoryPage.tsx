@@ -7,7 +7,9 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductCard, { Product } from '@/components/ProductCard';
 import { Apple, Leaf, Cookie, Sparkles, ShoppingBag, ArrowLeft, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useProductsByCategory } from '@/hooks/useCatalog';
 
+// TODO: remove in cleanup
 const FRUITS_PRODUCTS: Product[] = [
   {
     productId: 'healthy-chicken-salad',
@@ -88,6 +90,28 @@ const FRUITS_PRODUCTS: Product[] = [
 ];
 
 export default function FruitsCategoryPage() {
+  const { data, isLoading, isError } = useProductsByCategory('fruits');
+  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
+  const products: Product[] = shouldUseFallback
+    ? FRUITS_PRODUCTS
+    : (data ?? []).map((product) => ({
+        productId: product.slug,
+        name: product.name,
+        description: product.description,
+        basePrice: product.basePrice,
+        image: product.imageUrl || undefined,
+        placeholderIcon: Apple,
+        placeholderGradient: 'from-orange-50 to-amber-100 border-orange-200/50 text-orange-600',
+        options: product.options.map((option) => ({
+          name: option.name,
+          choices: option.choices.map((choice) => ({
+            value: choice.value,
+            priceModifier: choice.priceModifier,
+          })),
+        })),
+        isAvailable: product.isAvailable,
+      }));
+
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
       <Navbar />
@@ -128,9 +152,20 @@ export default function FruitsCategoryPage() {
               </div>
             </div>
 
+            {isLoading && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground" role="status">
+                Loading fruits and snacks...
+              </p>
+            )}
+            {isError && (
+              <p className="mb-6 text-sm font-medium text-destructive" role="alert">
+                Unable to load fruits and snacks. Showing the temporary catalogue instead.
+              </p>
+            )}
+
             {/* Responsive grid matching homepage design */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {FRUITS_PRODUCTS.map((product, idx) => (
+              {products.map((product, idx) => (
                 <motion.div
                   key={product.productId}
                   initial={{ opacity: 0, y: 20 }}

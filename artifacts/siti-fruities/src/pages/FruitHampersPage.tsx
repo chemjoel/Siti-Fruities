@@ -8,23 +8,25 @@ import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Gift, ArrowLeft, Clock, Plus, Minus, ChevronDown, ChevronUp, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useProductsByCategory } from '@/hooks/useCatalog';
 
 // Helper for formatting currency
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
 interface HamperProduct {
-  id: string;
+  slug: string;
   name: string;
-  price: number;
+  basePrice: number;
   description: string;
   contents: string[];
 }
 
+// TODO: remove in cleanup
 const HAMPER_PRODUCTS: HamperProduct[] = [
   {
-    id: 'deluxe-hamper',
+    slug: 'deluxe-hamper',
     name: 'Deluxe Hamper',
-    price: 70000,
+    basePrice: 70000,
     description: 'A premium gift hamper combining fresh fruits, Greek yoghurt, crunchy granola, nuts, treats and thoughtful finishing touches.',
     contents: [
       '1 whole Watermelon',
@@ -45,9 +47,9 @@ const HAMPER_PRODUCTS: HamperProduct[] = [
     ]
   },
   {
-    id: 'exotic-fruit-hamper',
+    slug: 'exotic-fruit-hamper',
     name: 'Exotic Fruit Hamper',
-    price: 55000,
+    basePrice: 55000,
     description: 'A colourful fruit-focused hamper filled with carefully selected fruits and presented as a thoughtful gift.',
     contents: [
       '1 Big Pineapple',
@@ -70,15 +72,15 @@ function HamperCard({ product }: { product: HamperProduct }) {
   const [quantity, setQuantity] = useState(1);
   const [isContentsExpanded, setIsContentsExpanded] = useState(false);
 
-  const totalPrice = product.price * quantity;
+  const totalPrice = product.basePrice * quantity;
 
   const handleAdd = () => {
     addItem({
-      productId: product.id,
+      productId: product.slug,
       name: product.name,
       // Fallback thumbnail pointing to the fruit hamper cover asset
       image: '/assets/Screenshot_20260729-213638_1785360173839.jpg',
-      price: product.price,
+      price: product.basePrice,
       quantity,
     });
     setQuantity(1);
@@ -191,6 +193,25 @@ function HamperCard({ product }: { product: HamperProduct }) {
 }
 
 export default function FruitHampersPage() {
+  const { data, isLoading, isError } = useProductsByCategory('fruit-hampers');
+  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
+  const products: HamperProduct[] = shouldUseFallback
+    ? HAMPER_PRODUCTS
+    : (data ?? []).map((product) => {
+        const contents = (product.ingredients ?? '')
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        return {
+          slug: product.slug,
+          name: product.name,
+          basePrice: product.basePrice,
+          description: product.description,
+          contents: contents.length > 0 ? contents : product.description ? [product.description] : [],
+        };
+      });
+
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
       <Navbar />
@@ -230,11 +251,22 @@ export default function FruitHampersPage() {
               </div>
             </div>
 
+            {isLoading && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground" role="status">
+                Loading fruit hampers...
+              </p>
+            )}
+            {isError && (
+              <p className="mb-6 text-sm font-medium text-destructive" role="alert">
+                Unable to load fruit hampers. Showing the temporary catalogue instead.
+              </p>
+            )}
+
             {/* Grid for Hamper Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto gap-6 md:gap-8">
-              {HAMPER_PRODUCTS.map((product, idx) => (
+              {products.map((product, idx) => (
                 <motion.div
-                  key={product.id}
+                  key={product.slug}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.05 }}

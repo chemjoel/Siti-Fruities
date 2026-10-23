@@ -1,12 +1,9 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 export function StrawberryDecoration({ className = '', size = 56 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, -10, 0], rotate: [0, 6, 0] }}
-      transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-md ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-md ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
@@ -42,16 +39,14 @@ export function StrawberryDecoration({ className = '', size = 56 }: { className?
         />
         <path d="M32 4 C31 1 33 0 34 0" stroke="#047857" strokeWidth="2.5" strokeLinecap="round" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function StrawberryHalfDecoration({ className = '', size = 72 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, -8, 0], rotate: [-5, 5, -5] }}
-      transition={{ repeat: Infinity, duration: 7, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-lg ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-lg ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 80 80" fill="none" className="w-full h-full">
@@ -86,16 +81,14 @@ export function StrawberryHalfDecoration({ className = '', size = 72 }: { classN
         {/* Calyx */}
         <path d="M40 2 C38 5 39 8 40 8 C36 5 30 4 28 7 C31 9 35 10 37 12 C32 12 26 14 26 17 C31 16 36 14 39 13 C38 17 38 21 40 21 C42 21 42 17 41 13 C44 14 49 16 54 17 C54 14 48 12 43 12 C45 10 49 9 52 7 C50 4 44 5 40 8 Z" fill="#15803D" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function KiwiSliceDecoration({ className = '', size = 60 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, 10, 0], rotate: [0, -8, 0] }}
-      transition={{ repeat: Infinity, duration: 7, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-md ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-md ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
@@ -128,16 +121,14 @@ export function KiwiSliceDecoration({ className = '', size = 60 }: { className?:
           );
         })}
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function BlueberryDecoration({ className = '', size = 52 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, -8, 0], rotate: [0, -6, 0] }}
-      transition={{ repeat: Infinity, duration: 5.5, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-md ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-md ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
@@ -161,16 +152,14 @@ export function BlueberryDecoration({ className = '', size = 52 }: { className?:
         <ellipse cx="19" cy="34" rx="5" ry="3" fill="#BFDBFE" opacity="0.4" transform="rotate(-30 19 34)" />
         <path d="M24 32 L26 35 L29 34 L27 37 L30 39 L26 39 L24 43 L22 39 L18 39 L21 37 L19 34 L22 35 Z" fill="#0F172A" opacity="0.85" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function GrapeClusterDecoration({ className = '', size = 72 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, -12, 0], rotate: [0, 4, 0] }}
-      transition={{ repeat: Infinity, duration: 6.5, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-lg ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-lg ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 80 90" fill="none" className="w-full h-full">
@@ -219,16 +208,14 @@ export function GrapeClusterDecoration({ className = '', size = 72 }: { classNam
         {/* Leaf */}
         <path d="M36 10 C30 6 22 8 20 14 C24 14 28 12 30 14 C26 16 22 20 22 24 C26 22 30 18 34 18 C32 22 32 26 34 28 C36 24 36 20 38 18 Z" fill="#16A34A" opacity="0.9" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function WatermelonSliceDecoration({ className = '', size = 70 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, 9, 0], rotate: [0, -7, 0] }}
-      transition={{ repeat: Infinity, duration: 7.5, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-lg ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-lg ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 80 60" fill="none" className="w-full h-full">
@@ -261,16 +248,14 @@ export function WatermelonSliceDecoration({ className = '', size = 70 }: { class
         {/* Highlight */}
         <path d="M22 26 C30 20 50 22 58 28" stroke="#FCA5A5" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function OrangeSliceDecoration({ className = '', size = 64 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, -10, 0], rotate: [0, 8, 0] }}
-      transition={{ repeat: Infinity, duration: 6.2, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-md ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-md ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
@@ -301,16 +286,14 @@ export function OrangeSliceDecoration({ className = '', size = 64 }: { className
         {/* Highlight */}
         <ellipse cx="22" cy="22" rx="7" ry="4" fill="white" opacity="0.22" transform="rotate(-40 22 22)" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function PineappleSliceDecoration({ className = '', size = 66 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, 11, 0], rotate: [0, -6, 0] }}
-      transition={{ repeat: Infinity, duration: 8, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-md ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-md ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 70 80" fill="none" className="w-full h-full">
@@ -351,16 +334,14 @@ export function PineappleSliceDecoration({ className = '', size = 66 }: { classN
         {/* Highlight */}
         <ellipse cx="26" cy="38" rx="7" ry="4" fill="white" opacity="0.25" transform="rotate(-30 26 38)" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function YoghurtSwirlDecoration({ className = '', size = 80 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ scale: [1, 1.04, 1], rotate: [0, 3, 0] }}
-      transition={{ repeat: Infinity, duration: 8, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 100 100" fill="none" className="w-full h-full">
@@ -406,16 +387,14 @@ export function YoghurtSwirlDecoration({ className = '', size = 80 }: { classNam
         {/* Soft shine */}
         <ellipse cx="44" cy="40" rx="6" ry="3" fill="white" opacity="0.4" transform="rotate(-20 44 40)" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function MangoDecoration({ className = '', size = 54 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, 9, 0], rotate: [0, 8, 0] }}
-      transition={{ repeat: Infinity, duration: 6.5, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-md ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-md ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
@@ -434,16 +413,14 @@ export function MangoDecoration({ className = '', size = 54 }: { className?: str
         <path d="M18 16 C26 12 38 16 44 22" stroke="#FEF9C3" strokeWidth="2.5" strokeLinecap="round" opacity="0.75" />
         <circle cx="28" cy="24" r="2" fill="#FFFFFF" opacity="0.5" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function MintLeafDecoration({ className = '', size = 50 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, -11, 0], rotate: [0, -12, 0] }}
-      transition={{ repeat: Infinity, duration: 8, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-md ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-md ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
@@ -463,16 +440,14 @@ export function MintLeafDecoration({ className = '', size = 50 }: { className?: 
         <path d="M28 36 C34 33 40 35 43 38" stroke="#065F46" strokeWidth="1.2" strokeLinecap="round" />
         <path d="M38 26 C44 23 48 24 50 26" stroke="#065F46" strokeWidth="1.2" strokeLinecap="round" />
       </svg>
-    </motion.div>
+    </div>
   );
 }
 
 export function CashewDecoration({ className = '', size = 48 }: { className?: string; size?: number }) {
   return (
-    <motion.div
-      animate={{ y: [0, 8, 0], rotate: [0, 10, 0] }}
-      transition={{ repeat: Infinity, duration: 6.8, ease: 'easeInOut' }}
-      className={`pointer-events-none select-none drop-shadow-md ${className}`}
+    <div
+      className={`fruit-art pointer-events-none select-none drop-shadow-md ${className}`}
       style={{ width: size, height: size }}
     >
       <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
@@ -493,6 +468,6 @@ export function CashewDecoration({ className = '', size = 48 }: { className?: st
         />
         <path d="M26 16 C34 14 44 18 48 26" stroke="#FEF9C3" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
       </svg>
-    </motion.div>
+    </div>
   );
 }

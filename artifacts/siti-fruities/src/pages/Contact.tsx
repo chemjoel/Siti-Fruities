@@ -19,6 +19,7 @@ import {
   Instagram
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { BUSINESS_HOURS } from '@/lib/businessHours';
 
 export default function Contact() {
   const whatsappUrl = "https://wa.me/2348120842962?text=Hello%20SITI%20FRUITIES%2C%20I%27d%20like%20to%20make%20an%20enquiry.";
@@ -195,34 +196,12 @@ export default function Contact() {
                   </div>
 
                   <div className="space-y-3 divide-y divide-border text-sm">
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-medium text-foreground">Monday</span>
-                      <span className="font-bold text-primary">9:00 AM – 10:00 PM</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-medium text-foreground">Tuesday</span>
-                      <span className="font-bold text-primary">9:00 AM – 10:00 PM</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-medium text-foreground">Wednesday</span>
-                      <span className="font-bold text-primary">9:00 AM – 10:00 PM</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-medium text-foreground">Thursday</span>
-                      <span className="font-bold text-primary">9:00 AM – 10:00 PM</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-medium text-foreground">Friday</span>
-                      <span className="font-bold text-primary">9:00 AM – 10:00 PM</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-medium text-foreground">Saturday</span>
-                      <span className="font-bold text-primary">9:00 AM – 10:00 PM</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-medium text-foreground">Sunday</span>
-                      <span className="font-bold text-secondary">1:00 PM – 8:00 PM</span>
-                    </div>
+                    {BUSINESS_HOURS.map(({ days, hours }) => (
+                      <div key={days} className="flex justify-between items-center pt-2">
+                        <span className="font-medium text-foreground">{days}</span>
+                        <span className={`font-bold ${days === 'Sunday' ? 'text-secondary' : 'text-primary'}`}>{hours}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

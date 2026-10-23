@@ -2,6 +2,7 @@ import React from 'react';
 const logoImg = '/assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png';
 import { MapPin, Phone, Instagram, Facebook } from 'lucide-react';
 import { SiWhatsapp } from 'react-icons/si';
+import { BUSINESS_HOURS } from '@/lib/businessHours';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -74,14 +75,15 @@ export default function Footer() {
               <span className="w-1.5 h-6 bg-accent rounded-full inline-block" /> Opening Hours
             </h4>
             <ul className="space-y-4 text-sm bg-white/5 rounded-2xl p-6 border border-white/10">
-              <li className="flex justify-between items-center border-b border-white/10 pb-3">
-                <span className="text-white/60">Mon - Sat</span>
-                <span className="font-semibold text-white">7:00 AM - 8:00 PM</span>
-              </li>
-              <li className="flex justify-between items-center pt-1">
-                <span className="text-white/60">Sunday</span>
-                <span className="font-semibold text-white">10:00 AM - 6:00 PM</span>
-              </li>
+              {BUSINESS_HOURS.map(({ days, hours }, index) => (
+                <li
+                  key={days}
+                  className={`flex justify-between items-center ${index === 0 ? 'border-b border-white/10 pb-3' : 'pt-1'}`}
+                >
+                  <span className="text-white/60">{days}</span>
+                  <span className="font-semibold text-white">{hours}</span>
+                </li>
+              ))}
             </ul>
           </div>
 

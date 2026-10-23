@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { GlassWater, ArrowLeft, Clock, Plus, Minus, Info, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useProductsByCategory } from '@/hooks/useCatalog';
 
 // Helper for formatting currency
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
@@ -23,6 +24,7 @@ interface JuiceProduct {
   iconColor: string;
 }
 
+// TODO: remove in cleanup
 const JUICE_PRODUCTS: JuiceProduct[] = [
   {
     id: 'ping',
@@ -56,6 +58,21 @@ const JUICE_PRODUCTS: JuiceProduct[] = [
   }
 ];
 
+const JUICE_STYLES: Record<string, Pick<JuiceProduct, 'placeholderGradient' | 'iconColor'>> = {
+  ping: {
+    placeholderGradient: 'from-yellow-50 to-amber-100 border-amber-200/50',
+    iconColor: 'text-amber-600',
+  },
+  'sweet-green': {
+    placeholderGradient: 'from-emerald-50 to-green-100 border-emerald-200/50',
+    iconColor: 'text-emerald-600',
+  },
+  'beet-the-heat': {
+    placeholderGradient: 'from-red-50 to-rose-100 border-rose-200/50',
+    iconColor: 'text-rose-600',
+  },
+};
+
 function JuiceCard({ juice }: { juice: JuiceProduct }) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
@@ -70,9 +87,7 @@ function JuiceCard({ juice }: { juice: JuiceProduct }) {
       image: '/assets/Screenshot_20260729-212547_1785360049692.jpg',
       price: juice.price,
       quantity,
-      options: [
-        { name: 'Size', value: juice.size }
-      ]
+      options: juice.size ? [{ name: 'Size', value: juice.size }] : [],
     });
     setQuantity(1);
   };
@@ -155,6 +170,27 @@ function JuiceCard({ juice }: { juice: JuiceProduct }) {
 }
 
 export default function ColdPressedJuicesPage() {
+  const { data, isLoading, isError } = useProductsByCategory('cold-pressed-juices');
+  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
+  const juices: JuiceProduct[] = shouldUseFallback
+    ? JUICE_PRODUCTS
+    : (data ?? []).map((product) => {
+        const sizeOption = product.options.find((option) => option.name === 'Size');
+        const sizeChoice = sizeOption?.choices[0];
+      const style = JUICE_STYLES[product.slug];
+
+        return {
+          id: product.slug,
+          name: product.name,
+          ingredients: [],
+          description: product.description,
+          size: sizeChoice?.value ?? '',
+          price: product.basePrice + (sizeChoice?.priceModifier ?? 0),
+          placeholderGradient: style?.placeholderGradient ?? 'from-emerald-50 to-green-100 border-emerald-200/50',
+          iconColor: style?.iconColor ?? 'text-emerald-600',
+        };
+      });
+
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
       <Navbar />
@@ -205,9 +241,20 @@ export default function ColdPressedJuicesPage() {
               </div>
             </div>
 
+            {isLoading && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground" role="status">
+                Loading juices...
+              </p>
+            )}
+            {isError && (
+              <p className="mb-6 text-sm font-medium text-destructive" role="alert">
+                Unable to load juices. Showing the temporary catalogue instead.
+              </p>
+            )}
+
             {/* Grid for Juice Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {JUICE_PRODUCTS.map((juice, idx) => (
+              {juices.map((juice, idx) => (
                 <motion.div
                   key={juice.id}
                   initial={{ opacity: 0, y: 20 }}

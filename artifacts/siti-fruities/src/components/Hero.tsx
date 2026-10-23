@@ -54,7 +54,7 @@ export default function Hero() {
   const activeParfait = HERO_PARFAIT_IMAGES[currentHeroIdx];
 
   return (
-    <section className="relative min-h-[92dvh] pt-24 md:pt-32 pb-16 overflow-hidden flex items-center bg-[#0C1B08]">
+    <section className="cream-wave-bottom relative min-h-[92dvh] pt-24 md:pt-32 pb-16 overflow-hidden flex items-center bg-[#102719]">
       {/* Background with warm atmospheric gradient overlay */}
       <div className="absolute inset-0 z-0">
         <img
@@ -62,8 +62,8 @@ export default function Hero() {
           alt="Siti Fruities hero atmosphere"
           className="w-full h-full object-cover object-center opacity-40 mix-blend-luminosity"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C1B08] via-[#0C1B08]/85 to-[#0C1B08]/60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0C1B08] via-transparent to-[#0C1B08]/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#102719] via-[#102719]/85 to-[#102719]/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#102719] via-transparent to-[#102719]/60" />
       </div>
 
       {/* Atmospheric glowing food lighting */}
@@ -99,8 +99,8 @@ export default function Hero() {
             transition={{ duration: 0.6 }}
             className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs sm:text-sm font-semibold px-4 py-2 rounded-full mb-6 shadow-sm"
           >
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            Fresh orders available now · Ile-Ife, Osun State
+            <span className="w-2 h-2 rounded-full bg-primary ring-4 ring-primary/20" />
+            Freshly made in Ile-Ife · Osun State
           </motion.div>
 
           <motion.h1 
@@ -110,9 +110,9 @@ export default function Hero() {
             className="font-serif text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[1.05] tracking-tight mb-6"
           >
             Eat Healthy.<br />
-            <span className="text-primary relative inline-block">
+            <span className="brand-neon-orange relative inline-block">
               Feel Amazing.
-              <svg className="absolute -bottom-2 md:-bottom-4 left-0 w-full h-3 md:h-5 text-primary/40" viewBox="0 0 200 20" preserveAspectRatio="none">
+              <svg className="absolute -bottom-2 md:-bottom-4 left-0 w-full h-3 md:h-5 text-accent/50" viewBox="0 0 200 20" preserveAspectRatio="none">
                 <path d="M0,10 Q100,20 200,5" stroke="currentColor" strokeWidth="8" fill="none" strokeLinecap="round" />
               </svg>
             </span>

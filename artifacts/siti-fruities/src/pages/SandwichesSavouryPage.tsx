@@ -7,7 +7,9 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductCard, { Product } from '@/components/ProductCard';
 import { Sparkles, Leaf, ArrowLeft, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useProductsByCategory } from '@/hooks/useCatalog';
 
+// TODO: remove in cleanup
 const SANDWICH_PRODUCTS: Product[] = [
   {
     productId: 'chicken-sandwich',
@@ -47,6 +49,7 @@ const SANDWICH_PRODUCTS: Product[] = [
   }
 ];
 
+// TODO: remove in cleanup. This fallback also contains Healthy Chicken Salad.
 const SAVOURY_PRODUCTS: Product[] = [
   {
     productId: 'cheesesteak',
@@ -85,6 +88,31 @@ const SAVOURY_PRODUCTS: Product[] = [
 ];
 
 export default function SandwichesSavouryPage() {
+  const { data, isLoading, isError } = useProductsByCategory('sandwiches-savoury');
+  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
+  const fallbackProducts = [...SANDWICH_PRODUCTS, ...SAVOURY_PRODUCTS];
+  const products: Product[] = shouldUseFallback
+    ? fallbackProducts
+    : (data ?? []).map((product) => ({
+        productId: product.slug,
+        name: product.name,
+        description: product.description,
+        basePrice: product.basePrice,
+        image: product.imageUrl ?? undefined,
+        placeholderIcon: Sparkles,
+        placeholderGradient: 'from-yellow-50 to-amber-100 border-yellow-200/50 text-amber-600',
+        options: product.options.map((option) => ({
+          name: option.name,
+          choices: option.choices.map((choice) => ({
+            value: choice.value,
+            priceModifier: choice.priceModifier,
+          })),
+        })),
+        isAvailable: product.isAvailable,
+      }));
+  const sandwichProducts = products.filter((product) => product.productId.includes('sandwich'));
+  const savouryProducts = products.filter((product) => !product.productId.includes('sandwich'));
+
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
       <Navbar />
@@ -113,6 +141,16 @@ export default function SandwichesSavouryPage() {
         {/* Product Catalogue Grid */}
         <section className="py-16 bg-background">
           <div className="container mx-auto px-4 md:px-8">
+            {isLoading && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground" role="status">
+                Loading sandwiches and savoury products...
+              </p>
+            )}
+            {isError && (
+              <p className="mb-6 text-sm font-medium text-destructive" role="alert">
+                Unable to load sandwiches and savoury products. Showing the temporary catalogue instead.
+              </p>
+            )}
             
             {/* Section A: Sandwiches */}
             <div className="mb-16">
@@ -129,7 +167,7 @@ export default function SandwichesSavouryPage() {
 
               {/* Grid for Sandwiches */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {SANDWICH_PRODUCTS.map((product, idx) => (
+                {sandwichProducts.map((product, idx) => (
                   <motion.div
                     key={product.productId}
                     initial={{ opacity: 0, y: 20 }}
@@ -154,7 +192,7 @@ export default function SandwichesSavouryPage() {
 
               {/* Grid for Savoury & Salads */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {SAVOURY_PRODUCTS.map((product, idx) => (
+                {savouryProducts.map((product, idx) => (
                   <motion.div
                     key={product.productId}
                     initial={{ opacity: 0, y: 20 }}

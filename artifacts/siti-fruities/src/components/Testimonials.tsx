@@ -40,7 +40,7 @@ export default function Testimonials() {
   }, [emblaApi]);
 
   return (
-    <section className="py-24 bg-[#FAFAF7] relative">
+    <section className="py-24 bg-background relative">
       <div className="container mx-auto px-4 md:px-8">
         <div className="text-center mb-16">
           <motion.h2 

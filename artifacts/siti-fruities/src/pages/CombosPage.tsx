@@ -8,11 +8,24 @@ import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Sparkles, ArrowLeft, Clock, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useProductsByCategory } from '@/hooks/useCatalog';
+import type { CatalogProductOption } from '@/hooks/useCatalog';
 
 // Helper for formatting currency
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
 interface ComboProduct {
+  id: string;
+  slug: string;
+  name: string;
+  basePrice: number;
+  description: string;
+  imageUrl: string | null;
+  options: CatalogProductOption[];
+  includedItems: string[];
+}
+
+interface FallbackComboProduct {
   id: string;
   name: string;
   price: number;
@@ -22,7 +35,8 @@ interface ComboProduct {
   requiresSandwich?: boolean;
 }
 
-const COMBO_PRODUCTS: ComboProduct[] = [
+// TODO: remove in cleanup
+const COMBO_PRODUCTS: FallbackComboProduct[] = [
   {
     id: 'cheesesteak-smoothie',
     name: 'Cheesesteak + Smoothie',
@@ -127,40 +141,39 @@ const SANDWICH_CHOICES = [
 function ComboCard({ product }: { product: ComboProduct }) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [selectedSmoothie, setSelectedSmoothie] = useState('');
-  const [selectedSandwich, setSelectedSandwich] = useState('');
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
-  const totalPrice = product.price * quantity;
+  const unitPrice = product.basePrice + product.options.reduce((modifierTotal, option) => {
+    const selectedValue = selectedOptions[option.name];
+    const selectedChoice = option.choices.find((choice) => choice.value === selectedValue);
+    return modifierTotal + (selectedChoice?.priceModifier ?? 0);
+  }, 0);
+  const totalPrice = unitPrice * quantity;
 
-  // Determine if required selections have been made
-  const isSelectionMissing = 
-    (product.requiresSmoothie && !selectedSmoothie) || 
-    (product.requiresSandwich && !selectedSandwich);
+  const selectorOptions = product.options.filter(
+    (option) => option.name === 'Smoothie' || option.name === 'Sandwich',
+  );
+  const isSelectionMissing = selectorOptions.some((option) => !selectedOptions[option.name]);
 
   const handleAdd = () => {
     if (isSelectionMissing) return;
 
-    const formattedOptions = [];
-    if (product.requiresSmoothie && selectedSmoothie) {
-      formattedOptions.push({ name: 'Smoothie', value: selectedSmoothie });
-    }
-    if (product.requiresSandwich && selectedSandwich) {
-      formattedOptions.push({ name: 'Sandwich', value: selectedSandwich });
-    }
+    const formattedOptions: { name: string; value: string }[] = selectorOptions
+      .filter((option) => selectedOptions[option.name])
+      .map((option) => ({ name: option.name, value: selectedOptions[option.name] }));
 
     addItem({
-      productId: product.id,
+      productId: product.slug,
       name: product.name,
       // Fallback logo asset for combinations card thumbnail in cart
-      image: '/assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png',
-      price: product.price,
+      image: product.imageUrl || '/assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png',
+      price: unitPrice,
       quantity,
       options: formattedOptions,
     });
 
     // Reset selectors
-    setSelectedSmoothie('');
-    setSelectedSandwich('');
+    setSelectedOptions({});
     setQuantity(1);
   };
 
@@ -169,11 +182,17 @@ function ComboCard({ product }: { product: ComboProduct }) {
       
       {/* Polished Empty Branded Image Placeholder */}
       <div className="relative aspect-[4/3] w-full bg-gradient-to-br from-amber-50 to-orange-100 border-orange-200/50 flex flex-col items-center justify-center border-b border-card-border p-6 overflow-hidden shrink-0">
-        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="bg-white/80 backdrop-blur-sm p-4 rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
-          <Sparkles className="w-10 h-10 stroke-[1.5] text-primary" />
-        </div>
-        <span className="text-[10px] font-bold tracking-widest text-primary/70 uppercase mt-4">Siti Combos</span>
+        {product.imageUrl ? (
+          <img src={product.imageUrl} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
+              <Sparkles className="w-10 h-10 stroke-[1.5] text-primary" />
+            </div>
+            <span className="text-[10px] font-bold tracking-widest text-primary/70 uppercase mt-4">Siti Combos</span>
+          </>
+        )}
       </div>
 
       {/* Card Content */}
@@ -201,53 +220,54 @@ function ComboCard({ product }: { product: ComboProduct }) {
         </div>
 
         {/* Dynamic Smoothie Option Selector */}
-        {product.requiresSmoothie && (
-          <div className="space-y-2 pt-2 border-t border-border/40">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
-              Choose your 50cl Smoothie
-            </label>
-            <select
-              value={selectedSmoothie}
-              onChange={(e) => setSelectedSmoothie(e.target.value)}
-              className="w-full bg-white border border-border hover:border-primary/50 text-foreground text-sm font-semibold rounded-xl p-2.5 outline-none transition-all cursor-pointer"
-            >
-              <option value="" disabled>Select smoothie...</option>
-              {SMOOTHIE_CHOICES.map((choice) => (
-                <option key={choice} value={choice}>
-                  {choice}
-                </option>
-              ))}
-            </select>
+        {selectorOptions.map((option) => (
+          <div key={option.name} className="space-y-2 pt-2 border-t border-border/40">
+            {option.name === 'Smoothie' ? (
+              <>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+                  Choose your 50cl Smoothie
+                </label>
+                <select
+                  value={selectedOptions[option.name] ?? ''}
+                  onChange={(event) => setSelectedOptions((current) => ({ ...current, [option.name]: event.target.value }))}
+                  className="w-full bg-white border border-border hover:border-primary/50 text-foreground text-sm font-semibold rounded-xl p-2.5 outline-none transition-all cursor-pointer"
+                >
+                  <option value="" disabled>Select smoothie...</option>
+                  {option.choices.map((choice) => (
+                    <option key={choice.value} value={choice.value}>
+                      {choice.value}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : (
+              <>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+                  Choose your sandwich
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {option.choices.map((choice) => {
+                    const isSelected = selectedOptions[option.name] === choice.value;
+                    return (
+                      <button
+                        key={choice.value}
+                        type="button"
+                        onClick={() => setSelectedOptions((current) => ({ ...current, [option.name]: choice.value }))}
+                        className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
+                          isSelected
+                            ? 'bg-primary border-primary text-white shadow-sm'
+                            : 'bg-white border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
+                        }`}
+                      >
+                        {choice.value}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
-        )}
-
-        {/* Dynamic Sandwich Option Selector */}
-        {product.requiresSandwich && (
-          <div className="space-y-2 pt-2 border-t border-border/40">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
-              Choose your sandwich
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {SANDWICH_CHOICES.map((choice) => {
-                const isSelected = selectedSandwich === choice;
-                return (
-                  <button
-                    key={choice}
-                    type="button"
-                    onClick={() => setSelectedSandwich(choice)}
-                    className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
-                      isSelected
-                        ? 'bg-primary border-primary text-white shadow-sm'
-                        : 'bg-white border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
-                    }`}
-                  >
-                    {choice}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        ))}
 
         {/* Card Footer - Price, Quantity & Add to Cart */}
         <div className="mt-auto border-t border-border pt-4 flex flex-col gap-3">
@@ -297,6 +317,31 @@ function ComboCard({ product }: { product: ComboProduct }) {
 }
 
 export default function CombosPage() {
+  const { data, isLoading, isError } = useProductsByCategory('combos');
+  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
+  const products: ComboProduct[] = shouldUseFallback
+    ? COMBO_PRODUCTS.map((product) => ({
+        id: product.id,
+        slug: product.id,
+        name: product.name,
+        basePrice: product.price,
+        description: product.description,
+        imageUrl: null,
+        options: [
+          ...(product.requiresSmoothie
+            ? [{ name: 'Smoothie', choices: SMOOTHIE_CHOICES.map((value) => ({ value })) }]
+            : []),
+          ...(product.requiresSandwich
+            ? [{ name: 'Sandwich', choices: SANDWICH_CHOICES.map((value) => ({ value })) }]
+            : []),
+        ],
+        includedItems: product.includedItems,
+      }))
+    : (data ?? []).map((product) => ({
+        ...product,
+        includedItems: [product.description],
+      }));
+
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
       <Navbar />
@@ -336,11 +381,22 @@ export default function CombosPage() {
               </div>
             </div>
 
+            {isLoading && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground" role="status">
+                Loading combos...
+              </p>
+            )}
+            {isError && (
+              <p className="mb-6 text-sm font-medium text-destructive" role="alert">
+                Unable to load combos. Showing the temporary catalogue instead.
+              </p>
+            )}
+
             {/* Grid for Combo Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {COMBO_PRODUCTS.map((product) => (
+              {products.map((product) => (
                 <motion.div
-                  key={product.id}
+                  key={product.slug}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
