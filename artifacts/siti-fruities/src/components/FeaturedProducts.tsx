@@ -94,14 +94,14 @@ function GreekYoghurtCard() {
 
   const handleAdd = () => {
     addItem({
-      productId: 'greek-yoghurt',
+      productId: 'greek-yogurt',
       name: 'Greek Yoghurt',
       image: greekYoghurtImg,
       price: sizePrices[size],
       quantity,
       options: [
         { name: 'Size', value: size },
-        { name: 'Type', value: sweetness }
+        { name: 'Yogurt Type', value: sweetness }
       ]
     });
     setQuantity(1);
@@ -127,7 +127,7 @@ function GreekYoghurtCard() {
 
         <div className="space-y-4 flex-1">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Type</label>
+            <label className="text-xs font-bold text-muted-foreground uppercase">Yogurt Type</label>
             <PillToggle options={['Sweetened', 'Unsweetened']} selected={sweetness} onChange={setSweetness} />
           </div>
           <div className="space-y-2">

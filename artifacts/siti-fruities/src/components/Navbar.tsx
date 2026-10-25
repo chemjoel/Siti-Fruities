@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 const logoImg = '/assets/file_000000007ec48243992a1dcbe27b3dc6_1785361828173.png';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCategories } from '@/hooks/useCatalog';
 
 const MAIN_LINKS = [
   { name: 'Home', href: '/' },
@@ -13,21 +14,13 @@ const MAIN_LINKS = [
   { name: 'Contact / Get in Touch', href: '/contact' },
 ];
 
-const SHOP_LINKS = [
-  { name: 'Fresh Fruits & Healthy Snacks', href: '/fruits' },
-  { name: 'Greek Yogurt & Parfaits', href: '/greek-yogurt-parfaits' },
-  { name: 'Smoothies', href: '/smoothies' },
-  { name: 'Cold-Pressed Juices', href: '/cold-pressed-juices' },
-  { name: 'Sandwiches & Savoury', href: '/sandwiches-savoury' },
-  { name: 'Milk Tea & Drinks', href: '/milk-tea-drinks' },
-  { name: 'Treat Boxes', href: '/treat-boxes' },
-  { name: 'Fruit Hampers', href: '/fruit-hampers' },
-  { name: 'Combos', href: '/combos' },
-  { name: 'Catering & Events', href: '/catering-events' },
-];
-
 export default function Navbar() {
   const { totalItems, setIsCartOpen } = useCart();
+  const { data, isLoading, isError } = useCategories();
+  const shopLinks = (data ?? [])
+    .filter((category) => category.is_active)
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((category) => ({ name: category.name, href: `/${category.slug}` }));
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -144,7 +137,17 @@ export default function Navbar() {
                     Our Menu / Shop
                   </div>
                   <div className="space-y-0.5 pb-12">
-                    {SHOP_LINKS.map((link, i) => (
+                    {isLoading && (
+                      <p className="px-4 py-2.5 text-sm text-muted-foreground" role="status">
+                        Loading categories...
+                      </p>
+                    )}
+                    {isError && (
+                      <p className="px-4 py-2.5 text-sm text-destructive" role="alert">
+                        Unable to load categories.
+                      </p>
+                    )}
+                    {shopLinks.map((link, i) => (
                       <motion.div
                         key={link.name}
                         initial={{ opacity: 0, x: 20 }}
