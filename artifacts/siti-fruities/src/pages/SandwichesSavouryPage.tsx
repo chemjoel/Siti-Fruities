@@ -5,111 +5,29 @@ import Footer from '@/components/Footer';
 import CartPanel from '@/components/CartPanel';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductCard, { Product } from '@/components/ProductCard';
-import { Sparkles, Leaf, ArrowLeft, Clock } from 'lucide-react';
+import { Sparkles, ArrowLeft, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProductsByCategory } from '@/hooks/useCatalog';
 
-// TODO: remove in cleanup
-const SANDWICH_PRODUCTS: Product[] = [
-  {
-    productId: 'chicken-sandwich',
-    name: 'Chicken Sandwich',
-    description: '3 sliced breads, cabbage, carrot, in-house cream and chicken.',
-    basePrice: 3000,
-    image: '/assets/IMG_1940_sandwich.jpg',
-    placeholderIcon: Sparkles,
-    placeholderGradient: 'from-yellow-50 to-amber-100 border-yellow-200/50 text-amber-600'
-  },
-  {
-    productId: 'beef-sandwich',
-    name: 'Beef Sandwich',
-    description: '3 sliced breads, cabbage, carrot, in-house cream and beef.',
-    basePrice: 3000,
-    image: '/assets/IMG_1940_sandwich.jpg',
-    placeholderIcon: Sparkles,
-    placeholderGradient: 'from-amber-50 to-orange-100 border-orange-200/50 text-orange-600'
-  },
-  {
-    productId: 'chicken-egg-sandwich',
-    name: 'Chicken & Egg Sandwich',
-    description: '3 sliced breads, cabbage, carrot, in-house cream, chicken and egg.',
-    basePrice: 5000,
-    image: '/assets/IMG_1940_sandwich.jpg',
-    placeholderIcon: Sparkles,
-    placeholderGradient: 'from-orange-50 to-red-100 border-orange-200/50 text-red-600',
-    options: [
-      {
-        name: 'Egg Preparation',
-        choices: [
-          { value: 'Fried' },
-          { value: 'Boiled' }
-        ]
-      }
-    ]
-  }
-];
-
-// TODO: remove in cleanup. This fallback also contains Healthy Chicken Salad.
-const SAVOURY_PRODUCTS: Product[] = [
-  {
-    productId: 'cheesesteak',
-    name: 'Cheesesteak',
-    description: 'A loaf of bread, mozzarella cheese, stir-fried beef and bell peppers topped with our in-house bread sauce.',
-    basePrice: 9000,
-    placeholderIcon: Sparkles,
-    placeholderGradient: 'from-red-50 to-pink-100 border-red-200/50 text-red-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: 'Small' },
-          { value: 'Medium', priceModifier: 4000 }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'healthy-chicken-salad',
-    name: 'Healthy Chicken Salad',
-    description: 'Lettuce, carrot, cucumber, bell peppers, purple cabbage, red grapes, green apple, sweetcorn, raisins, grilled chicken and salad cream.',
-    basePrice: 5000,
-    placeholderIcon: Leaf,
-    placeholderGradient: 'from-emerald-50 to-green-100 border-emerald-200/50 text-emerald-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '300ml' },
-          { value: '400ml', priceModifier: 2500 }
-        ]
-      }
-    ]
-  }
-];
-
 export default function SandwichesSavouryPage() {
   const { data, isLoading, isError } = useProductsByCategory('sandwiches-savoury');
-  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
-  const fallbackProducts = [...SANDWICH_PRODUCTS, ...SAVOURY_PRODUCTS];
-  const products: Product[] = shouldUseFallback
-    ? fallbackProducts
-    : (data ?? []).map((product) => ({
-        productId: product.slug,
-        name: product.name,
-        description: product.description,
-        basePrice: product.basePrice,
-        image: product.imageUrl ?? undefined,
-        placeholderIcon: Sparkles,
-        placeholderGradient: 'from-yellow-50 to-amber-100 border-yellow-200/50 text-amber-600',
-        options: product.options.map((option) => ({
-          name: option.name,
-          choices: option.choices.map((choice) => ({
-            value: choice.value,
-            priceModifier: choice.priceModifier,
-          })),
-        })),
-        isAvailable: product.isAvailable,
-      }));
+  const products: Product[] = (data ?? []).map((product) => ({
+    productId: product.slug,
+    name: product.name,
+    description: product.description,
+    basePrice: product.basePrice,
+    image: product.imageUrl ?? undefined,
+    placeholderIcon: Sparkles,
+    placeholderGradient: 'from-yellow-50 to-amber-100 border-yellow-200/50 text-amber-600',
+    options: product.options.map((option) => ({
+      name: option.name,
+      choices: option.choices.map((choice) => ({
+        value: choice.value,
+        priceModifier: choice.priceModifier,
+      })),
+    })),
+    isAvailable: product.isAvailable,
+  }));
   const sandwichProducts = products.filter((product) => product.productId.includes('sandwich'));
   const savouryProducts = products.filter((product) => !product.productId.includes('sandwich'));
 
@@ -148,7 +66,12 @@ export default function SandwichesSavouryPage() {
             )}
             {isError && (
               <p className="mb-6 text-sm font-medium text-destructive" role="alert">
-                Unable to load sandwiches and savoury products. Showing the temporary catalogue instead.
+                Unable to load sandwiches and savoury products.
+              </p>
+            )}
+            {!isLoading && !isError && products.length === 0 && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground">
+                No products available right now.
               </p>
             )}
             

@@ -8,155 +8,21 @@ import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Gift, ArrowLeft, Clock, Plus, Minus, ChevronDown, ChevronUp, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useProductsByCategory } from '@/hooks/useCatalog';
+import type { CatalogProductOption } from '@/hooks/useCatalog';
 
 // Helper for formatting currency
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
 interface TreatBoxProduct {
-  id: string;
+  slug: string;
   name: string;
-  price: number;
+  basePrice: number;
   description: string;
+  imageUrl: string | null;
+  options: CatalogProductOption[];
   contents: string[];
-  options?: {
-    name: string;
-    choices: string[];
-  }[];
 }
-
-const TREAT_BOX_PRODUCTS: TreatBoxProduct[] = [
-  {
-    id: 'juicy-treatbox',
-    name: 'Juicy Treatbox',
-    price: 23500,
-    description: 'A luscious collection featuring our signature ginger-pineapple juice, fresh parfait, nourishing tigernut milk, banana bread, and a delicious sandwich.',
-    contents: [
-      '500ml PING Juice (Pineapple & Ginger)',
-      '400ml Exotic Parfait',
-      '50cl Tigernut Drink',
-      'Whole Wheat Banana Bread',
-      '1 pack of Yummy Sandwich'
-    ]
-  },
-  {
-    id: 'mini-treatbox',
-    name: 'Mini Treatbox',
-    price: 14000,
-    description: 'A delightful personal selection featuring exotic parfait, a sandwich, and refreshing zobo drink.',
-    contents: [
-      '500ml bowl of Exotic Parfait',
-      '1 pack of Sandwich',
-      '1 bottle of cold Zobo'
-    ]
-  },
-  {
-    id: 'maxi-treatbox',
-    name: 'Maxi Treatbox',
-    price: 35000,
-    description: 'A generous feast box featuring a rich variety of premium parfaits, yogurts, salad, drinks, and healthy granola.',
-    contents: [
-      'Gbemidele Parfait (550ml)',
-      '500ml Greek Yoghurt',
-      '1 pack of Exotic Fruit Salad',
-      '50cl Tigernut Drink',
-      '50cl Zobo Drink',
-      '1 pack of Sandwich',
-      'Granola'
-    ]
-  },
-  {
-    id: 'deluxe-treatbox',
-    name: 'Deluxe Treatbox',
-    price: 40000,
-    description: 'Our ultimate wellness bundle packed with nutrient-rich meals, drinks, and healthy toppings perfect for gifting.',
-    contents: [
-      '1 bowl of Healthy Chicken Salad',
-      '500ml Greek Yoghurt',
-      'Gbemidele-sized Parfait (550ml)',
-      '1 bowl of Exotic Fruit Salad',
-      '50cl Tigernut Drink',
-      '50cl Zobo Drink',
-      '1 pouch of Granola'
-    ]
-  },
-  {
-    id: 'intentional-treatbox',
-    name: 'Intentional Treatbox',
-    price: 29500,
-    description: 'Thoughtfully combined to feed your body with organic goodness, containing yogurt parfait, bread, juice, and more.',
-    contents: [
-      'Gbemidele Parfait',
-      'Chicken & Egg Sandwich',
-      'Exotic Fruit Bowl',
-      'Whole Wheat Banana Bread',
-      'PING Juice',
-      'Zobo Drink'
-    ]
-  },
-  {
-    id: 'mini-treatbox-2',
-    name: 'Mini Treatbox 2',
-    price: 14500,
-    description: 'A satisfying and energizing combination of parfait, traditional hibiscus flower tea, sandwich, and crunchy toppings.',
-    contents: [
-      '500ml Exotic Parfait',
-      '35cl Hibiscus Drink (Zobo)',
-      '1 pack of Sandwich',
-      '1 pack of Toppings'
-    ]
-  },
-  {
-    id: 'mini-treatbox-3',
-    name: 'Mini Treatbox 3',
-    price: 17500,
-    description: 'A wholesome breakfast or high tea box featuring banana breads, fresh juice, and creamy yogurt parfait.',
-    contents: [
-      '400ml Exotic Parfait',
-      '2 Whole Wheat Banana Breads',
-      '25cl Zobo Drink',
-      '25cl Any Cold-Pressed Juice'
-    ],
-    options: [
-      {
-        name: 'Cold-Pressed Juice',
-        choices: ['PING', 'SWEET GREEN', 'BEET THE HEAT']
-      }
-    ]
-  },
-  {
-    id: 'juicy-treatbox-2',
-    name: 'Juicy Treatbox 2',
-    price: 23500,
-    description: 'A gorgeous pairing curated for sharing, containing juices, fresh parfait, banana bread, and your choice of sandwich.',
-    contents: [
-      'PING Juice (Pineapple & Ginger)',
-      '500ml Exotic Parfait',
-      '50cl Zobo Drink',
-      '2 Whole Wheat Banana Breads',
-      '1 pack of Chicken/Beef Sandwich'
-    ],
-    options: [
-      {
-        name: 'Sandwich',
-        choices: ['Chicken Sandwich', 'Beef Sandwich']
-      }
-    ]
-  },
-  {
-    id: 'perfecto-treatbox',
-    name: 'Perfecto Treatbox',
-    price: 24000,
-    description: 'The complete gourmet package featuring banana bread, chicken sandwich, zobo, PING juice, and a lovely note card.',
-    contents: [
-      '500ml Exotic Parfait',
-      '1 pack of Yummy Chicken Sandwich',
-      '2 Whole Wheat Banana Breads',
-      '1 bottle of Fresh PING Juice',
-      '1 bottle of cold Zobo',
-      'Note card'
-    ]
-  }
-];
 
 function TreatBoxCard({ product }: { product: TreatBoxProduct }) {
   const { addItem } = useCart();
@@ -169,14 +35,21 @@ function TreatBoxCard({ product }: { product: TreatBoxProduct }) {
     if (product.options) {
       product.options.forEach((opt) => {
         if (opt.choices && opt.choices.length > 0) {
-          initial[opt.name] = opt.choices[0];
+          initial[opt.name] = opt.choices[0].value;
         }
       });
     }
     return initial;
   });
 
-  const totalPrice = product.price * quantity;
+  const unitPrice =
+    product.basePrice +
+    product.options.reduce((modifierTotal, option) => {
+      const selectedValue = selectedOptions[option.name];
+      const selectedChoice = option.choices.find((choice) => choice.value === selectedValue);
+      return modifierTotal + (selectedChoice?.priceModifier ?? 0);
+    }, 0);
+  const totalPrice = unitPrice * quantity;
 
   const handleOptionChange = (optionName: string, value: string) => {
     setSelectedOptions((prev) => ({
@@ -187,15 +60,17 @@ function TreatBoxCard({ product }: { product: TreatBoxProduct }) {
 
   const handleAdd = () => {
     const formattedOptions = product.options
-      ? Object.entries(selectedOptions).map(([name, value]) => ({ name, value }))
+      ? product.options
+          .filter((opt) => selectedOptions[opt.name])
+          .map((opt) => ({ name: opt.name, value: selectedOptions[opt.name] }))
       : [];
 
     addItem({
-      productId: product.id,
+      productId: product.slug,
       name: product.name,
       // Fallback thumbnail pointing to the treat box cover asset
-      image: '/assets/Screenshot_20260729-212815_1785360013704.jpg',
-      price: product.price,
+      image: product.imageUrl || '/assets/Screenshot_20260729-212815_1785360013704.jpg',
+      price: unitPrice,
       quantity,
       options: formattedOptions,
     });
@@ -233,19 +108,19 @@ function TreatBoxCard({ product }: { product: TreatBoxProduct }) {
             </label>
             <div className="flex flex-wrap gap-2">
               {opt.choices.map((choice) => {
-                const isSelected = selectedOptions[opt.name] === choice;
+                const isSelected = selectedOptions[opt.name] === choice.value;
                 return (
                   <button
-                    key={choice}
+                    key={choice.value}
                     type="button"
-                    onClick={() => handleOptionChange(opt.name, choice)}
+                    onClick={() => handleOptionChange(opt.name, choice.value)}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
                       isSelected
                         ? 'bg-primary border-primary text-white shadow-sm'
                         : 'bg-white border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
                     }`}
                   >
-                    {choice}
+                    {choice.value}
                   </button>
                 );
               })}
@@ -254,41 +129,43 @@ function TreatBoxCard({ product }: { product: TreatBoxProduct }) {
         ))}
 
         {/* What's inside expandable section */}
-        <div className="border-t border-b border-border/50 py-1 my-1">
-          <button
-            type="button"
-            onClick={() => setIsContentsExpanded(!isContentsExpanded)}
-            className="w-full flex items-center justify-between py-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider"
-          >
-            <span>What's inside</span>
-            {isContentsExpanded ? (
-              <ChevronUp className="w-4 h-4 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-            )}
-          </button>
-          
-          <AnimatePresence initial={false}>
-            {isContentsExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <ul className="pt-2 pb-1 space-y-1.5">
-                  {product.contents.map((item, idx) => (
-                    <li key={idx} className="text-xs text-foreground/80 font-medium flex items-start gap-2">
-                      <span className="text-secondary select-none font-bold">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {product.contents.length > 0 && (
+          <div className="border-t border-b border-border/50 py-1 my-1">
+            <button
+              type="button"
+              onClick={() => setIsContentsExpanded(!isContentsExpanded)}
+              className="w-full flex items-center justify-between py-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider"
+            >
+              <span>What's inside</span>
+              {isContentsExpanded ? (
+                <ChevronUp className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              )}
+            </button>
+            
+            <AnimatePresence initial={false}>
+              {isContentsExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <ul className="pt-2 pb-1 space-y-1.5">
+                    {product.contents.map((item, idx) => (
+                      <li key={idx} className="text-xs text-foreground/80 font-medium flex items-start gap-2">
+                        <span className="text-secondary select-none font-bold">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
 
         {/* Card Footer - Price, Quantity & Add to Cart */}
         <div className="mt-auto border-t border-border pt-4 flex flex-col gap-3">
@@ -337,6 +214,24 @@ function TreatBoxCard({ product }: { product: TreatBoxProduct }) {
 }
 
 export default function TreatBoxesPage() {
+  const { data, isLoading, isError } = useProductsByCategory('treat-boxes');
+  const products: TreatBoxProduct[] = (data ?? []).map((product) => {
+    const contents = (product.ingredients ?? '')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    return {
+      slug: product.slug,
+      name: product.name,
+      basePrice: product.basePrice,
+      description: product.description,
+      imageUrl: product.imageUrl,
+      options: product.options,
+      contents,
+    };
+  });
+
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
       <Navbar />
@@ -376,11 +271,27 @@ export default function TreatBoxesPage() {
               </div>
             </div>
 
+            {isLoading && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground" role="status">
+                Loading treat boxes...
+              </p>
+            )}
+            {isError && (
+              <p className="mb-6 text-sm font-medium text-destructive" role="alert">
+                Unable to load treat boxes.
+              </p>
+            )}
+            {!isLoading && !isError && products.length === 0 && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground">
+                No products available right now.
+              </p>
+            )}
+
             {/* Grid for Treat Box Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {TREAT_BOX_PRODUCTS.map((product, idx) => (
+              {products.map((product, idx) => (
                 <motion.div
-                  key={product.id}
+                  key={product.slug}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.05 }}

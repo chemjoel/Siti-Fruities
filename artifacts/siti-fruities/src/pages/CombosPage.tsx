@@ -25,119 +25,6 @@ interface ComboProduct {
   includedItems: string[];
 }
 
-interface FallbackComboProduct {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  includedItems: string[];
-  requiresSmoothie?: boolean;
-  requiresSandwich?: boolean;
-}
-
-// TODO: remove in cleanup
-const COMBO_PRODUCTS: FallbackComboProduct[] = [
-  {
-    id: 'cheesesteak-smoothie',
-    name: 'Cheesesteak + Smoothie',
-    price: 16000,
-    description: 'Cheesesteak paired with a 50cl smoothie of your choice.',
-    includedItems: ['Cheesesteak', '50cl Smoothie (Your Choice)'],
-    requiresSmoothie: true
-  },
-  {
-    id: 'cheesesteak-cold-zobo',
-    name: 'Cheesesteak + Cold Zobo',
-    price: 15000,
-    description: 'A classic cheesesteak paired with a refreshing cold Zobo drink.',
-    includedItems: ['Cheesesteak', 'Cold Zobo (50cl)']
-  },
-  {
-    id: 'tigernut-drink-sandwich',
-    name: 'Tigernut Drink + Sandwich',
-    price: 8000,
-    description: 'Creamy Tigernut Drink (50cl) paired with your choice of sandwich.',
-    includedItems: ['Tigernut Drink (50cl)', 'Sandwich (Your Choice)'],
-    requiresSandwich: true
-  },
-  {
-    id: 'zobo-drink-sandwich',
-    name: 'Zobo Drink + Sandwich',
-    price: 5000,
-    description: 'Traditional hibiscus tea paired with your choice of sandwich.',
-    includedItems: ['Zobo Drink', 'Sandwich (Your Choice)'],
-    requiresSandwich: true
-  },
-  {
-    id: 'vvip-parfait-sandwich',
-    name: '550ml VVIP Parfait + Sandwich',
-    price: 12900,
-    description: 'A premium 550ml VVIP Parfait paired with your choice of sandwich.',
-    includedItems: ['VVIP Parfait (550ml)', 'Sandwich (Your Choice)'],
-    requiresSandwich: true
-  },
-  {
-    id: 'cheesesteak-tigernut-drink',
-    name: 'Cheesesteak + Tigernut Drink',
-    price: 18000,
-    description: 'Cheesesteak paired with a rich, traditional Tigernut Drink (50cl).',
-    includedItems: ['Cheesesteak', 'Tigernut Drink (50cl)']
-  },
-  {
-    id: 'cheesesteak-ping-juice',
-    name: 'Cheesesteak + PING Juice',
-    price: 16000,
-    description: 'Cheesesteak paired with our signature Pineapple & Ginger (PING) Cold-Pressed Juice (35cl).',
-    includedItems: ['Cheesesteak', 'PING Cold-Pressed Juice (35cl)']
-  },
-  {
-    id: 'banana-bread-tigernut-drink',
-    name: 'Whole Wheat Banana Bread + Tigernut Drink',
-    price: 7000,
-    description: 'A slice of wholesome Whole Wheat Banana Bread paired with Tigernut Drink.',
-    includedItems: ['Whole Wheat Banana Bread', 'Tigernut Drink']
-  },
-  {
-    id: 'sandwich-ping-juice',
-    name: 'Chicken / Beef Sandwich + PING Juice',
-    price: 6200,
-    description: 'Your choice of sandwich paired with refreshing PING Cold-Pressed Juice (35cl).',
-    includedItems: ['Sandwich (Your Choice)', 'PING Juice (35cl)'],
-    requiresSandwich: true
-  },
-  {
-    id: 'banana-bread-cold-zobo',
-    name: 'Whole Wheat Banana Bread + Cold Zobo',
-    price: 4000,
-    description: 'A slice of wholesome Whole Wheat Banana Bread paired with traditional cold Zobo.',
-    includedItems: ['Whole Wheat Banana Bread', 'Cold Zobo']
-  },
-  {
-    id: 'greek-yoghurt-sandwich',
-    name: '500ml Greek Yoghurt + Sandwich',
-    price: 9000,
-    description: 'Rich and creamy Greek Yoghurt (500ml) paired with your choice of sandwich.',
-    includedItems: ['Greek Yoghurt (500ml)', 'Sandwich (Your Choice)'],
-    requiresSandwich: true
-  }
-];
-
-const SMOOTHIE_CHOICES = [
-  'Milk Mix',
-  'Yoghurt Mix',
-  'Nutty Chocolate',
-  'So Creamy',
-  'Ginger Blast',
-  'Strawberry',
-  'Fruity',
-  'Healthy Green'
-];
-
-const SANDWICH_CHOICES = [
-  'Chicken Sandwich',
-  'Beef Sandwich'
-];
-
 function ComboCard({ product }: { product: ComboProduct }) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
@@ -318,29 +205,17 @@ function ComboCard({ product }: { product: ComboProduct }) {
 
 export default function CombosPage() {
   const { data, isLoading, isError } = useProductsByCategory('combos');
-  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
-  const products: ComboProduct[] = shouldUseFallback
-    ? COMBO_PRODUCTS.map((product) => ({
-        id: product.id,
-        slug: product.id,
-        name: product.name,
-        basePrice: product.price,
-        description: product.description,
-        imageUrl: null,
-        options: [
-          ...(product.requiresSmoothie
-            ? [{ name: 'Smoothie', choices: SMOOTHIE_CHOICES.map((value) => ({ value })) }]
-            : []),
-          ...(product.requiresSandwich
-            ? [{ name: 'Sandwich', choices: SANDWICH_CHOICES.map((value) => ({ value })) }]
-            : []),
-        ],
-        includedItems: product.includedItems,
-      }))
-    : (data ?? []).map((product) => ({
-        ...product,
-        includedItems: [product.description],
-      }));
+  const products: ComboProduct[] = (data ?? []).map((product) => {
+    const ingredientItems = (product.ingredients ?? '')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    return {
+      ...product,
+      includedItems: ingredientItems.length > 0 ? ingredientItems : [product.description],
+    };
+  });
 
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
@@ -388,7 +263,12 @@ export default function CombosPage() {
             )}
             {isError && (
               <p className="mb-6 text-sm font-medium text-destructive" role="alert">
-                Unable to load combos. Showing the temporary catalogue instead.
+                Unable to load combos.
+              </p>
+            )}
+            {!isLoading && !isError && products.length === 0 && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground">
+                No products available right now.
               </p>
             )}
 

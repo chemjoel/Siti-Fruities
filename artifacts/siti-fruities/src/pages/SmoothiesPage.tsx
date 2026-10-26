@@ -5,186 +5,29 @@ import Footer from '@/components/Footer';
 import CartPanel from '@/components/CartPanel';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductCard, { Product } from '@/components/ProductCard';
-import { Milk, GlassWater, Sparkles, Apple, Leaf, ArrowLeft, Clock } from 'lucide-react';
+import { GlassWater, ArrowLeft, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProductsByCategory } from '@/hooks/useCatalog';
 
-// TODO: remove in cleanup
-const SMOOTHIE_PRODUCTS: Product[] = [
-  {
-    productId: 'milk-mix',
-    name: 'Milk Mix',
-    description: 'Banana, evaporated milk and your choice of watermelon or pineapple.',
-    basePrice: 2000,
-    placeholderIcon: Milk,
-    placeholderGradient: 'from-orange-50 to-amber-100 border-orange-200/50 text-orange-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 2000 }
-        ]
-      },
-      {
-        name: 'Fruit Choice',
-        choices: [
-          { value: 'Watermelon' },
-          { value: 'Pineapple' }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'yoghurt-mix',
-    name: 'Yoghurt Mix',
-    description: 'Banana, sweetened yoghurt and pineapple.',
-    basePrice: 2000,
-    placeholderIcon: GlassWater,
-    placeholderGradient: 'from-emerald-50 to-teal-100 border-emerald-200/50 text-emerald-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 2000 }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'nutty-chocolate',
-    name: 'Nutty Chocolate',
-    description: 'Banana, peanut butter, Greek yoghurt, watermelon and chocolate chips.',
-    basePrice: 2300,
-    placeholderIcon: Sparkles,
-    placeholderGradient: 'from-yellow-50 to-amber-100 border-yellow-200/50 text-amber-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 2200 }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'so-creamy',
-    name: 'So Creamy',
-    description: 'Dates, peanut butter, Greek yoghurt, banana, cinnamon and watermelon.',
-    basePrice: 2500,
-    placeholderIcon: GlassWater,
-    placeholderGradient: 'from-pink-50 to-rose-100 border-pink-200/50 text-rose-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 2500 }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'ginger-blast',
-    name: 'Ginger Blast',
-    description: 'A delicious blend of banana, fresh ginger and pineapple.',
-    basePrice: 1800,
-    placeholderIcon: Sparkles,
-    placeholderGradient: 'from-orange-50 to-amber-100 border-orange-200/50 text-orange-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 1700 }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'strawberry-smoothie',
-    name: 'Strawberry',
-    description: 'Fresh strawberries, grapes, apple, banana and your choice of watermelon or pineapple.',
-    basePrice: 2500,
-    placeholderIcon: GlassWater,
-    placeholderGradient: 'from-red-50 to-pink-100 border-red-200/50 text-red-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 2500 }
-        ]
-      },
-      {
-        name: 'Fruit Choice',
-        choices: [
-          { value: 'Watermelon' },
-          { value: 'Pineapple' }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'fruity-smoothie',
-    name: 'Fruity',
-    description: 'Apple, grapes, pineapple, watermelon and banana.',
-    basePrice: 1800,
-    placeholderIcon: Apple,
-    placeholderGradient: 'from-yellow-50 to-amber-100 border-yellow-200/50 text-amber-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 1700 }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'healthy-green',
-    name: 'Healthy Green',
-    description: 'Banana, apple, pumpkin leaf, lemon juice and pineapple.',
-    basePrice: 2000,
-    placeholderIcon: Leaf,
-    placeholderGradient: 'from-emerald-50 to-green-100 border-emerald-200/50 text-emerald-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 2000 }
-        ]
-      }
-    ]
-  }
-];
-
 export default function SmoothiesPage() {
   const { data, isLoading, isError } = useProductsByCategory('smoothies');
-  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
-  const products: Product[] = shouldUseFallback
-    ? SMOOTHIE_PRODUCTS
-    : (data ?? []).map((product) => ({
-        productId: product.slug,
-        name: product.name,
-        description: product.description,
-        basePrice: product.basePrice,
-        image: product.imageUrl ?? undefined,
-        placeholderIcon: GlassWater,
-        placeholderGradient: 'from-emerald-50 to-green-100 border-emerald-200/50 text-emerald-600',
-        options: product.options.map((option) => ({
-          name: option.name,
-          choices: option.choices.map((choice) => ({
-            value: choice.value,
-            priceModifier: choice.priceModifier,
-          })),
-        })),
-        isAvailable: product.isAvailable,
-      }));
+  const products: Product[] = (data ?? []).map((product) => ({
+    productId: product.slug,
+    name: product.name,
+    description: product.description,
+    basePrice: product.basePrice,
+    image: product.imageUrl ?? undefined,
+    placeholderIcon: GlassWater,
+    placeholderGradient: 'from-emerald-50 to-green-100 border-emerald-200/50 text-emerald-600',
+    options: product.options.map((option) => ({
+      name: option.name,
+      choices: option.choices.map((choice) => ({
+        value: choice.value,
+        priceModifier: choice.priceModifier,
+      })),
+    })),
+    isAvailable: product.isAvailable,
+  }));
 
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
@@ -232,7 +75,12 @@ export default function SmoothiesPage() {
             )}
             {isError && (
               <p className="mb-6 text-sm font-medium text-destructive" role="alert">
-                Unable to load smoothies. Showing the temporary catalogue instead.
+                Unable to load smoothies.
+              </p>
+            )}
+            {!isLoading && !isError && products.length === 0 && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground">
+                No products available right now.
               </p>
             )}
 

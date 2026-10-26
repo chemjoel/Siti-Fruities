@@ -21,52 +21,6 @@ interface HamperProduct {
   contents: string[];
 }
 
-// TODO: remove in cleanup
-const HAMPER_PRODUCTS: HamperProduct[] = [
-  {
-    slug: 'deluxe-hamper',
-    name: 'Deluxe Hamper',
-    basePrice: 70000,
-    description: 'A premium gift hamper combining fresh fruits, Greek yoghurt, crunchy granola, nuts, treats and thoughtful finishing touches.',
-    contents: [
-      '1 whole Watermelon',
-      '1 whole Pineapple',
-      '1 litre Greek Yoghurt',
-      'Carefully selected mixed nuts (500ml)',
-      'Crunchy Granola (100g)',
-      'Big red Apples',
-      'Fresh Oranges',
-      '1 pack of Blueberries',
-      '1 pack of Strawberries',
-      'Clementines',
-      'Kiwi',
-      'Exotic Biscuits',
-      'Cookies',
-      'Customised Gold Hamper Basket',
-      'Note Card'
-    ]
-  },
-  {
-    slug: 'exotic-fruit-hamper',
-    name: 'Exotic Fruit Hamper',
-    basePrice: 55000,
-    description: 'A colourful fruit-focused hamper filled with carefully selected fruits and presented as a thoughtful gift.',
-    contents: [
-      '1 Big Pineapple',
-      '1 Big Watermelon',
-      '5 Red Apples',
-      '4 Clementines',
-      '1 pack of Red Seedless Grapes',
-      '1 pack of Strawberries',
-      '2 Kiwis',
-      '2 Oranges',
-      '2 Lemons',
-      'Luxury Hamper Basket',
-      'Note Card'
-    ]
-  }
-];
-
 function HamperCard({ product }: { product: HamperProduct }) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
@@ -110,41 +64,43 @@ function HamperCard({ product }: { product: HamperProduct }) {
         </div>
 
         {/* What's included expandable section */}
-        <div className="border-t border-b border-border/50 py-1 my-1">
-          <button
-            type="button"
-            onClick={() => setIsContentsExpanded(!isContentsExpanded)}
-            className="w-full flex items-center justify-between py-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider"
-          >
-            <span>What's included</span>
-            {isContentsExpanded ? (
-              <ChevronUp className="w-4 h-4 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-            )}
-          </button>
-          
-          <AnimatePresence initial={false}>
-            {isContentsExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <ul className="pt-2 pb-1 space-y-1.5">
-                  {product.contents.map((item, idx) => (
-                    <li key={idx} className="text-xs text-foreground/80 font-medium flex items-start gap-2">
-                      <span className="text-secondary select-none font-bold">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {product.contents.length > 0 && (
+          <div className="border-t border-b border-border/50 py-1 my-1">
+            <button
+              type="button"
+              onClick={() => setIsContentsExpanded(!isContentsExpanded)}
+              className="w-full flex items-center justify-between py-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider"
+            >
+              <span>What's included</span>
+              {isContentsExpanded ? (
+                <ChevronUp className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              )}
+            </button>
+            
+            <AnimatePresence initial={false}>
+              {isContentsExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <ul className="pt-2 pb-1 space-y-1.5">
+                    {product.contents.map((item, idx) => (
+                      <li key={idx} className="text-xs text-foreground/80 font-medium flex items-start gap-2">
+                        <span className="text-secondary select-none font-bold">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
 
         {/* Card Footer - Price, Quantity & Add to Cart */}
         <div className="mt-auto border-t border-border pt-4 flex flex-col gap-3">
@@ -194,23 +150,20 @@ function HamperCard({ product }: { product: HamperProduct }) {
 
 export default function FruitHampersPage() {
   const { data, isLoading, isError } = useProductsByCategory('fruit-hampers');
-  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
-  const products: HamperProduct[] = shouldUseFallback
-    ? HAMPER_PRODUCTS
-    : (data ?? []).map((product) => {
-        const contents = (product.ingredients ?? '')
-          .split(/\r?\n/)
-          .map((line) => line.trim())
-          .filter(Boolean);
+  const products: HamperProduct[] = (data ?? []).map((product) => {
+    const contents = (product.ingredients ?? '')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
 
-        return {
-          slug: product.slug,
-          name: product.name,
-          basePrice: product.basePrice,
-          description: product.description,
-          contents: contents.length > 0 ? contents : product.description ? [product.description] : [],
-        };
-      });
+    return {
+      slug: product.slug,
+      name: product.name,
+      basePrice: product.basePrice,
+      description: product.description,
+      contents,
+    };
+  });
 
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
@@ -258,7 +211,12 @@ export default function FruitHampersPage() {
             )}
             {isError && (
               <p className="mb-6 text-sm font-medium text-destructive" role="alert">
-                Unable to load fruit hampers. Showing the temporary catalogue instead.
+                Unable to load fruit hampers.
+              </p>
+            )}
+            {!isLoading && !isError && products.length === 0 && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground">
+                No products available right now.
               </p>
             )}
 

@@ -5,112 +5,29 @@ import Footer from '@/components/Footer';
 import CartPanel from '@/components/CartPanel';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductCard, { Product } from '@/components/ProductCard';
-import { Apple, Leaf, Cookie, Sparkles, ShoppingBag, ArrowLeft, Clock } from 'lucide-react';
+import { Apple, ArrowLeft, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProductsByCategory } from '@/hooks/useCatalog';
 
-// TODO: remove in cleanup
-const FRUITS_PRODUCTS: Product[] = [
-  {
-    productId: 'healthy-chicken-salad',
-    name: 'Healthy Chicken Salad',
-    description: 'Fresh crisp shredded chicken breast paired with seasonal cabbage, carrot, and SITI FRUITIES in-house salad dressing.',
-    basePrice: 4500,
-    placeholderIcon: Leaf,
-    placeholderGradient: 'from-emerald-50 to-teal-100 border-emerald-200/50 text-emerald-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: 'Single Serving' },
-          { value: 'Large Bowl', priceModifier: 1500 }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'exotic-fruit-salad',
-    name: 'Exotic Fruit Salad Bowl',
-    description: 'A beautifully arranged selection of handpicked fresh seasonal fruits (watermelon, pineapple, apples, grapes, oranges).',
-    basePrice: 3500,
-    placeholderIcon: Apple,
-    placeholderGradient: 'from-orange-50 to-amber-100 border-orange-200/50 text-orange-600',
-    options: [
-      {
-        name: 'Bowl Size',
-        choices: [
-          { value: 'Medium Bowl' },
-          { value: 'Gbemidele Size', priceModifier: 2000 }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'fruit-yogurt-combo',
-    name: 'Fresh Fruit & Yogurt Combo',
-    description: 'Our freshly pressed yogurt served with selected fruit toppings. A perfect healthy midday pick-me-up.',
-    basePrice: 5000,
-    placeholderIcon: Sparkles,
-    placeholderGradient: 'from-pink-50 to-rose-100 border-pink-200/50 text-rose-600',
-    options: [
-      {
-        name: 'Yogurt Type',
-        choices: [
-          { value: 'Sweetened Greek Yogurt' },
-          { value: 'Unsweetened Greek Yogurt' }
-        ]
-      }
-    ]
-  },
-  {
-    productId: 'crunchy-granola-snack',
-    name: 'Crunchy Granola Snack Pack (100g)',
-    description: 'Premium crunchy baked granola loaded with coconut flakes, raisins, and roasted cashew nuts.',
-    basePrice: 3500,
-    placeholderIcon: Cookie,
-    placeholderGradient: 'from-yellow-50 to-amber-100 border-yellow-200/50 text-amber-600'
-  },
-  {
-    productId: 'custom-fruit-cup',
-    name: 'Custom Fruit Cup',
-    description: 'Customize your bowl with your choice of sweetened/unsweetened yogurt base and custom fresh sliced fruits.',
-    basePrice: 3000,
-    placeholderIcon: ShoppingBag,
-    placeholderGradient: 'from-sky-50 to-indigo-100 border-sky-200/50 text-indigo-600',
-    options: [
-      {
-        name: 'Serving Size',
-        choices: [
-          { value: 'Regular Cup' },
-          { value: 'Deluxe Bowl', priceModifier: 1500 }
-        ]
-      }
-    ]
-  }
-];
-
 export default function FruitsCategoryPage() {
   const { data, isLoading, isError } = useProductsByCategory('fruits');
-  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
-  const products: Product[] = shouldUseFallback
-    ? FRUITS_PRODUCTS
-    : (data ?? []).map((product) => ({
-        productId: product.slug,
-        name: product.name,
-        description: product.description,
-        basePrice: product.basePrice,
-        image: product.imageUrl || undefined,
-        placeholderIcon: Apple,
-        placeholderGradient: 'from-orange-50 to-amber-100 border-orange-200/50 text-orange-600',
-        options: product.options.map((option) => ({
-          name: option.name,
-          choices: option.choices.map((choice) => ({
-            value: choice.value,
-            priceModifier: choice.priceModifier,
-          })),
-        })),
-        isAvailable: product.isAvailable,
-      }));
+  const products: Product[] = (data ?? []).map((product) => ({
+    productId: product.slug,
+    name: product.name,
+    description: product.description,
+    basePrice: product.basePrice,
+    image: product.imageUrl || undefined,
+    placeholderIcon: Apple,
+    placeholderGradient: 'from-orange-50 to-amber-100 border-orange-200/50 text-orange-600',
+    options: product.options.map((option) => ({
+      name: option.name,
+      choices: option.choices.map((choice) => ({
+        value: choice.value,
+        priceModifier: choice.priceModifier,
+      })),
+    })),
+    isAvailable: product.isAvailable,
+  }));
 
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
@@ -159,7 +76,12 @@ export default function FruitsCategoryPage() {
             )}
             {isError && (
               <p className="mb-6 text-sm font-medium text-destructive" role="alert">
-                Unable to load fruits and snacks. Showing the temporary catalogue instead.
+                Unable to load fruits and snacks.
+              </p>
+            )}
+            {!isLoading && !isError && products.length === 0 && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground">
+                No products available right now.
               </p>
             )}
 

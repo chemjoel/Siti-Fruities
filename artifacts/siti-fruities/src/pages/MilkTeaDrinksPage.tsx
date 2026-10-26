@@ -9,128 +9,63 @@ import { Coffee, GlassWater, Milk, ArrowLeft, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProductsByCategory } from '@/hooks/useCatalog';
 
-// TODO: remove in cleanup
-const MILK_TEA_PRODUCTS: Product[] = [
-  {
-    productId: 'matcha-milk-tea',
-    name: 'MATCHA MILK TEA',
-    description: 'Premium Matcha Flavor with Chewy Tapioca Pearls',
-    basePrice: 8500,
-    image: '/assets/IMG_2326_bubble_tea.jpg',
+const DRINK_STYLES: Record<string, { placeholderIcon: React.ComponentType<{ className?: string }>; placeholderGradient: string }> = {
+  'matcha-milk-tea': {
     placeholderIcon: Coffee,
-    placeholderGradient: 'from-emerald-50 to-teal-100 border-emerald-200/50 text-emerald-600'
+    placeholderGradient: 'from-emerald-50 to-teal-100 border-emerald-200/50 text-emerald-600',
   },
-  {
-    productId: 'taro-milk-tea',
-    name: 'TARO MILK TEA',
-    description: 'Creamy Taro Flavored Tea, with chewy Tapioca Pearls',
-    basePrice: 8000,
-    image: '/assets/IMG_2326_bubble_tea.jpg',
+  'taro-milk-tea': {
     placeholderIcon: Coffee,
-    placeholderGradient: 'from-purple-50 to-indigo-100 border-indigo-200/50 text-indigo-600'
+    placeholderGradient: 'from-purple-50 to-indigo-100 border-indigo-200/50 text-indigo-600',
   },
-  {
-    productId: 'strawberry-milk-tea',
-    name: 'STRAWBERRY MILK TEA',
-    description: 'Sweet Strawberry Delight Tea, with chewy Tapioca Pearls',
-    basePrice: 8500,
-    image: '/assets/IMG_2364_bubble_tea_duo.jpg',
+  'strawberry-milk-tea': {
     placeholderIcon: Coffee,
-    placeholderGradient: 'from-pink-50 to-rose-100 border-rose-200/50 text-rose-600'
+    placeholderGradient: 'from-pink-50 to-rose-100 border-rose-200/50 text-rose-600',
   },
-  {
-    productId: 'chocolate-milk-tea',
-    name: 'CHOCOLATE MILK TEA',
-    description: 'Rich Chocolate Flavored Bubble Tea with chewy Tapioca Pearls',
-    basePrice: 8500,
-    image: '/assets/IMG_2326_bubble_tea.jpg',
+  'chocolate-milk-tea': {
     placeholderIcon: Coffee,
-    placeholderGradient: 'from-[#E6CCB2]/40 to-[#B08968]/30 border-[#B08968]/20 text-[#6F4E37]'
+    placeholderGradient: 'from-[#E6CCB2]/40 to-[#B08968]/30 border-[#B08968]/20 text-[#6F4E37]',
   },
-  {
-    productId: 'vanilla-milk-tea',
-    name: 'VANILLA MILK TEA',
-    description: 'Smooth and Rich Vanilla Flavor with chewy Tapioca Pearls',
-    basePrice: 8000,
-    image: '/assets/IMG_2326_bubble_tea.jpg',
+  'vanilla-milk-tea': {
     placeholderIcon: Coffee,
-    placeholderGradient: 'from-[#FEF3C7] to-[#FDE68A]/80 border-[#FDE68A]/40 text-[#D97706]'
+    placeholderGradient: 'from-[#FEF3C7] to-[#FDE68A]/80 border-[#FDE68A]/40 text-[#D97706]',
   },
-  {
-    productId: 'classic-milk-tea',
-    name: 'CLASSIC MILK TEA',
-    description: 'Our Signature Original Milk Tea with Chewy Tapioca Pearls',
-    basePrice: 7000,
-    image: '/assets/IMG_2364_bubble_tea_duo.jpg',
+  'classic-milk-tea': {
     placeholderIcon: Coffee,
-    placeholderGradient: 'from-amber-50 to-orange-100 border-orange-200/50 text-orange-600'
-  }
-];
-
-// TODO: remove in cleanup
-const OTHER_DRINKS_PRODUCTS: Product[] = [
-  {
-    productId: 'hibiscus-drink-zobo',
-    name: 'Hibiscus Drink (Zobo)',
-    description: 'Traditional refreshing hibiscus flower tea.',
-    basePrice: 1000,
+    placeholderGradient: 'from-amber-50 to-orange-100 border-orange-200/50 text-orange-600',
+  },
+  'hibiscus-drink-zobo': {
     placeholderIcon: GlassWater,
     placeholderGradient: 'from-red-50 to-rose-100 border-red-200/50 text-red-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 1000 }
-        ]
-      }
-    ]
   },
-  {
-    productId: 'tigernut-drink',
-    name: 'Tigernut Drink',
-    description: 'Traditional freshly pressed tigernut milk infused with coconut, dates and ginger.',
-    basePrice: 2500,
+  'tigernut-drink': {
     placeholderIcon: Milk,
     placeholderGradient: 'from-yellow-50 to-amber-100 border-yellow-200/50 text-amber-600',
-    options: [
-      {
-        name: 'Size',
-        choices: [
-          { value: '25cl' },
-          { value: '50cl', priceModifier: 2500 }
-        ]
-      }
-    ]
-  }
-];
+  },
+};
 
 export default function MilkTeaDrinksPage() {
   const { data, isLoading, isError } = useProductsByCategory('milk-tea-drinks');
-  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
-  const fallbackProducts = [...MILK_TEA_PRODUCTS, ...OTHER_DRINKS_PRODUCTS];
-  const products: Product[] = shouldUseFallback
-    ? fallbackProducts
-    : (data ?? []).map((product) => {
-        const fallbackStyle = fallbackProducts.find((item) => item.productId === product.slug);
-        return {
-          productId: product.slug,
-          name: product.name,
-          description: product.description,
-          basePrice: product.basePrice,
-          image: product.imageUrl ?? undefined,
-          placeholderIcon: fallbackStyle?.placeholderIcon ?? GlassWater,
-          placeholderGradient: fallbackStyle?.placeholderGradient ?? 'from-emerald-50 to-teal-100 border-emerald-200/50 text-emerald-600',
-          options: product.options.map((option) => ({
-            name: option.name,
-            choices: option.choices.map((choice) => ({
-              value: choice.value,
-              priceModifier: choice.priceModifier,
-            })),
-          })),
-          isAvailable: product.isAvailable,
-        };
-      });
+  const products: Product[] = (data ?? []).map((product) => {
+    const style = DRINK_STYLES[product.slug];
+    return {
+      productId: product.slug,
+      name: product.name,
+      description: product.description,
+      basePrice: product.basePrice,
+      image: product.imageUrl ?? undefined,
+      placeholderIcon: style?.placeholderIcon ?? GlassWater,
+      placeholderGradient: style?.placeholderGradient ?? 'from-emerald-50 to-teal-100 border-emerald-200/50 text-emerald-600',
+      options: product.options.map((option) => ({
+        name: option.name,
+        choices: option.choices.map((choice) => ({
+          value: choice.value,
+          priceModifier: choice.priceModifier,
+        })),
+      })),
+      isAvailable: product.isAvailable,
+    };
+  });
   const milkTeaProducts = products.filter((product) => !product.options?.length);
   const otherDrinksProducts = products.filter((product) => product.options?.length);
 
@@ -169,7 +104,12 @@ export default function MilkTeaDrinksPage() {
             )}
             {isError && (
               <p className="mb-6 text-sm font-medium text-destructive" role="alert">
-                Unable to load drinks. Showing the temporary catalogue instead.
+                Unable to load drinks.
+              </p>
+            )}
+            {!isLoading && !isError && products.length === 0 && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground">
+                No products available right now.
               </p>
             )}
             

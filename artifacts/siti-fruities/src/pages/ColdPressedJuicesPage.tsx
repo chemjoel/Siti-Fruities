@@ -24,40 +24,6 @@ interface JuiceProduct {
   iconColor: string;
 }
 
-// TODO: remove in cleanup
-const JUICE_PRODUCTS: JuiceProduct[] = [
-  {
-    id: 'ping',
-    name: 'PING',
-    ingredients: ['Pineapple', 'Ginger'],
-    description: 'Pineapple and ginger.',
-    size: '35cl',
-    price: 3200,
-    placeholderGradient: 'from-yellow-50 to-amber-100 border-amber-200/50',
-    iconColor: 'text-amber-600'
-  },
-  {
-    id: 'sweet-green',
-    name: 'SWEET GREEN',
-    ingredients: ['Apple', 'Orange', 'Cucumber', 'Lemon'],
-    description: 'Apple, orange, cucumber and lemon.',
-    size: '35cl',
-    price: 4500,
-    placeholderGradient: 'from-emerald-50 to-green-100 border-emerald-200/50',
-    iconColor: 'text-emerald-600'
-  },
-  {
-    id: 'beet-the-heat',
-    name: 'BEET THE HEAT',
-    ingredients: ['Beetroot', 'Carrot', 'Watermelon', 'Lemon'],
-    description: 'Beetroot, carrot, watermelon and lemon.',
-    size: '35cl',
-    price: 5000,
-    placeholderGradient: 'from-red-50 to-rose-100 border-rose-200/50',
-    iconColor: 'text-rose-600'
-  }
-];
-
 const JUICE_STYLES: Record<string, Pick<JuiceProduct, 'placeholderGradient' | 'iconColor'>> = {
   ping: {
     placeholderGradient: 'from-yellow-50 to-amber-100 border-amber-200/50',
@@ -171,25 +137,22 @@ function JuiceCard({ juice }: { juice: JuiceProduct }) {
 
 export default function ColdPressedJuicesPage() {
   const { data, isLoading, isError } = useProductsByCategory('cold-pressed-juices');
-  const shouldUseFallback = !isLoading && (isError || data?.length === 0);
-  const juices: JuiceProduct[] = shouldUseFallback
-    ? JUICE_PRODUCTS
-    : (data ?? []).map((product) => {
-        const sizeOption = product.options.find((option) => option.name === 'Size');
-        const sizeChoice = sizeOption?.choices[0];
-      const style = JUICE_STYLES[product.slug];
+  const juices: JuiceProduct[] = (data ?? []).map((product) => {
+    const sizeOption = product.options.find((option) => option.name === 'Size');
+    const sizeChoice = sizeOption?.choices[0];
+    const style = JUICE_STYLES[product.slug];
 
-        return {
-          id: product.slug,
-          name: product.name,
-          ingredients: [],
-          description: product.description,
-          size: sizeChoice?.value ?? '',
-          price: product.basePrice + (sizeChoice?.priceModifier ?? 0),
-          placeholderGradient: style?.placeholderGradient ?? 'from-emerald-50 to-green-100 border-emerald-200/50',
-          iconColor: style?.iconColor ?? 'text-emerald-600',
-        };
-      });
+    return {
+      id: product.slug,
+      name: product.name,
+      ingredients: [],
+      description: product.description,
+      size: sizeChoice?.value ?? '',
+      price: product.basePrice + (sizeChoice?.priceModifier ?? 0),
+      placeholderGradient: style?.placeholderGradient ?? 'from-emerald-50 to-green-100 border-emerald-200/50',
+      iconColor: style?.iconColor ?? 'text-emerald-600',
+    };
+  });
 
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
@@ -248,7 +211,12 @@ export default function ColdPressedJuicesPage() {
             )}
             {isError && (
               <p className="mb-6 text-sm font-medium text-destructive" role="alert">
-                Unable to load juices. Showing the temporary catalogue instead.
+                Unable to load juices.
+              </p>
+            )}
+            {!isLoading && !isError && juices.length === 0 && (
+              <p className="mb-6 text-sm font-medium text-muted-foreground">
+                No products available right now.
               </p>
             )}
 
