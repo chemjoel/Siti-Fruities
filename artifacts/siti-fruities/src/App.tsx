@@ -24,6 +24,7 @@ import { CartProvider } from '@/context/CartContext';
 import { useCart } from '@/context/CartContext';
 import CartReminder from '@/components/CartReminder';
 import ScrollToTop from '@/components/ScrollToTop';
+import TawkChat from '@/components/TawkChat';
 import { trackMetaEvent } from '@/lib/metaPixel';
 import { trackFirstPartyEvent } from '@/lib/firstPartyAnalytics';
 
@@ -154,6 +155,7 @@ function App() {
             <FirstPartyAnalyticsTracker />
             <MetaPixelPageViewTracker />
             <CartReminderHost />
+            <TawkChat />
             <ScrollToTop />
             <Router />
           </WouterRouter>

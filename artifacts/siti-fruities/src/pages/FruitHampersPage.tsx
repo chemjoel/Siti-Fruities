@@ -18,6 +18,7 @@ interface HamperProduct {
   name: string;
   basePrice: number;
   description: string;
+  imageUrl: string | null;
   contents: string[];
 }
 
@@ -25,6 +26,7 @@ function HamperCard({ product }: { product: HamperProduct }) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [isContentsExpanded, setIsContentsExpanded] = useState(false);
+  const [imageLoadFailed, setImageLoadFailed] = useState(false);
 
   const totalPrice = product.basePrice * quantity;
 
@@ -33,7 +35,7 @@ function HamperCard({ product }: { product: HamperProduct }) {
       productId: product.slug,
       name: product.name,
       // Fallback thumbnail pointing to the fruit hamper cover asset
-      image: '/assets/Screenshot_20260729-213638_1785360173839.jpg',
+      image: product.imageUrl || '/assets/Screenshot_20260729-213638_1785360173839.jpg',
       price: product.basePrice,
       quantity,
     });
@@ -43,14 +45,25 @@ function HamperCard({ product }: { product: HamperProduct }) {
   return (
     <div className="bg-card rounded-2xl shadow-md border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
       
-      {/* Polished Empty Branded Image Placeholder */}
-      <div className="relative aspect-[4/3] w-full bg-gradient-to-br from-emerald-50 to-teal-100 border-emerald-200/50 flex flex-col items-center justify-center border-b border-card-border p-6 overflow-hidden shrink-0">
-        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="bg-white/80 backdrop-blur-sm p-4 rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
-          <Gift className="w-10 h-10 stroke-[1.5] text-primary" />
+      {product.imageUrl && !imageLoadFailed ? (
+        <div className="relative aspect-[4/3] w-full overflow-hidden shrink-0 bg-muted border-b border-card-border">
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={() => setImageLoadFailed(true)}
+          />
         </div>
-        <span className="text-[10px] font-bold tracking-widest text-primary/70 uppercase mt-4">Siti Fruit Hampers</span>
-      </div>
+      ) : (
+        /* Polished Empty Branded Image Placeholder */
+        <div className="relative aspect-[4/3] w-full bg-gradient-to-br from-emerald-50 to-teal-100 border-emerald-200/50 flex flex-col items-center justify-center border-b border-card-border p-6 overflow-hidden shrink-0">
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="bg-white/80 backdrop-blur-sm p-4 rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
+            <Gift className="w-10 h-10 stroke-[1.5] text-primary" />
+          </div>
+          <span className="text-[10px] font-bold tracking-widest text-primary/70 uppercase mt-4">Siti Fruit Hampers</span>
+        </div>
+      )}
 
       {/* Card Content */}
       <div className="p-6 flex flex-col flex-1 gap-4">
@@ -161,6 +174,7 @@ export default function FruitHampersPage() {
       name: product.name,
       basePrice: product.basePrice,
       description: product.description,
+      imageUrl: product.imageUrl,
       contents,
     };
   });

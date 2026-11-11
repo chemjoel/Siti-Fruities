@@ -20,6 +20,7 @@ interface JuiceProduct {
   description: string;
   size: string;
   price: number;
+  imageUrl: string | null;
   placeholderGradient: string;
   iconColor: string;
 }
@@ -42,6 +43,7 @@ const JUICE_STYLES: Record<string, Pick<JuiceProduct, 'placeholderGradient' | 'i
 function JuiceCard({ juice }: { juice: JuiceProduct }) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [imageLoadFailed, setImageLoadFailed] = useState(false);
 
   const totalPrice = juice.price * quantity;
 
@@ -50,7 +52,7 @@ function JuiceCard({ juice }: { juice: JuiceProduct }) {
       productId: juice.id,
       name: juice.name,
       // Fallback thumbnail pointing to the original cold pressed juices cover asset
-      image: '/assets/Screenshot_20260729-212547_1785360049692.jpg',
+      image: juice.imageUrl || '/assets/Screenshot_20260729-212547_1785360049692.jpg',
       price: juice.price,
       quantity,
       options: juice.size ? [{ name: 'Size', value: juice.size }] : [],
@@ -59,16 +61,27 @@ function JuiceCard({ juice }: { juice: JuiceProduct }) {
   };
 
   return (
-    <div className="bg-card rounded-2xl shadow-md border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
+    <div className="w-full bg-card rounded-2xl shadow-md border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
       
-      {/* Polished Empty Branded Image Placeholder */}
-      <div className={`relative aspect-[4/3] w-full bg-gradient-to-br ${juice.placeholderGradient} flex flex-col items-center justify-center border-b border-card-border p-6 overflow-hidden shrink-0`}>
-        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="bg-white/80 backdrop-blur-sm p-4 rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
-          <GlassWater className={`w-10 h-10 stroke-[1.5] ${juice.iconColor}`} />
+      {juice.imageUrl && !imageLoadFailed ? (
+        <div className="relative aspect-[4/3] w-full overflow-hidden shrink-0 bg-muted border-b border-card-border">
+          <img
+            src={juice.imageUrl}
+            alt={juice.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={() => setImageLoadFailed(true)}
+          />
         </div>
-        <span className={`text-[10px] font-bold tracking-widest uppercase mt-4 ${juice.iconColor}/70`}>Siti Juices Fresh</span>
-      </div>
+      ) : (
+        /* Polished Empty Branded Image Placeholder */
+        <div className={`relative aspect-[4/3] w-full bg-gradient-to-br ${juice.placeholderGradient} flex flex-col items-center justify-center border-b border-card-border p-6 overflow-hidden shrink-0`}>
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="bg-white/80 backdrop-blur-sm p-4 rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
+            <GlassWater className={`w-10 h-10 stroke-[1.5] ${juice.iconColor}`} />
+          </div>
+          <span className={`text-[10px] font-bold tracking-widest uppercase mt-4 ${juice.iconColor}/70`}>Siti Juices Fresh</span>
+        </div>
+      )}
 
       {/* Card Content */}
       <div className="p-6 flex flex-col flex-1 gap-5">
@@ -149,6 +162,7 @@ export default function ColdPressedJuicesPage() {
       description: product.description,
       size: sizeChoice?.value ?? '',
       price: product.basePrice + (sizeChoice?.priceModifier ?? 0),
+      imageUrl: product.imageUrl,
       placeholderGradient: style?.placeholderGradient ?? 'from-emerald-50 to-green-100 border-emerald-200/50',
       iconColor: style?.iconColor ?? 'text-emerald-600',
     };

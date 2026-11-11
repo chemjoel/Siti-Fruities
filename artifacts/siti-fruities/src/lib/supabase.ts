@@ -42,6 +42,22 @@ const getStoredSession = (): SupabaseSession | null => {
   }
 };
 
+const isAccessTokenValid = (token: string): boolean => {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return false;
+
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '='));
+    const bytes = Uint8Array.from(decoded, (character) => character.charCodeAt(0));
+    const claims = JSON.parse(new TextDecoder().decode(bytes));
+
+    return typeof claims.exp === 'number' && claims.exp > Date.now() / 1000 + 30;
+  } catch {
+    return false;
+  }
+};
+
 const setStoredSession = (session: SupabaseSession | null) => {
   try {
     if (session) {
@@ -67,7 +83,9 @@ class QueryBuilder<T = any> {
   constructor(table: string) {
     this.table = table;
     const session = getStoredSession();
-    const token = session?.access_token || SUPABASE_ANON_KEY;
+    const token = session?.access_token && isAccessTokenValid(session.access_token)
+      ? session.access_token
+      : SUPABASE_ANON_KEY;
 
     this.headers = {
       'Content-Type': 'application/json',
