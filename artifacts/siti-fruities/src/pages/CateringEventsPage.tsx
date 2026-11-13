@@ -20,7 +20,6 @@ const MENU_INTERESTS = [
   'Greek Yoghurt',
   'Smoothies',
   'Cold-Pressed Juices',
-  'Sandwiches',
   'Healthy Chicken Salad',
   'Fruit Bowls',
   'Zobo',
@@ -38,11 +37,7 @@ interface EventProduct {
 const POPULAR_EVENT_PRODUCTS: EventProduct[] = [
   {
     name: 'Smallie Parfait',
-    description: 'Perfect 330ml cup size for high-tea, office brunches, and birthday celebrations.'
-  },
-  {
-    name: 'Sandwiches',
-    description: 'Freshly assembled club sandwiches sliced neatly for easy sharing and platters.'
+    description: 'Perfect 200ml cup size for high-tea, office brunches, and birthday celebrations.'
   },
   {
     name: 'Smoothies',
@@ -71,6 +66,8 @@ export default function CateringEventsPage() {
   
   // Smallie Parfait States
   const [parfaitQty, setParfaitQty] = useState(2); // Minimum 2 cups
+  const [parfaitType, setParfaitType] = useState<'VVIP (with strawberries & kiwi)' | 'VIP (without strawberries & kiwi)'>('VVIP (with strawberries & kiwi)');
+  const parfaitUnitPrice = 5000 + (parfaitType === 'VIP (without strawberries & kiwi)' ? -500 : 0);
   
   // Event Form States
   const [eventType, setEventType] = useState('');
@@ -90,9 +87,12 @@ export default function CateringEventsPage() {
       productId: 'smallie-parfait',
       name: 'Smallie Parfait',
       image: '/assets/Screenshot_20260729-212242_1785360049881.jpg',
-      price: 4000,
+      price: parfaitUnitPrice,
       quantity: parfaitQty,
-      options: [{ name: 'Category', value: 'Catering & Events' }]
+      options: [
+        { name: 'Parfait Type', value: parfaitType },
+        { name: 'Category', value: 'Events & Catering' }
+      ]
     });
     setParfaitQty(2); // Reset to minimum
   };
@@ -205,7 +205,7 @@ ${eventDetails.trim() || 'None'}`;
                   Make Your Next Gathering a Little More Exotic
                 </h2>
                 <p className="text-muted-foreground font-medium text-lg leading-relaxed mb-6">
-                  From office meetings to special gatherings, SITI FRUITIES offers a selection of fruits, parfaits, drinks, sandwiches and other treats that can be arranged to suit your occasion.
+                  From office meetings to special gatherings, SITI FRUITIES offers a selection of fruits, parfaits, drinks, and other treats that can be arranged to suit your occasion.
                 </p>
                 <p className="text-muted-foreground text-sm leading-relaxed">
                   Whether it is a morning boardroom check-in, a milestone party, or a formal catering dessert table, our team prepares everything clean, fresh, and beautifully packaged to serve on-time.
@@ -249,14 +249,35 @@ ${eventDetails.trim() || 'None'}`;
                 <div>
                   <h3 className="text-2xl font-bold font-serif text-foreground">Smallie Parfait</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-                    A perfect 330ml mini parfait cup layered with probiotic Greek yogurt, crunchy granola, fresh fruit toppings, and honey. Designed for corporate events, meetings, or celebrations.
+                    A perfect 200ml mini parfait cup layered with probiotic Greek yogurt, crunchy granola, fresh fruit toppings, and honey. Designed for corporate events, meetings, or celebrations.
                   </p>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Parfait Type</span>
+                  <div className="flex flex-wrap gap-2">
+                    {(['VVIP (with strawberries & kiwi)', 'VIP (without strawberries & kiwi)'] as const).map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        aria-pressed={parfaitType === type}
+                        onClick={() => setParfaitType(type)}
+                        className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
+                          parfaitType === type
+                            ? 'bg-primary border-primary text-white shadow-md'
+                            : 'bg-white border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
+                        }`}
+                      >
+                        {type} — {formatPrice(type === 'VVIP (with strawberries & kiwi)' ? 5000 : 4500)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap gap-x-8 gap-y-4 pt-1">
                   <div>
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Price</span>
-                    <span className="text-2xl font-black text-primary">{formatPrice(4000)} / cup</span>
+                    <span className="text-2xl font-black text-primary">{formatPrice(parfaitUnitPrice)} / cup</span>
                   </div>
                   <div>
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Minimum Order</span>
@@ -274,7 +295,7 @@ ${eventDetails.trim() || 'None'}`;
                   <div className="flex flex-col">
                     <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total price</span>
                     <span className="text-xl font-black text-primary leading-none mt-1">
-                      {formatPrice(4000 * parfaitQty)}
+                      {formatPrice(parfaitUnitPrice * parfaitQty)}
                     </span>
                   </div>
 
@@ -501,7 +522,6 @@ ${eventDetails.trim() || 'None'}`;
                     // Match sync category
                     const categoryMapping: Record<string, string> = {
                       'Smallie Parfait': 'Smallie Parfait',
-                      'Sandwiches': 'Sandwiches',
                       'Smoothies': 'Smoothies',
                       'Cold-Pressed Juices': 'Cold-Pressed Juices',
                       'Zobo': 'Zobo',

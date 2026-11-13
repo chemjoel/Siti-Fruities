@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import CartPanel from '@/components/CartPanel';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductCard, { Product } from '@/components/ProductCard';
-import { Sparkles, ArrowLeft, Clock } from 'lucide-react';
+import { Sparkles, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProductsByCategory } from '@/hooks/useCatalog';
 
@@ -28,9 +28,6 @@ export default function SandwichesSavouryPage() {
     })),
     isAvailable: product.isAvailable,
   }));
-  const sandwichProducts = products.filter((product) => product.productId.includes('sandwich'));
-  const savouryProducts = products.filter((product) => !product.productId.includes('sandwich'));
-
   return (
     <div className="min-h-[100dvh] flex flex-col w-full bg-background relative overflow-x-hidden">
       <Navbar />
@@ -48,7 +45,7 @@ export default function SandwichesSavouryPage() {
               <span>Back to Home</span>
             </Link>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-serif mb-4 leading-tight">
-              Sandwiches & Savoury
+              Savoury & Salads
             </h1>
             <p className="text-lg md:text-xl text-white/90 max-w-2xl font-medium leading-relaxed">
               Fresh, satisfying savoury options made for a quick meal, a healthy bite or something a little more filling.
@@ -61,12 +58,12 @@ export default function SandwichesSavouryPage() {
           <div className="container mx-auto px-4 md:px-8">
             {isLoading && (
               <p className="mb-6 text-sm font-medium text-muted-foreground" role="status">
-                Loading sandwiches and savoury products...
+                Loading savoury products...
               </p>
             )}
             {isError && (
               <p className="mb-6 text-sm font-medium text-destructive" role="alert">
-                Unable to load sandwiches and savoury products.
+                Unable to load savoury products.
               </p>
             )}
             {!isLoading && !isError && products.length === 0 && (
@@ -75,36 +72,6 @@ export default function SandwichesSavouryPage() {
               </p>
             )}
             
-            {/* Section A: Sandwiches */}
-            <div className="mb-16">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8 pb-4 border-b border-border">
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold font-serif text-foreground">Sandwiches</h2>
-                  <p className="text-sm text-muted-foreground font-medium">Freshly made signature sandwiches on sliced bread</p>
-                </div>
-                <div className="flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-full border border-secondary/20 shrink-0">
-                  <Clock className="w-4 h-4 animate-pulse" />
-                  <span className="text-xs font-bold uppercase tracking-wider">Freshly Assembled Daily</span>
-                </div>
-              </div>
-
-              {/* Grid for Sandwiches */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {sandwichProducts.map((product, idx) => (
-                  <motion.div
-                    key={product.productId}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: idx * 0.05 }}
-                    className="flex"
-                  >
-                    <ProductCard product={product} />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Section B: Savoury & Salads */}
             <div>
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8 pb-4 border-b border-border">
                 <div>
@@ -115,7 +82,7 @@ export default function SandwichesSavouryPage() {
 
               {/* Grid for Savoury & Salads */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {savouryProducts.map((product, idx) => (
+                {products.map((product, idx) => (
                   <motion.div
                     key={product.productId}
                     initial={{ opacity: 0, y: 20 }}

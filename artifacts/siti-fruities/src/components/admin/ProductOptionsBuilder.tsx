@@ -30,7 +30,7 @@ export default function ProductOptionsBuilder({ options, onChange }: ProductOpti
         choices: [
           { value: 'Mini (330ml)', price_modifier: -2500 },
           { value: 'Medium (500ml)', price_modifier: 0 },
-          { value: 'Gbemidele (550ml)', price_modifier: 1500 },
+          { value: 'Gbemidebe (550ml)', price_modifier: 1500 },
           { value: 'Ay Bowl (1L)', price_modifier: 6500 },
         ],
       };

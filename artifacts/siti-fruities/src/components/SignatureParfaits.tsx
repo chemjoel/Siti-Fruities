@@ -61,7 +61,7 @@ const PARFAIT_PRODUCTS: ParfaitProduct[] = [
       'Smallie (200ml)': 5000,
       'Mini (330ml)': 7000,
       'Medium (500ml)': 10000,
-      'Gbemidele (550ml)': 12000,
+      'Gbemidebe (550ml)': 12000,
       'Ay Bowl (1L)': 17000,
       'Wonder Bowl (2L)': 33000,
       'Tiwa Bowl (5L)': 85000
@@ -80,7 +80,7 @@ const PARFAIT_PRODUCTS: ParfaitProduct[] = [
       'Smallie (200ml)': 4500,
       'Mini (330ml)': 6500,
       'Medium (500ml)': 9000,
-      'Gbemidele (550ml)': 11000,
+      'Gbemidebe (550ml)': 11000,
       'Ay Bowl (1L)': 16000
     },
     defaultSize: 'Medium (500ml)'

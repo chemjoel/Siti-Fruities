@@ -27,7 +27,7 @@ import { motion } from 'framer-motion';
 const freshFruitsImg = '/assets/Screenshot_20260729-212635_1785360049633.jpg';
 const parfaitImg = '/assets/IMG_8455_parfait_bowls.jpg';
 const smoothieImg = '/assets/Screenshot_20260729-212748_1785360013740.jpg';
-const sandwichImg = '/assets/IMG_1940_sandwich.jpg';
+const bananaBreadImg = '/assets/IMG_7131_banana_bread_tray.jpg';
 const hamperImg = '/assets/Screenshot_20260729-213638_1785360173839.jpg';
 const founderImg = '/assets/IMG_1954_founder.jpg';
 
@@ -163,13 +163,12 @@ export default function AboutUs() {
               {/* Category 3: Meals & Treats */}
               <div className="bg-card rounded-3xl border border-card-border overflow-hidden flex flex-col group hover:shadow-lg transition-all duration-300">
                 <div className="aspect-[4/3] w-full overflow-hidden relative bg-emerald-950/45">
-                  <img src={sandwichImg} alt="Sandwiches and snacks" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <img src={bananaBreadImg} alt="Banana bread" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                 </div>
                 <div className="p-6 flex-1 flex flex-col gap-4">
                   <h3 className="text-lg font-bold font-serif text-foreground">Meals & Bakery</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground font-medium flex-1">
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Signature cream sandwiches</li>
                     <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Gourmet beef cheesesteak</li>
                     <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Whole wheat banana bread</li>
                   </ul>

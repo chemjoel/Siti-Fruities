@@ -37,9 +37,7 @@ function ComboCard({ product }: { product: ComboProduct }) {
   }, 0);
   const totalPrice = unitPrice * quantity;
 
-  const selectorOptions = product.options.filter(
-    (option) => option.name === 'Smoothie' || option.name === 'Sandwich',
-  );
+  const selectorOptions = product.options.filter((option) => option.name === 'Smoothie');
   const isSelectionMissing = selectorOptions.some((option) => !selectedOptions[option.name]);
 
   const handleAdd = () => {
@@ -109,50 +107,21 @@ function ComboCard({ product }: { product: ComboProduct }) {
         {/* Dynamic Smoothie Option Selector */}
         {selectorOptions.map((option) => (
           <div key={option.name} className="space-y-2 pt-2 border-t border-border/40">
-            {option.name === 'Smoothie' ? (
-              <>
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
-                  Choose your 50cl Smoothie
-                </label>
-                <select
-                  value={selectedOptions[option.name] ?? ''}
-                  onChange={(event) => setSelectedOptions((current) => ({ ...current, [option.name]: event.target.value }))}
-                  className="w-full bg-white border border-border hover:border-primary/50 text-foreground text-sm font-semibold rounded-xl p-2.5 outline-none transition-all cursor-pointer"
-                >
-                  <option value="" disabled>Select smoothie...</option>
-                  {option.choices.map((choice) => (
-                    <option key={choice.value} value={choice.value}>
-                      {choice.value}
-                    </option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <>
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
-                  Choose your sandwich
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {option.choices.map((choice) => {
-                    const isSelected = selectedOptions[option.name] === choice.value;
-                    return (
-                      <button
-                        key={choice.value}
-                        type="button"
-                        onClick={() => setSelectedOptions((current) => ({ ...current, [option.name]: choice.value }))}
-                        className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
-                          isSelected
-                            ? 'bg-primary border-primary text-white shadow-sm'
-                            : 'bg-white border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
-                        }`}
-                      >
-                        {choice.value}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+              Choose your 50cl Smoothie
+            </label>
+            <select
+              value={selectedOptions[option.name] ?? ''}
+              onChange={(event) => setSelectedOptions((current) => ({ ...current, [option.name]: event.target.value }))}
+              className="w-full bg-white border border-border hover:border-primary/50 text-foreground text-sm font-semibold rounded-xl p-2.5 outline-none transition-all cursor-pointer"
+            >
+              <option value="" disabled>Select smoothie...</option>
+              {option.choices.map((choice) => (
+                <option key={choice.value} value={choice.value}>
+                  {choice.value}
+                </option>
+              ))}
+            </select>
           </div>
         ))}
 

@@ -80,7 +80,7 @@ export default function GreekYogurtParfaitsPage() {
       quantity: vvipQty,
       options: [
         { name: 'Yogurt Type', value: vvipYogurtType },
-        { name: 'Size', value: vvipSize === '200ml' ? 'Smallie (200ml)' : vvipSize === '330ml' ? 'Mini (330ml)' : vvipSize === '500ml' ? 'Medium (500ml)' : vvipSize === '550ml' ? 'Gbemidele (550ml)' : vvipSize === '1L' ? 'Ay Bowl (1L)' : vvipSize === '2L' ? 'Wonder Bowl (2L)' : 'Tiwa Bowl (5L)' }
+        { name: 'Size', value: vvipSize === '200ml' ? 'Smallie (200ml)' : vvipSize === '330ml' ? 'Mini (330ml)' : vvipSize === '500ml' ? 'Medium (500ml)' : vvipSize === '550ml' ? 'Gbemidebe (550ml)' : vvipSize === '1L' ? 'Ay Bowl (1L)' : vvipSize === '2L' ? 'Wonder Bowl (2L)' : 'Tiwa Bowl (5L)' }
       ]
     });
     setVvipQty(vvipSize === '200ml' ? 2 : 1);
@@ -111,7 +111,7 @@ export default function GreekYogurtParfaitsPage() {
       quantity: vipQty,
       options: [
         { name: 'Yogurt Type', value: vipYogurtType },
-        { name: 'Size', value: vipSize === '200ml' ? 'Smallie (200ml)' : vipSize === '330ml' ? 'Mini (330ml)' : vipSize === '500ml' ? 'Medium (500ml)' : vipSize === '550ml' ? 'Gbemidele (550ml)' : 'Ay Bowl (1L)' }
+        { name: 'Size', value: vipSize === '200ml' ? 'Smallie (200ml)' : vipSize === '330ml' ? 'Mini (330ml)' : vipSize === '500ml' ? 'Medium (500ml)' : vipSize === '550ml' ? 'Gbemidebe (550ml)' : 'Ay Bowl (1L)' }
       ]
     });
     setVipQty(vipSize === '200ml' ? 2 : 1);
@@ -310,7 +310,7 @@ export default function GreekYogurtParfaitsPage() {
                         { key: '200ml', label: 'Smallie (200ml)' },
                         { key: '330ml', label: 'Mini (330ml)' },
                         { key: '500ml', label: 'Medium (500ml)' },
-                        { key: '550ml', label: 'Gbemidele (550ml)' },
+                        { key: '550ml', label: 'Gbemidebe (550ml)' },
                         { key: '1L', label: 'Ay Bowl (1L)' },
                         { key: '2L', label: 'Wonder Bowl (2L)' },
                         { key: '5L', label: 'Tiwa Bowl (5L)' }
@@ -445,7 +445,7 @@ export default function GreekYogurtParfaitsPage() {
                       '200ml': 'Smallie — 200ml',
                       '330ml': 'Mini — 330ml',
                       '500ml': 'Medium — 500ml',
-                      '550ml': 'Gbemidele — 550ml',
+                      '550ml': 'Gbemidebe — 550ml',
                       '1L': 'Ay Bowl — 1L'
                     }).map(([size, label]) => (
                       <button
@@ -460,7 +460,7 @@ export default function GreekYogurtParfaitsPage() {
                             : 'bg-white border-border text-foreground hover:border-secondary/50 hover:bg-secondary/5'
                         }`}
                       >
-                        <span className="text-[10px] font-bold tracking-wide uppercase opacity-85">{size === '200ml' ? 'Smallie' : size === '330ml' ? 'Mini' : size === '500ml' ? 'Medium' : size === '550ml' ? 'Gbemidele' : 'Ay Bowl'}</span>
+                        <span className="text-[10px] font-bold tracking-wide uppercase opacity-85">{size === '200ml' ? 'Smallie' : size === '330ml' ? 'Mini' : size === '500ml' ? 'Medium' : size === '550ml' ? 'Gbemidebe' : 'Ay Bowl'}</span>
                         <span className="text-xs font-semibold mt-0.5">{size}</span>
                         <span className="text-sm font-black mt-2">{formatPrice(vipBasePrices[size])}</span>
                       </button>

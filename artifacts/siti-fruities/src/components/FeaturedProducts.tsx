@@ -222,29 +222,15 @@ function BananaBreadCard() {
 function TreatBoxCard() {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [selectedBox, setSelectedBox] = useState<'A' | 'B'>('A');
-
-  const boxDetails = {
-    A: {
-      name: 'Treat Box A',
-      price: 15500,
-      items: ['Healthy Chicken Salad', '500ml Greek Yoghurt', '500ml Parfait', 'Loaf of Banana Bread']
-    },
-    B: {
-      name: 'Treat Box B',
-      price: 13000,
-      items: ['Healthy Chicken Salad', '500ml Greek Yoghurt', '330ml Parfait', 'Loaf of Banana Bread']
-    }
-  };
 
   const handleAdd = () => {
     addItem({
-      productId: `treat-box-${selectedBox.toLowerCase()}`,
-      name: boxDetails[selectedBox].name,
+      productId: 'juicy-treatbox',
+      name: 'Juicy Treat Box',
       image: treatBoxImg,
-      price: boxDetails[selectedBox].price,
+      price: 24500,
       quantity,
-      options: [{ name: 'Package', value: selectedBox }]
+      options: []
     });
     setQuantity(1);
   };
@@ -254,51 +240,15 @@ function TreatBoxCard() {
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img src={treatBoxImg} alt="Treat Box" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          {formatPrice(boxDetails[selectedBox].price)}
+          {formatPrice(24500)}
         </div>
       </div>
       <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
         <div>
           <h3 className="text-xl font-bold font-serif mb-2">Juicy Treat Box</h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Curated gift & feast boxes combining your favourite SITI treats in one pack.
+            Curated fruits and SITI favourites in one generous treat box.
           </p>
-        </div>
-
-        <div className="space-y-4 flex-1">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Select Package</label>
-            <div className="grid grid-cols-2 gap-2">
-              {(['A', 'B'] as const).map((b) => (
-                <button
-                  key={b}
-                  onClick={() => setSelectedBox(b)}
-                  className={`p-3 rounded-xl text-xs font-bold border transition-all text-center ${
-                    selectedBox === b 
-                      ? 'bg-primary border-primary text-white shadow-md' 
-                      : 'bg-white border-border text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  <div>Treat Box {b}</div>
-                  <div className={`text-[10px] font-mono mt-0.5 ${selectedBox === b ? 'text-white/80' : 'text-muted-foreground'}`}>
-                    {formatPrice(boxDetails[b].price)}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-muted/40 rounded-xl p-3 border border-border">
-            <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider block mb-1.5">Includes:</span>
-            <ul className="text-xs space-y-1 text-foreground">
-              {boxDetails[selectedBox].items.map((item, i) => (
-                <li key={i} className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
 
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
@@ -315,15 +265,20 @@ function TreatBoxCard() {
 function CateringCard() {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(2); // Minimum 2
+  const [parfaitType, setParfaitType] = useState('VVIP (with strawberries & kiwi)');
+  const unitPrice = parfaitType === 'VVIP (with strawberries & kiwi)' ? 5000 : 4500;
 
   const handleAdd = () => {
     addItem({
       productId: 'smallie-parfait',
       name: 'Smallie Parfait (Events Cup)',
       image: cateringImg,
-      price: 4000,
+      price: unitPrice,
       quantity,
-      options: [{ name: 'Category', value: 'Events & Catering' }]
+      options: [
+        { name: 'Parfait Type', value: parfaitType },
+        { name: 'Category', value: 'Events & Catering' }
+      ]
     });
     setQuantity(2);
   };
@@ -333,18 +288,26 @@ function CateringCard() {
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img src={cateringImg} alt="Events & Catering" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          {formatPrice(4000)} / cup
+          {formatPrice(unitPrice)} / cup
         </div>
       </div>
       <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
         <div>
           <h3 className="text-xl font-bold font-serif mb-2">Smallie Parfait (Events)</h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            330ml cup layered with Greek yogurt, fruit and crunchy granola. Minimum 2 cups order.
+            200ml cup layered with Greek yogurt, fruit and crunchy granola. Minimum 2 cups order.
           </p>
         </div>
 
         <div className="space-y-3 flex-1">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase">Parfait Type</label>
+            <PillToggle
+              options={['VVIP (with strawberries & kiwi)', 'VIP (without strawberries & kiwi)']}
+              selected={parfaitType}
+              onChange={setParfaitType}
+            />
+          </div>
           <div className="bg-sky-50 border border-sky-200/60 rounded-xl p-3 text-sky-900 text-xs leading-relaxed font-medium">
             Planning a bigger gathering? We cater for office meetings, birthdays, weddings, and parties.
           </div>
@@ -356,7 +319,7 @@ function CateringCard() {
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
           <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
           <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
-            Add ({formatPrice(4000 * quantity)})
+            Add ({formatPrice(unitPrice * quantity)})
           </Button>
         </div>
       </div>
@@ -373,9 +336,9 @@ function ParfaitCard() {
       productId: 'vvip-parfait-featured',
       name: 'VVIP Exotic Parfait Bowl',
       image: parfaitImg,
-      price: 15000,
+      price: 17000,
       quantity,
-      options: [{ name: 'Size', value: '1 Litre (Ay Bowl)' }]
+      options: [{ name: 'Size', value: 'Ay Bowl (1L)' }]
     });
     setQuantity(1);
   };
@@ -385,7 +348,7 @@ function ParfaitCard() {
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img src={parfaitImg} alt="VVIP Exotic Parfait" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          {formatPrice(15000)}
+          {formatPrice(17000)}
         </div>
       </div>
       <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
@@ -453,7 +416,6 @@ export default function FeaturedProducts() {
       case 'banana-bread':
         return <BananaBreadCard key="banana-bread" />;
       case 'juicy-treatbox':
-      case 'treatbox':
         return <TreatBoxCard key="treatbox" />;
       case 'smallie-parfait':
       case 'catering':
