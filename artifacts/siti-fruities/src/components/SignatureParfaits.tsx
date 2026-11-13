@@ -56,13 +56,15 @@ const PARFAIT_PRODUCTS: ParfaitProduct[] = [
     tagline: 'The Ultimate Creamy Feast',
     desc: 'Greek Yogurt, Apple, Coconut, Grapes, Strawberries, Kiwi, Granola, Raisins, Cashew nuts.',
     images: vvipParfaitImages,
-    basePrice: 8500,
+    basePrice: 10000,
     sizes: {
-      'Mini (330ml)': 6000,
-      'Medium (500ml)': 8500,
-      'Gbemidele (550ml)': 10000,
-      'Ay Bowl (1L)': 15000,
-      'Wonder Bowl (2L)': 29000
+      'Smallie (200ml)': 5000,
+      'Mini (330ml)': 7000,
+      'Medium (500ml)': 10000,
+      'Gbemidele (550ml)': 12000,
+      'Ay Bowl (1L)': 17000,
+      'Wonder Bowl (2L)': 33000,
+      'Tiwa Bowl (5L)': 85000
     },
     defaultSize: 'Medium (500ml)'
   },
@@ -71,14 +73,15 @@ const PARFAIT_PRODUCTS: ParfaitProduct[] = [
     slug: 'vip-exotic-parfait',
     name: 'VIP Exotic Parfait',
     tagline: 'Classic Honeyed Delight',
-    desc: 'Greek Yogurt, Apple, Coconut, Grapes, Granola with rolled oats, Raisins, Cashew nuts.',
+    desc: 'Made with all VVIP ingredients except strawberries and kiwi.',
     images: vipParfaitImages,
-    basePrice: 8000,
+    basePrice: 9000,
     sizes: {
-      'Mini (330ml)': 5000,
-      'Medium (500ml)': 8000,
-      'Gbemidele (550ml)': 9000,
-      'Ay Bowl (1L)': 13500
+      'Smallie (200ml)': 4500,
+      'Mini (330ml)': 6500,
+      'Medium (500ml)': 9000,
+      'Gbemidele (550ml)': 11000,
+      'Ay Bowl (1L)': 16000
     },
     defaultSize: 'Medium (500ml)'
   },
@@ -89,13 +92,13 @@ const PARFAIT_PRODUCTS: ParfaitProduct[] = [
     tagline: '100% Raw Creamy Wholesomeness',
     desc: 'Thick, creamy, protein-packed probiotic Greek yogurt. No artificial additives.',
     images: greekYoghurtImages,
-    basePrice: 6500,
+    basePrice: 7000,
     sizes: {
-      '330ml': 4500,
-      '500ml': 6500,
-      '1L': 12000,
-      '2L': 23500,
-      '5L': 56000
+      '330ml': 5000,
+      '500ml': 7000,
+      '1L': 13000,
+      '2L': 25000,
+      '5L': 60000
     },
     defaultSize: '500ml'
   }
@@ -141,13 +144,13 @@ export default function SignatureParfaits() {
   }, [isHovered]);
 
   const handleUpdateSelection = (slug: string, field: 'size' | 'type' | 'qty', value: any) => {
-    setSelections(prev => ({
-      ...prev,
-      [slug]: {
-        ...prev[slug],
-        [field]: value
+    setSelections(prev => {
+      const selection = { ...prev[slug], [field]: value };
+      if (field === 'size' && value === 'Smallie (200ml)') {
+        selection.qty = Math.max(2, selection.qty);
       }
-    }));
+      return { ...prev, [slug]: selection };
+    });
   };
 
   const handleAddToCart = (product: ParfaitProduct) => {
@@ -167,7 +170,7 @@ export default function SignatureParfaits() {
     });
     
     // Reset quantity
-    handleUpdateSelection(product.slug, 'qty', 1);
+    handleUpdateSelection(product.slug, 'qty', sel.size === 'Smallie (200ml)' ? 2 : 1);
   };
 
   const scrollLeft = () => {
@@ -380,6 +383,9 @@ export default function SignatureParfaits() {
                           ))}
                         </select>
                       </div>
+                      {sel.size === 'Smallie (200ml)' && (
+                        <p className="text-[10px] text-muted-foreground">Smallie requires a minimum order of 2 cups.</p>
+                      )}
                     </div>
 
                     {/* Footer / Cart Actions */}
@@ -388,9 +394,9 @@ export default function SignatureParfaits() {
                       <div className="flex items-center bg-muted rounded-full p-0.5 border border-border">
                         <button
                           type="button"
-                          onClick={() => handleUpdateSelection(prod.slug, 'qty', Math.max(1, sel.qty - 1))}
+                          onClick={() => handleUpdateSelection(prod.slug, 'qty', Math.max(sel.size === 'Smallie (200ml)' ? 2 : 1, sel.qty - 1))}
                           className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-muted text-foreground transition-colors disabled:opacity-50"
-                          disabled={sel.qty <= 1}
+                          disabled={sel.qty <= (sel.size === 'Smallie (200ml)' ? 2 : 1)}
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>

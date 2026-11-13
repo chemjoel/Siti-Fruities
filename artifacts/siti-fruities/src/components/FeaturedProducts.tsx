@@ -22,7 +22,6 @@ import {
 
 // Assets
 const greekYoghurtImg = '/assets/Screenshot_20260729-212331_1785360049844.jpg';
-const sandwichImg = '/assets/IMG_1940_sandwich.jpg';
 const bananaBreadImg = '/assets/IMG_7131_banana_bread_tray.jpg';
 const cateringImg = '/assets/Screenshot_20260729-212642_1785360049574.jpg';
 const treatBoxImg = '/assets/Screenshot_20260729-212815_1785360013704.jpg';
@@ -85,11 +84,11 @@ function GreekYoghurtCard() {
   const [size, setSize] = useState('330ml');
   
   const sizePrices: Record<string, number> = {
-    '330ml': 4500,
-    '500ml': 6500,
-    '1L': 12000,
-    '2L': 23500,
-    '5L': 56000
+    '330ml': 5000,
+    '500ml': 7000,
+    '1L': 13000,
+    '2L': 25000,
+    '5L': 60000
   };
 
   const handleAdd = () => {
@@ -112,7 +111,7 @@ function GreekYoghurtCard() {
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img src={greekYoghurtImg} alt="Greek Yoghurt" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          From {formatPrice(4500)}
+          From {formatPrice(5000)}
         </div>
       </div>
       <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
@@ -155,87 +154,6 @@ function GreekYoghurtCard() {
   );
 }
 
-function SandwichCard() {
-  const { addItem } = useCart();
-  const [quantity, setQuantity] = useState(1);
-  const [type, setType] = useState('Chicken & Egg');
-  const [eggOption, setEggOption] = useState('Fried');
-  
-  const typePrices: Record<string, number> = {
-    'Chicken & Egg': 4000,
-    'Beef & Egg': 4000,
-    'Egg Sandwich': 3000
-  };
-
-  const handleAdd = () => {
-    addItem({
-      productId: 'sandwich',
-      name: 'Fresh Club Sandwich',
-      image: sandwichImg,
-      price: typePrices[type],
-      quantity,
-      options: [
-        { name: 'Type', value: type },
-        { name: 'Egg Option', value: eggOption }
-      ]
-    });
-    setQuantity(1);
-  };
-
-  return (
-    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <img src={sandwichImg} alt="Sandwiches" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          {formatPrice(typePrices[type])}
-        </div>
-      </div>
-      <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
-        <div>
-          <h3 className="text-xl font-bold font-serif mb-2">Fresh Club Sandwich</h3>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Fresh bread layered with protein, egg, vegetables and special creamy sauce.
-          </p>
-        </div>
-
-        <div className="space-y-4 flex-1">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Sandwich Type</label>
-            <div className="flex flex-col gap-2">
-              {Object.keys(typePrices).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setType(t)}
-                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold text-left transition-all border flex justify-between items-center ${
-                    type === t 
-                      ? 'bg-primary/5 border-primary text-primary' 
-                      : 'bg-white border-border text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  <span>{t}</span>
-                  <span className="font-mono text-muted-foreground">{formatPrice(typePrices[t])}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Egg Preparation</label>
-            <PillToggle options={['Fried', 'Boiled']} selected={eggOption} onChange={setEggOption} />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
-          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
-          <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
-            Add to Cart
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function BananaBreadCard() {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
@@ -243,7 +161,7 @@ function BananaBreadCard() {
   const [addIn, setAddIn] = useState('Chocolate');
 
   const sizePrices: Record<string, number> = {
-    'Slice': 1500,
+    'Slice': 2000,
     'Mini Loaf': 3500,
     'Loaf': 6500
   };
@@ -531,9 +449,6 @@ export default function FeaturedProducts() {
       case 'greek-yogurt':
       case 'greek-yoghurt':
         return <GreekYoghurtCard key="yoghurt" />;
-      case 'chicken-sandwich':
-      case 'sandwich':
-        return <SandwichCard key="sandwich" />;
       case 'whole-wheat-banana-bread':
       case 'banana-bread':
         return <BananaBreadCard key="banana-bread" />;
@@ -699,7 +614,6 @@ export default function FeaturedProducts() {
             <>
               <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><ParfaitCard /></div>
               <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><GreekYoghurtCard /></div>
-              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><SandwichCard /></div>
               <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><BananaBreadCard /></div>
               <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><TreatBoxCard /></div>
               <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><CateringCard /></div>
