@@ -79,3 +79,23 @@ export function useProductsByCategory(slug: string): {
     isError: query.isError,
   };
 }
+
+export function useFeaturedProducts(): {
+  data: CatalogProduct[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+} {
+  const query = useQuery({
+    queryKey: ['products', 'featured'],
+    queryFn: async () => (await productService.getFeaturedProducts())
+      .filter((product) => product.is_available)
+      .map(normalizeProduct),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}

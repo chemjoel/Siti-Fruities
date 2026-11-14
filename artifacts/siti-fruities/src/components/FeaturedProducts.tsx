@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useCart } from '@/context/CartContext';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Minus, Info, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { 
-  StrawberryDecoration, 
+import ProductCard from '@/components/ProductCard';
+import { useFeaturedProducts } from '@/hooks/useCatalog';
+import {
+  StrawberryDecoration,
   StrawberryHalfDecoration,
-  KiwiSliceDecoration, 
-  BlueberryDecoration, 
-  MintLeafDecoration, 
-  CashewDecoration, 
+  KiwiSliceDecoration,
+  BlueberryDecoration,
+  MintLeafDecoration,
+  CashewDecoration,
   MangoDecoration,
   GrapeClusterDecoration,
   WatermelonSliceDecoration,
@@ -20,372 +21,11 @@ import {
   YoghurtSwirlDecoration,
 } from './FruitAtmosphere';
 
-// Assets
-const greekYoghurtImg = '/assets/Screenshot_20260729-212331_1785360049844.jpg';
-const bananaBreadImg = '/assets/IMG_7131_banana_bread_tray.jpg';
-const cateringImg = '/assets/Screenshot_20260729-212642_1785360049574.jpg';
-const treatBoxImg = '/assets/Screenshot_20260729-212815_1785360013704.jpg';
-const parfaitImg = '/assets/IMG_1639_parfait_1l.jpg';
-
-// Helper for formatting currency
-const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
-
-// --- SUB-COMPONENTS --- //
-
-function QuantitySelector({ quantity, setQuantity }: { quantity: number, setQuantity: (q: number) => void }) {
-  return (
-    <div className="flex items-center bg-muted rounded-full p-1 border border-border">
-      <button 
-        type="button"
-        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50 disabled:shadow-none"
-        disabled={quantity <= 1}
-      >
-        <Minus className="w-4 h-4" />
-      </button>
-      <span className="w-8 text-center font-bold text-sm">{quantity}</span>
-      <button 
-        type="button"
-        onClick={() => setQuantity(quantity + 1)}
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm text-foreground hover:text-primary transition-colors"
-      >
-        <Plus className="w-4 h-4" />
-      </button>
-    </div>
-  );
-}
-
-function PillToggle({ options, selected, onChange }: { options: string[], selected: string, onChange: (val: string) => void }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((opt) => (
-        <button
-          key={opt}
-          onClick={() => onChange(opt)}
-          className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
-            selected === opt 
-              ? 'bg-primary border-primary text-white shadow-md' 
-              : 'bg-white border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
-          }`}
-        >
-          {opt}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// --- PRODUCT CARD COMPONENTS --- //
-
-function GreekYoghurtCard() {
-  const { addItem } = useCart();
-  const [quantity, setQuantity] = useState(1);
-  const [sweetness, setSweetness] = useState('Sweetened');
-  const [size, setSize] = useState('330ml');
-  
-  const sizePrices: Record<string, number> = {
-    '330ml': 5000,
-    '500ml': 7000,
-    '1L': 13000,
-    '2L': 25000,
-    '5L': 60000
-  };
-
-  const handleAdd = () => {
-    addItem({
-      productId: 'greek-yogurt',
-      name: 'Greek Yoghurt',
-      image: greekYoghurtImg,
-      price: sizePrices[size],
-      quantity,
-      options: [
-        { name: 'Size', value: size },
-        { name: 'Yogurt Type', value: sweetness }
-      ]
-    });
-    setQuantity(1);
-  };
-
-  return (
-    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <img src={greekYoghurtImg} alt="Greek Yoghurt" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          From {formatPrice(5000)}
-        </div>
-      </div>
-      <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
-        <div>
-          <h3 className="text-xl font-bold font-serif mb-2">Greek Yoghurt</h3>
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {['Rich in Probiotics', 'Gut Friendly', '100% Healthy'].map(chip => (
-              <span key={chip} className="text-[10px] uppercase tracking-wider font-bold bg-secondary/10 text-secondary px-2 py-1 rounded-full">{chip}</span>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-4 flex-1">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Yogurt Type</label>
-            <PillToggle options={['Sweetened', 'Unsweetened']} selected={sweetness} onChange={setSweetness} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Size & Price</label>
-            <select 
-              value={size} 
-              onChange={(e) => setSize(e.target.value)}
-              className="w-full bg-white border border-border rounded-xl px-4 py-3 text-sm font-semibold appearance-none focus:outline-none focus:ring-2 focus:ring-primary/50"
-            >
-              {Object.entries(sizePrices).map(([s, p]) => (
-                <option key={s} value={s}>{s} — {formatPrice(p)}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
-          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
-          <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
-            Add to Cart
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function BananaBreadCard() {
-  const { addItem } = useCart();
-  const [quantity, setQuantity] = useState(1);
-  const [size, setSize] = useState('Loaf');
-  const [addIn, setAddIn] = useState('Chocolate');
-
-  const sizePrices: Record<string, number> = {
-    'Slice': 2000,
-    'Mini Loaf': 3500,
-    'Loaf': 6500
-  };
-
-  const handleAdd = () => {
-    addItem({
-      productId: 'banana-bread',
-      name: 'Whole Wheat Banana Bread',
-      image: bananaBreadImg,
-      price: sizePrices[size],
-      quantity,
-      options: [
-        { name: 'Size', value: size },
-        { name: 'Add-In', value: addIn }
-      ]
-    });
-    setQuantity(1);
-  };
-
-  return (
-    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <img src={bananaBreadImg} alt="Banana Bread" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          {formatPrice(sizePrices[size])}
-        </div>
-      </div>
-      <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
-        <div>
-          <h3 className="text-xl font-bold font-serif mb-2">Whole Wheat Banana Bread</h3>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            100% Whole wheat, naturally sweetened with ripe bananas. Moist and wholesome.
-          </p>
-        </div>
-
-        <div className="space-y-4 flex-1">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Size</label>
-            <PillToggle options={['Slice', 'Mini Loaf', 'Loaf']} selected={size} onChange={setSize} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Flavour / Add-in</label>
-            <PillToggle options={['Chocolate', 'Raisins', 'Coconut']} selected={addIn} onChange={setAddIn} />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
-          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
-          <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
-            Add to Cart
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TreatBoxCard() {
-  const { addItem } = useCart();
-  const [quantity, setQuantity] = useState(1);
-
-  const handleAdd = () => {
-    addItem({
-      productId: 'juicy-treatbox',
-      name: 'Juicy Treat Box',
-      image: treatBoxImg,
-      price: 24500,
-      quantity,
-      options: []
-    });
-    setQuantity(1);
-  };
-
-  return (
-    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <img src={treatBoxImg} alt="Treat Box" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          {formatPrice(24500)}
-        </div>
-      </div>
-      <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
-        <div>
-          <h3 className="text-xl font-bold font-serif mb-2">Juicy Treat Box</h3>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Curated fruits and SITI favourites in one generous treat box.
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
-          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
-          <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
-            Add to Cart
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CateringCard() {
-  const { addItem } = useCart();
-  const [quantity, setQuantity] = useState(2); // Minimum 2
-  const [parfaitType, setParfaitType] = useState('VVIP (with strawberries & kiwi)');
-  const unitPrice = parfaitType === 'VVIP (with strawberries & kiwi)' ? 5000 : 4500;
-
-  const handleAdd = () => {
-    addItem({
-      productId: 'smallie-parfait',
-      name: 'Smallie Parfait (Events Cup)',
-      image: cateringImg,
-      price: unitPrice,
-      quantity,
-      options: [
-        { name: 'Parfait Type', value: parfaitType },
-        { name: 'Category', value: 'Events & Catering' }
-      ]
-    });
-    setQuantity(2);
-  };
-
-  return (
-    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <img src={cateringImg} alt="Events & Catering" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          {formatPrice(unitPrice)} / cup
-        </div>
-      </div>
-      <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
-        <div>
-          <h3 className="text-xl font-bold font-serif mb-2">Smallie Parfait (Events)</h3>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            200ml cup layered with Greek yogurt, fruit and crunchy granola. Minimum 2 cups order.
-          </p>
-        </div>
-
-        <div className="space-y-3 flex-1">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Parfait Type</label>
-            <PillToggle
-              options={['VVIP (with strawberries & kiwi)', 'VIP (without strawberries & kiwi)']}
-              selected={parfaitType}
-              onChange={setParfaitType}
-            />
-          </div>
-          <div className="bg-sky-50 border border-sky-200/60 rounded-xl p-3 text-sky-900 text-xs leading-relaxed font-medium">
-            Planning a bigger gathering? We cater for office meetings, birthdays, weddings, and parties.
-          </div>
-          <Link href="/catering-events" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
-            <span>Explore full catering options →</span>
-          </Link>
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
-          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
-          <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
-            Add ({formatPrice(unitPrice * quantity)})
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ParfaitCard() {
-  const { addItem } = useCart();
-  const [quantity, setQuantity] = useState(1);
-
-  const handleAdd = () => {
-    addItem({
-      productId: 'vvip-parfait-featured',
-      name: 'VVIP Exotic Parfait Bowl',
-      image: parfaitImg,
-      price: 17000,
-      quantity,
-      options: [{ name: 'Size', value: 'Ay Bowl (1L)' }]
-    });
-    setQuantity(1);
-  };
-
-  return (
-    <div className="bg-card rounded-2xl shadow-lg border border-card-border overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <img src={parfaitImg} alt="VVIP Exotic Parfait" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-bold text-foreground shadow-sm">
-          {formatPrice(17000)}
-        </div>
-      </div>
-      <div className="p-5 md:p-6 flex flex-col flex-1 gap-5">
-        <div>
-          <h3 className="text-xl font-bold font-serif mb-2">VVIP Ay Bowl Parfait</h3>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            1 Litre loaded bowl of fresh kiwi, strawberries, grapes, cashew nuts and thick yogurt.
-          </p>
-        </div>
-
-        <div className="space-y-2 flex-1">
-          <div className="flex flex-wrap gap-1.5">
-            {['1 Litre Bowl', 'Exotic Fruits', 'Cashew Nuts', 'Probiotic Base'].map(chip => (
-              <span key={chip} className="text-[10px] uppercase tracking-wider font-bold bg-primary/10 text-primary px-2 py-1 rounded-full">{chip}</span>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border gap-4">
-          <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
-          <Button onClick={handleAdd} className="flex-1 bg-primary hover:bg-primary/90 rounded-full font-bold text-white shadow-md hover:shadow-lg transition-all h-11">
-            Add to Cart
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// --- MAIN FEATURED PRODUCTS COMPONENT --- //
-
 export default function FeaturedProducts() {
-  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const { data: featuredProducts, isLoading, isError } = useFeaturedProducts();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Auto-scroll the Featured Products carousel smoothly
   useEffect(() => {
     if (isHovered) return;
 
@@ -404,27 +44,6 @@ export default function FeaturedProducts() {
     return () => clearInterval(scrollTimer);
   }, [isHovered]);
 
-  const renderCardForSlug = (slug: string) => {
-    switch (slug) {
-      case 'vvip-exotic-parfait':
-      case 'parfait':
-        return <ParfaitCard key="parfait" />;
-      case 'greek-yogurt':
-      case 'greek-yoghurt':
-        return <GreekYoghurtCard key="yoghurt" />;
-      case 'whole-wheat-banana-bread':
-      case 'banana-bread':
-        return <BananaBreadCard key="banana-bread" />;
-      case 'juicy-treatbox':
-        return <TreatBoxCard key="treatbox" />;
-      case 'smallie-parfait':
-      case 'catering':
-        return <CateringCard key="catering" />;
-      default:
-        return null;
-    }
-  };
-
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: -360, behavior: 'smooth' });
@@ -437,8 +56,12 @@ export default function FeaturedProducts() {
     }
   };
 
+  if (!isLoading && (isError || !featuredProducts?.length)) {
+    return null;
+  }
+
   return (
-    <section 
+    <section
       className="py-20 bg-background relative border-t border-border/20 overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -453,7 +76,6 @@ export default function FeaturedProducts() {
           FRUIT & YOGHURT ATMOSPHERE — visible on ALL screen sizes
          ================================================================ */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
-
         {/* ── TOP EDGE ── */}
         {/* Top-left: grape cluster peering from corner */}
         <div className="absolute -top-3 -left-3 opacity-68" style={{ transform: 'rotate(-12deg)' }}>
@@ -520,11 +142,10 @@ export default function FeaturedProducts() {
       </div>
 
       <div className="container mx-auto px-4 md:px-8 relative z-10">
-        
         {/* Header with Scroll Controls */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6">
           <div className="max-w-xl">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -532,7 +153,7 @@ export default function FeaturedProducts() {
             >
               Our Favourites
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -542,16 +163,16 @@ export default function FeaturedProducts() {
               Crafted fresh, every single day with premium ingredients and zero artificial additives.
             </motion.p>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={scrollLeft}
               className="w-11 h-11 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-all shadow-sm active:scale-95"
               aria-label="Scroll left"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <button 
+            <button
               onClick={scrollRight}
               className="w-11 h-11 rounded-full border-2 border-border bg-white hover:bg-muted text-foreground flex items-center justify-center transition-all shadow-sm active:scale-95"
               aria-label="Scroll right"
@@ -562,32 +183,47 @@ export default function FeaturedProducts() {
         </div>
 
         {/* Auto-advancing Swipeable & Scrollable Horizontal Carousel */}
-        <div 
+        <div
           ref={scrollContainerRef}
           className="flex gap-6 overflow-x-auto pb-8 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {featuredProducts.length > 0 ? (
-            featuredProducts.map((p) => (
-              <div key={p.id} className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always">
-                {renderCardForSlug(p.slug) || <ParfaitCard />}
+          {isLoading
+            ? Array.from({ length: 3 }, (_, index) => (
+              <div key={index} className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always">
+                <div className="overflow-hidden rounded-2xl border border-card-border bg-card shadow-md">
+                  <Skeleton className="aspect-[4/3] w-full rounded-none" />
+                  <div className="space-y-4 p-6">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-10 w-full rounded-full" />
+                  </div>
+                </div>
               </div>
             ))
-          ) : (
-            <>
-              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><ParfaitCard /></div>
-              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><GreekYoghurtCard /></div>
-              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><BananaBreadCard /></div>
-              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><TreatBoxCard /></div>
-              <div className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always"><CateringCard /></div>
-            </>
-          )}
+            : featuredProducts?.map((product) => (
+              <div key={product.id} className="w-[290px] sm:w-[350px] shrink-0 snap-start snap-always">
+                <ProductCard
+                  product={{
+                    productId: product.id,
+                    name: product.name,
+                    description: product.description,
+                    basePrice: product.basePrice,
+                    image: product.imageUrl ?? undefined,
+                    placeholderIcon: Package,
+                    placeholderGradient: 'from-orange-100 to-amber-100',
+                    options: product.options,
+                    isAvailable: product.isAvailable,
+                  }}
+                />
+              </div>
+            ))}
         </div>
 
         {/* View All Products CTA */}
         <div className="flex justify-center mt-10">
           <Link href="/greek-yogurt-parfaits">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-full font-bold px-8 h-12 text-sm transition-all shadow-md active:scale-95"
             >
               View All Products
