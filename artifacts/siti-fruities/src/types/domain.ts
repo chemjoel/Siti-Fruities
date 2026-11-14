@@ -46,6 +46,33 @@ export interface Category {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// HOME MEDIA
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface HeroSlide {
+  id: string;
+  image_url: string;
+  alt_text: string;
+  is_active: boolean;
+  display_order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface EventGalleryItem {
+  id: string;
+  media_type: 'image' | 'video';
+  media_url: string;
+  thumbnail_url: string | null;
+  caption: string | null;
+  event_name: string | null;
+  is_active: boolean;
+  display_order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // PRODUCTS
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -27,6 +27,8 @@ import type {
   DeliveryZone,
   Coupon,
   Promotion,
+  HeroSlide,
+  EventGalleryItem,
   Order,
   OrderItem,
   CateringEnquiry,
@@ -107,6 +109,22 @@ export interface IPromotionService {
    * Returns only promotions where is_active = true and within start/end dates.
    */
   getActivePromotions(): Promise<Promotion[]>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MEDIA SERVICE
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface IMediaService {
+  /**
+   * Fetch all active hero slides for the homepage photo grid.
+   */
+  getHeroSlides(): Promise<HeroSlide[]>;
+
+  /**
+   * Fetch all active event gallery items for the homepage gallery.
+   */
+  getEventGallery(): Promise<EventGalleryItem[]>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
