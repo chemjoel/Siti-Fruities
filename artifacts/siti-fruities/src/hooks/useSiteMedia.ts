@@ -10,7 +10,7 @@ export function useHeroSlides(): {
   const query = useQuery({
     queryKey: ['hero-slides'],
     queryFn: () => mediaService.getHeroSlides(),
-    initialData: DEFAULT_HERO_SLIDES,
+    placeholderData: DEFAULT_HERO_SLIDES,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -29,7 +29,7 @@ export function useEventGallery(): {
   const query = useQuery({
     queryKey: ['event-gallery'],
     queryFn: () => mediaService.getEventGallery(),
-    initialData: DEFAULT_EVENT_GALLERY,
+    placeholderData: DEFAULT_EVENT_GALLERY,
     staleTime: 5 * 60 * 1000,
   });
 

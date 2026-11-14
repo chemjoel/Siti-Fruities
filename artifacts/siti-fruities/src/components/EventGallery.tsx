@@ -14,6 +14,8 @@ export default function EventGallery() {
   const [visibleCount, setVisibleCount] = useState(VISIBLE_INITIAL_COUNT);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const lightboxVideoRef = useRef<HTMLVideoElement | null>(null);
+  const visibleItems = data.slice(0, visibleCount);
+  const selectedItem = selectedIndex !== null ? data[selectedIndex] : null;
 
   useEffect(() => {
     if (data.length === 0) {
@@ -76,9 +78,6 @@ export default function EventGallery() {
       video.currentTime = 0;
     };
   }, [selectedItem]);
-
-  const visibleItems = data.slice(0, visibleCount);
-  const selectedItem = selectedIndex !== null ? data[selectedIndex] : null;
 
   if (!isLoading && data.length === 0) {
     return null;
