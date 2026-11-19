@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 import Home from '@/pages/Home';
-import CategoryPlaceholder from '@/pages/CategoryPlaceholder';
+import CategoryPage from '@/pages/CategoryPage';
 import FruitsCategoryPage from '@/pages/FruitsCategoryPage';
 import GreekYogurtParfaitsPage from '@/pages/GreekYogurtParfaitsPage';
 import SmoothiesPage from '@/pages/SmoothiesPage';
@@ -139,7 +139,7 @@ function Router() {
       <Route path="/catering-events" component={CateringEventsPage} />
       <Route path="/about" component={AboutUs} />
       <Route path="/contact" component={Contact} />
-      <Route path="/:category" component={CategoryPlaceholder} />
+      <Route path="/:category" component={CategoryPage} />
       <Route component={NotFound} />
     </Switch>
   );
