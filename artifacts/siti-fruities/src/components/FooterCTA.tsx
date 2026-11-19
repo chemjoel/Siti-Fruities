@@ -28,20 +28,6 @@ export default function FooterCTA() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a 
-              href="https://wa.me/2348120842962" 
-              target="_blank" 
-              rel="noreferrer"
-              className="w-full sm:w-auto"
-            >
-              <Button 
-                size="lg" 
-                className="w-full rounded-full bg-primary text-white hover:bg-primary/90 font-bold px-8 py-6 h-auto text-lg shadow-xl"
-              >
-                Order on WhatsApp
-              </Button>
-            </a>
-            
             <Button 
               size="lg" 
               variant="outline"

@@ -41,17 +41,21 @@ export default function Hero() {
           onTouchStart={() => setIsPaused(true)}
           onTouchEnd={() => setIsPaused(false)}
         >
-          <div className="aspect-[4/3] overflow-hidden rounded-[2rem] border-4 border-white bg-white/10 shadow-2xl sm:aspect-[16/9]">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border-4 border-white bg-white/10 shadow-2xl sm:aspect-[16/9]">
             {heroSlides[0] ? (
               <img
                 src={heroSlides[0].image_url}
                 alt={heroSlides[0].alt_text}
                 loading="eager"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover object-top"
               />
             ) : (
               <div className="h-full w-full animate-pulse bg-white/10" />
             )}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-1/2 bg-gradient-to-t from-[#102719]/95 via-[#102719]/50 to-transparent" />
+            <h1 className="absolute bottom-6 left-6 z-10 w-[42%] max-w-[60%] text-left font-serif text-2xl font-black leading-tight text-white sm:bottom-8 sm:left-8 sm:text-4xl">
+              {HERO_TAGLINE}
+            </h1>
           </div>
 
           <div className="absolute -bottom-5 right-0 z-20 w-[48%] max-w-[240px] overflow-hidden rounded-2xl border-4 border-white bg-white shadow-xl sm:right-6">
@@ -96,9 +100,6 @@ export default function Hero() {
           transition={{ duration: 0.5 }}
           className="max-w-3xl"
         >
-          <h1 className="font-serif text-4xl font-black leading-tight sm:text-5xl md:text-6xl">
-            {HERO_TAGLINE}
-          </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg">
             {HERO_WELCOME}
           </p>
