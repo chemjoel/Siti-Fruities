@@ -36,7 +36,7 @@ export default function FooterCTA() {
             >
               <Button 
                 size="lg" 
-                className="w-full rounded-full bg-white text-primary hover:bg-white/90 font-bold px-8 py-6 h-auto text-lg shadow-xl"
+                className="w-full rounded-full bg-primary text-white hover:bg-primary/90 font-bold px-8 py-6 h-auto text-lg shadow-xl"
               >
                 Order on WhatsApp
               </Button>

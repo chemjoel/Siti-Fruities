@@ -65,13 +65,16 @@ export default function ProductCard({ product }: ProductCardProps) {
     return () => observer.disconnect();
   }, [product.productId, isAvailable]);
   
-  // Initialize options state with first choice of each option
+  // Default size options to their base-price choice.
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     if (product.options) {
       product.options.forEach((opt) => {
         if (opt.choices && opt.choices.length > 0) {
-          initial[opt.name] = opt.choices[0].value;
+          const baseChoice = opt.name.toLowerCase() === 'size'
+            ? opt.choices.find((choice) => (choice.priceModifier ?? 0) === 0)
+            : undefined;
+          initial[opt.name] = (baseChoice ?? opt.choices[0]).value;
         }
       });
     }
@@ -182,9 +185,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div className="flex flex-wrap gap-2">
               {opt.choices.map((choice) => {
                 const isSelected = selectedOptions[opt.name] === choice.value;
-                const modifierText = choice.priceModifier 
-                  ? ` (+${formatPrice(choice.priceModifier)})`
-                  : '';
+                const modifier = choice.priceModifier ?? 0;
+                const choiceLabel = opt.name.toLowerCase() === 'size'
+                  ? `${choice.value} - N${(product.basePrice + modifier).toLocaleString()}`
+                  : modifier > 0
+                    ? `${choice.value} (+N${modifier.toLocaleString()})`
+                    : choice.value;
                 return (
                   <button
                     key={choice.value}
@@ -197,7 +203,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         : 'bg-white border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    {choice.value}{modifierText}
+                    {choiceLabel}
                   </button>
                 );
               })}
@@ -241,10 +247,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           <Button 
             onClick={handleAdd}
             disabled={!isAvailable}
-            className="w-full bg-secondary hover:bg-secondary/90 hover:shadow-md active:scale-95 text-white font-bold rounded-full h-10 px-4 text-sm transition-all flex items-center justify-center gap-2 disabled:bg-muted-foreground/30 disabled:text-muted-foreground disabled:shadow-none"
+            className="w-full bg-primary hover:bg-primary/90 hover:shadow-md active:scale-95 text-white font-bold rounded-full h-10 px-4 text-sm transition-all flex items-center justify-center gap-2 disabled:bg-muted-foreground/30 disabled:text-muted-foreground disabled:shadow-none"
           >
             <ShoppingBag className="w-4 h-4 shrink-0" />
-            <span className="truncate">{isAvailable ? 'Add to Order' : 'Unavailable'}</span>
+            <span className="truncate">{isAvailable ? 'Add to Bag' : 'Unavailable'}</span>
           </Button>
         </div>
 

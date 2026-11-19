@@ -1,12 +1,12 @@
 /**
  * SITI FRUITIES — Media Service Implementation
  *
- * Fetches homepage hero slides and event gallery content from Supabase when
- * configured, otherwise falls back to the bundled public URLs from the CMS data.
+ * Fetches homepage hero slides, customer testimonials, and event gallery content
+ * from Supabase when configured, otherwise falls back to bundled public URLs.
  */
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import type { HeroSlide, EventGalleryItem } from '@/types/domain';
+import type { HeroSlide, Testimonial, EventGalleryItem } from '@/types/domain';
 import type { IMediaService } from '@/types/services';
 
 export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
@@ -56,6 +56,17 @@ export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
     updated_at: new Date().toISOString(),
   },
 ];
+
+export const DEFAULT_TESTIMONIALS: Testimonial[] = Array.from({ length: 8 }, (_, index) => {
+  const imageNumber = String(index).padStart(4, '0');
+  return {
+    id: `testimonial-${index + 1}`,
+    image_url: `https://ltkuakrkcjiktkwovhjq.supabase.co/storage/v1/object/public/site-media/reviews/IMG-20261118-WA${imageNumber}.jpg`,
+    alt_text: 'Customer review on WhatsApp',
+    is_active: true,
+    display_order: index + 1,
+  };
+});
 
 export const DEFAULT_EVENT_GALLERY: EventGalleryItem[] = [
   {
@@ -339,6 +350,22 @@ export const mediaService: IMediaService = {
     }
 
     return DEFAULT_HERO_SLIDES;
+  },
+
+  async getTestimonials(): Promise<Testimonial[]> {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from<Testimonial[]>('testimonials')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+    }
+
+    return DEFAULT_TESTIMONIALS;
   },
 
   async getEventGallery(): Promise<EventGalleryItem[]> {

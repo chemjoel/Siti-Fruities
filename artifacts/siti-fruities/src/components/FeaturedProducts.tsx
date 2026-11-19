@@ -223,8 +223,7 @@ export default function FeaturedProducts() {
         <div className="flex justify-center mt-10">
           <Link href="/greek-yogurt-parfaits">
             <Button
-              variant="outline"
-              className="border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-full font-bold px-8 h-12 text-sm transition-all shadow-md active:scale-95"
+              className="rounded-full bg-primary px-8 font-bold text-white shadow-md transition-all hover:bg-primary/90 active:scale-95 h-12 text-sm"
             >
               View All Products
             </Button>

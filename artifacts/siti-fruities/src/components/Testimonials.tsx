@@ -1,21 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import { Star, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const rev1 = '/assets/Screenshot_20260729-213453_1785360013623.jpg';
-const rev2 = '/assets/Screenshot_20260729-213507_1785360013666.jpg';
-const rev3 = '/assets/Screenshot_20260729-213514_1785360013577.jpg';
-const rev4 = '/assets/Screenshot_20260729-213549_1785360013494.jpg';
-
-const REVIEWS = [
-  { img: rev1, name: "Aisha T.", type: "Breakthrough feeling" },
-  { img: rev2, name: "Olu B.", type: "Repeat Customer" },
-  { img: rev3, name: "Grace O.", type: "Birthday Order" },
-  { img: rev4, name: "Chidi N.", type: "Yoghurt Fan" },
-];
+import { useTestimonials } from '@/hooks/useSiteMedia';
 
 export default function Testimonials() {
+  const { data: testimonials = [] } = useTestimonials();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'center' });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -27,10 +16,8 @@ export default function Testimonials() {
     };
 
     emblaApi.on('select', onSelect);
-    
-    // Auto scroll setup
     const interval = setInterval(() => {
-      if (emblaApi) emblaApi.scrollNext();
+      emblaApi.scrollNext();
     }, 4000);
 
     return () => {
@@ -40,82 +27,56 @@ export default function Testimonials() {
   }, [emblaApi]);
 
   return (
-    <section className="py-24 bg-background relative">
+    <section className="relative bg-background py-24">
       <div className="container mx-auto px-4 md:px-8">
-        <div className="text-center mb-16">
-          <motion.h2 
+        <div className="mb-16 text-center">
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold font-serif text-foreground mb-4"
+            className="mb-4 font-serif text-4xl font-bold text-foreground md:text-5xl"
           >
             What Our Customers Say
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-lg text-muted-foreground font-medium"
+            className="text-lg font-medium text-muted-foreground"
           >
             Real reviews from real customers via WhatsApp
           </motion.p>
         </div>
 
-        <div className="relative max-w-5xl mx-auto">
-          <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
-            <div className="flex -ml-4">
-              {REVIEWS.map((review, i) => (
-                <div key={i} className="flex-[0_0_85%] md:flex-[0_0_50%] lg:flex-[0_0_40%] pl-4 min-w-0">
-                  <div className="bg-[#202C33] rounded-[24px] overflow-hidden shadow-2xl border border-white/10 flex flex-col h-full">
-                    {/* Fake WhatsApp Header */}
-                    <div className="bg-[#202C33] px-4 py-3 flex items-center gap-3 border-b border-white/5">
-                      <div className="w-10 h-10 rounded-full bg-primary text-white font-bold flex items-center justify-center text-lg">
-                        {review.name[0]}
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-white font-semibold text-sm">{review.name}</div>
-                        <div className="flex items-center gap-1 text-white/60 text-xs">
-                          <CheckCircle className="w-3 h-3 text-secondary fill-secondary/20" />
-                          Verified Customer
-                        </div>
-                      </div>
-                      <div className="flex gap-0.5">
-                        {[1,2,3,4,5].map(s => (
-                          <Star key={s} className="w-3.5 h-3.5 text-accent fill-accent" />
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* The actual screenshot */}
-                    <div className="p-4 bg-[#0B141A] flex-1 flex items-center justify-center relative">
-                      {/* Chat bg pattern subtle hint */}
-                      <div className="absolute inset-0 opacity-[0.03] bg-[url('https://i.pinimg.com/originals/8f/ba/cb/8fbacbd464e996966eb9d4a6b7a9c21e.jpg')] bg-repeat z-0" />
-                      
-                      <div className="relative z-10 w-full rounded-xl overflow-hidden shadow-lg border border-white/5">
-                        <img 
-                          src={review.img} 
-                          alt="Customer Review" 
-                          className="w-full h-auto object-cover max-h-[400px] object-top"
-                        />
-                      </div>
-                    </div>
+        <div className="relative mx-auto max-w-5xl">
+          <div className="cursor-grab overflow-hidden active:cursor-grabbing" ref={emblaRef}>
+            <div className="-ml-4 flex">
+              {testimonials.map((testimonial, index) => (
+                <div key={testimonial.id} className="min-w-0 flex-[0_0_85%] pl-4 md:flex-[0_0_50%] lg:flex-[0_0_40%]">
+                  <div className="flex h-full items-center justify-center overflow-hidden rounded-[24px] border border-border bg-card p-3 shadow-xl">
+                    <img
+                      src={testimonial.image_url}
+                      alt={testimonial.alt_text}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      className="h-[420px] max-h-[60vh] w-full rounded-xl object-contain sm:h-[480px]"
+                    />
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Dots */}
-          <div className="flex justify-center gap-2 mt-8">
-            {REVIEWS.map((_, i) => (
+          <div className="mt-8 flex justify-center gap-2">
+            {testimonials.map((testimonial, index) => (
               <button
-                key={i}
-                onClick={() => emblaApi?.scrollTo(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  i === selectedIndex ? 'bg-primary w-8' : 'bg-border hover:bg-primary/50'
+                key={testimonial.id}
+                type="button"
+                onClick={() => emblaApi?.scrollTo(index)}
+                className={`h-2.5 rounded-full transition-all duration-300 ${
+                  index === selectedIndex ? 'w-8 bg-primary' : 'w-2.5 bg-border hover:bg-primary/50'
                 }`}
-                aria-label={`Go to slide ${i + 1}`}
+                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>

@@ -28,6 +28,7 @@ import type {
   Coupon,
   Promotion,
   HeroSlide,
+  Testimonial,
   EventGalleryItem,
   Order,
   OrderItem,
@@ -120,6 +121,11 @@ export interface IMediaService {
    * Fetch all active hero slides for the homepage photo grid.
    */
   getHeroSlides(): Promise<HeroSlide[]>;
+
+  /**
+   * Fetch all active customer testimonials for the homepage.
+   */
+  getTestimonials(): Promise<Testimonial[]>;
 
   /**
    * Fetch all active event gallery items for the homepage gallery.

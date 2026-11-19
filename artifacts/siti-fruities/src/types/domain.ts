@@ -59,6 +59,14 @@ export interface HeroSlide {
   updated_at?: string;
 }
 
+export interface Testimonial {
+  id: string;
+  image_url: string;
+  alt_text: string;
+  is_active: boolean;
+  display_order: number;
+}
+
 export interface EventGalleryItem {
   id: string;
   media_type: 'image' | 'video';

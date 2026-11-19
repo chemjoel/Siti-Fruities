@@ -225,8 +225,8 @@ export default function CategorySection() {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-primary border-t border-border pt-4 mt-auto">
-                        <span>Explore Menu</span>
+                      <div className="mt-auto flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-primary/90">
+                        <span>Order Now</span>
                         <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>

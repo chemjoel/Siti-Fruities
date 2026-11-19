@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { DEFAULT_EVENT_GALLERY, DEFAULT_HERO_SLIDES, mediaService } from '@/services/media.service';
-import type { EventGalleryItem, HeroSlide } from '@/types/domain';
+import { DEFAULT_EVENT_GALLERY, DEFAULT_HERO_SLIDES, DEFAULT_TESTIMONIALS, mediaService } from '@/services/media.service';
+import type { EventGalleryItem, HeroSlide, Testimonial } from '@/types/domain';
 
 export function useHeroSlides(): {
   data: HeroSlide[] | undefined;
@@ -11,6 +11,25 @@ export function useHeroSlides(): {
     queryKey: ['hero-slides'],
     queryFn: () => mediaService.getHeroSlides(),
     placeholderData: DEFAULT_HERO_SLIDES,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}
+
+export function useTestimonials(): {
+  data: Testimonial[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+} {
+  const query = useQuery({
+    queryKey: ['testimonials'],
+    queryFn: () => mediaService.getTestimonials(),
+    placeholderData: DEFAULT_TESTIMONIALS,
     staleTime: 5 * 60 * 1000,
   });
 

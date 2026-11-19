@@ -67,14 +67,14 @@ export default function Navbar() {
         {/* Desktop Nav (Hidden on mobile, just showing icons) */}
         <div className="flex items-center gap-4 md:gap-6">
           <button className="p-2 text-foreground/80 hover:text-primary transition-colors rounded-full hover:bg-black/5">
-            <Search className="w-5 h-5 md:w-6 md:h-6" />
+            <Search className="h-6 w-6 md:h-7 md:w-7" strokeWidth={2.5} />
           </button>
           
           <button 
             onClick={() => setIsCartOpen(true)}
             className="p-2 text-foreground/80 hover:text-primary transition-colors relative rounded-full hover:bg-black/5"
           >
-            <ShoppingBag className="w-5 h-5 md:w-6 md:h-6" />
+            <ShoppingBag className="h-6 w-6 md:h-7 md:w-7" strokeWidth={2.5} />
             <AnimatePresence>
               {totalItems > 0 && (
                 <motion.span 
@@ -96,7 +96,7 @@ export default function Navbar() {
                 aria-label="Open Navigation Menu"
                 className="p-2 text-foreground/80 hover:text-primary transition-colors rounded-full hover:bg-black/5"
               >
-                <Menu className="w-6 h-6 md:w-7 md:h-7" />
+                <Menu className="h-7 w-7 md:h-8 md:w-8" strokeWidth={2.5} />
               </button>
             </SheetTrigger>
             <SheetContent 

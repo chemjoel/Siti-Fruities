@@ -181,7 +181,7 @@ export default function EventGallery() {
                 <button
                   type="button"
                   onClick={() => setVisibleCount((current) => Math.min(current + 8, data.length))}
-                  className="rounded-full border border-primary/20 bg-primary/5 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+                  className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
                 >
                   Show more
                 </button>
